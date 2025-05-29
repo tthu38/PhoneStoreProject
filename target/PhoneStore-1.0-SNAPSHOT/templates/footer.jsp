@@ -1,7 +1,17 @@
+<<<<<<< HEAD
+=======
+<%-- 
+    Document   : footer
+    Created on : May 27, 2025, 7:25:57 PM
+    Author     : ThienThu
+--%>
+
+>>>>>>> 58f77f9d956029c1b9a774e58572bf704236515f
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html>
     <head>
+<<<<<<< HEAD
         <meta charset="UTF-8">
         <title>Footer</title>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -223,5 +233,12 @@
                 <p>&copy; 2025 <strong>PhoneStore</strong>. All rights reserved.</p>
             </div>
         </footer>
+=======
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>JSP Page</title>
+    </head>
+    <body>
+        <h1>Hello World!</h1>
+>>>>>>> 58f77f9d956029c1b9a774e58572bf704236515f
     </body>
 </html>
