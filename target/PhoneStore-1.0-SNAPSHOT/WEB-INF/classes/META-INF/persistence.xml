@@ -1,26 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <persistence version="3.0" xmlns="https://jakarta.ee/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd">
-    <!-- Define Persistence Unit --><persistence-unit name="PhoneStorePU">
-    
-    
-    <class>model.User</class>
-    <class>model.UserAddress</class>
-    <class>model.Product</class>
-    <class>model.ProductVariant</class>
-    <class>model.ProductBrand</class>
-    <class>model.Category</class>
-    <class>model.Warehouse</class>
-    <class>model.InventoryLog</class>
-    <class>model.Order</class>
-    <class>model.OrderDetsils</class>
+    <!-- Define Persistence Unit -->
+    <persistence-unit name="PhoneStorePU">
+        <class>model.User</class>
+        <class>model.UserAddress</class>
+        <class>model.Product</class>
+        <class>model.ProductVariant</class>
+        <class>model.ProductBrand</class>
+        <class>model.Category</class>
+        <class>model.Warehouse</class>
+        <class>model.InventoryLog</class>
+        <class>model.Order</class>
+        <class>model.OrderDetails</class>
+        <class>model.GoogleUser</class>
+        <class>model.Cart</class>
+        <class>model.CartItem</class>
 
-    <properties>
-      <property name="jakarta.persistence.jdbc.driver" value="com.microsoft.sqlserver.jdbc.SQLServerDriver"/>
-      <property name="jakarta.persistence.jdbc.url" value="jdbc:sqlserver://localhost:1433;databaseName=PhoneStore;encrypt=true;trustServerCertificate=true"/>
-      <property name="jakarta.persistence.jdbc.user" value="sa"/>
-      <property name="jakarta.persistence.jdbc.password" value="123"/>
-      <property name="jakarta.persistence.schema-generation.database.action" value="none"/>
-      <property name="jakarta.persistence.logging.level" value="FINE"/>
-    </properties>
-  </persistence-unit>
+        <properties>
+            <property name="jakarta.persistence.jdbc.driver" value="com.microsoft.sqlserver.jdbc.SQLServerDriver"/>
+            <property name="jakarta.persistence.jdbc.url" value="jdbc:sqlserver://localhost:1433;databaseName=PhoneStore;encrypt=true;trustServerCertificate=true"/>
+            <property name="jakarta.persistence.jdbc.user" value="sa"/>
+            <property name="jakarta.persistence.jdbc.password" value="123"/>
+            <property name="jakarta.persistence.schema-generation.database.action" value="none"/>
+            <property name="hibernate.show_sql" value="true"/>
+            <property name="hibernate.format_sql" value="true"/>
+            <property name="jakarta.persistence.logging.level" value="FINE"/>
+        </properties>
+    </persistence-unit>
 </persistence>

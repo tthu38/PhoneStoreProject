@@ -41,8 +41,8 @@ public class User {
     @Column(name = "Email", nullable = false, length = 100)
     private String email;
     
-    @Column(name = "HashPassword", nullable = false)
-    private String hashPassord;
+    @Column(name = "Password")
+    private String password;
     
     @Nationalized
     @Column(name = "PhoneNumber", length = 15)
@@ -78,6 +78,33 @@ public class User {
     @Column(name = "oauth_provider", length = 50)
     private String oauthProvider;
 
+    // Google OAuth specific fields
+    @Column(name = "google_id")
+    private String googleId;
+
+    @Column(name = "verified_email")
+    private boolean verifiedEmail;
+
+    @Column(name = "given_name")
+    private String givenName;
+
+    @Column(name = "family_name")
+    private String familyName;
+
+    @Column(name = "google_link")
+    private String googleLink;
+
+    public User() {
+    }
+
+    public User(String email, String password, String fullName, String phoneNumber, List<UserAddress> address) {
+        this.email = email;
+        this.password = password;
+        this.fullname = fullName;
+        this.phone = phoneNumber;
+        this.address = address;
+    }
+
     public int getId() {
         return id;
     }
@@ -102,12 +129,12 @@ public class User {
         this.email = email;
     }
 
-    public String getHashPassord() {
-        return hashPassord;
+    public String getPassword() {
+        return password;
     }
 
-    public void setHashPassord(String hashPassord) {
-        this.hashPassord = hashPassord;
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public String getPhone() {
@@ -182,7 +209,43 @@ public class User {
         this.oauthProvider = oauthProvider;
     }
 
-    
-    
-    
+    public String getGoogleId() {
+        return googleId;
+    }
+
+    public void setGoogleId(String googleId) {
+        this.googleId = googleId;
+    }
+
+    public boolean isVerifiedEmail() {
+        return verifiedEmail;
+    }
+
+    public void setVerifiedEmail(boolean verifiedEmail) {
+        this.verifiedEmail = verifiedEmail;
+    }
+
+    public String getGivenName() {
+        return givenName;
+    }
+
+    public void setGivenName(String givenName) {
+        this.givenName = givenName;
+    }
+
+    public String getFamilyName() {
+        return familyName;
+    }
+
+    public void setFamilyName(String familyName) {
+        this.familyName = familyName;
+    }
+
+    public String getGoogleLink() {
+        return googleLink;
+    }
+
+    public void setGoogleLink(String googleLink) {
+        this.googleLink = googleLink;
+    }
 }

@@ -4,10 +4,13 @@
  */
 package service;
 
-/**
- *
- * @author ThienThu
- */
-public class UserService {
-    
+import model.User;
+import java.sql.SQLException;
+
+public interface IUserService {
+    boolean register(User user) throws SQLException;
+    User login(String email, String password) throws SQLException;
+    User findByEmail(String email) throws SQLException;
+    boolean updatePassword(String email, String newPassword) throws SQLException;
+    User loginWithGoogle(String googleId, String email, String name, String picture) throws SQLException;
 }

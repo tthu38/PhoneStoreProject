@@ -4,20 +4,32 @@
  */
 package controller;
 
-import java.io.IOException;
-import java.io.PrintWriter;
+import model.User;
+import service.UserService;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.sql.SQLException;
+import service.IUserService;
 
 /**
  *
  * @author ThienThu
  */
-@WebServlet(name = "LoginServlet", urlPatterns = {"/logins"})
+@WebServlet("/login")
 public class LoginServlet extends HttpServlet {
+    private IUserService userService;
+
+    @Override
+    public void init() throws ServletException {
+        userService = new UserService();
+    }
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -57,7 +69,7 @@ public class LoginServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        request.getRequestDispatcher("/login.jsp").forward(request, response);
     }
 
     /**
@@ -71,7 +83,24 @@ public class LoginServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        String email = request.getParameter("email");
+        String password = request.getParameter("password");
+        
+        try {
+            User user = userService.login(email, password);
+            if (user != null) {
+                HttpSession session = request.getSession();
+                session.setAttribute("user", user);
+                response.sendRedirect(request.getContextPath() + "/home");
+            } else {
+                request.setAttribute("error", "Invalid email or password");
+                request.getRequestDispatcher("/login.jsp").forward(request, response);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            request.setAttribute("error", "Database error occurred");
+            request.getRequestDispatcher("/login.jsp").forward(request, response);
+        }
     }
 
     /**
