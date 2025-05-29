@@ -4,8 +4,15 @@
     
     
     <class>model.User</class>
+    <class>model.UserAddress</class>
     <class>model.Product</class>
+    <class>model.ProductVariant</class>
+    <class>model.ProductBrand</class>
     <class>model.Category</class>
+    <class>model.Warehouse</class>
+    <class>model.InventoryLog</class>
+    <class>model.Order</class>
+    <class>model.OrderDetsils</class>
 
     <properties>
       <property name="jakarta.persistence.jdbc.driver" value="com.microsoft.sqlserver.jdbc.SQLServerDriver"/>
