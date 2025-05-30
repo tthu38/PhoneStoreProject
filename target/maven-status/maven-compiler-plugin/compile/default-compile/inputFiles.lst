@@ -1,36 +1,3 @@
-<<<<<<< HEAD
-D:\PRJ301\PhoneStore\src\main\java\controller\MailServlet.java
-D:\PRJ301\PhoneStore\src\main\java\service\ProductVariantService.java
-D:\PRJ301\PhoneStore\src\main\java\controller\LogoutServlet.java
-D:\PRJ301\PhoneStore\src\main\java\model\Warehouse.java
-D:\PRJ301\PhoneStore\src\main\java\controller\InventoryServlet.java
-D:\PRJ301\PhoneStore\src\main\java\controller\UserServlet.java
-D:\PRJ301\PhoneStore\src\main\java\utils\Validation.java
-D:\PRJ301\PhoneStore\src\main\java\model\Product.java
-D:\PRJ301\PhoneStore\src\main\java\model\Category.java
-D:\PRJ301\PhoneStore\src\main\java\dao\GenericDAO.java
-D:\PRJ301\PhoneStore\src\main\java\service\ProductService.java
-D:\PRJ301\PhoneStore\src\main\java\controller\ProductServlet.java
-D:\PRJ301\PhoneStore\src\main\java\service\InventoryLogService.java
-D:\PRJ301\PhoneStore\src\main\java\service\OrderService.java
-D:\PRJ301\PhoneStore\src\main\java\service\UserService.java
-D:\PRJ301\PhoneStore\src\main\java\controller\LoginServlet.java
-D:\PRJ301\PhoneStore\src\main\java\model\InventoryLog.java
-D:\PRJ301\PhoneStore\src\main\java\service\CartService.java
-D:\PRJ301\PhoneStore\src\main\java\model\User.java
-D:\PRJ301\PhoneStore\src\main\java\model\Cart.java
-D:\PRJ301\PhoneStore\src\main\java\service\WarehouseService.java
-D:\PRJ301\PhoneStore\src\main\java\model\CartItem.java
-D:\PRJ301\PhoneStore\src\main\java\service\CategoryService.java
-D:\PRJ301\PhoneStore\src\main\java\model\Order.java
-D:\PRJ301\PhoneStore\src\main\java\controller\CartServlet.java
-D:\PRJ301\PhoneStore\src\main\java\model\ProductVariant.java
-D:\PRJ301\PhoneStore\src\main\java\dao\BaseDAO.java
-D:\PRJ301\PhoneStore\src\main\java\model\UserAddress.java
-D:\PRJ301\PhoneStore\src\main\java\model\ProductBrand.java
-D:\PRJ301\PhoneStore\src\main\java\model\OrderDetails.java
-D:\PRJ301\PhoneStore\src\main\java\controller\OrderServlet.java
-=======
 C:\asski3\PhoneStoreProject\src\main\java\utils\Validation.java
 C:\asski3\PhoneStoreProject\src\main\java\model\User.java
 C:\asski3\PhoneStoreProject\src\main\java\controller\InventoryServlet.java
@@ -74,4 +41,3 @@ C:\asski3\PhoneStoreProject\src\main\java\model\InventoryLog.java
 C:\asski3\PhoneStoreProject\src\main\java\service\UserService.java
 C:\asski3\PhoneStoreProject\src\main\java\service\OrderService.java
 C:\asski3\PhoneStoreProject\src\main\java\service\WarehouseService.java
->>>>>>> 58f77f9d956029c1b9a774e58572bf704236515f
