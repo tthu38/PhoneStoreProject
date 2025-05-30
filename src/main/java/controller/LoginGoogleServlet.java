@@ -7,7 +7,6 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import model.GooglePojo;
 import model.User;
 import service.UserService;
 import utils.GoogleUtils;
@@ -34,13 +33,13 @@ public class LoginGoogleServlet extends HttpServlet {
         
         try {
             String accessToken = GoogleUtils.getToken(code);
-            GooglePojo googlePojo = GoogleUtils.getUserInfo(accessToken);
+            User googleUser = GoogleUtils.getUserInfo(accessToken);
             
             User user = userService.loginWithGoogle(
-                googlePojo.getId(),
-                googlePojo.getEmail(),
-                googlePojo.getName(),
-                googlePojo.getPicture()
+                googleUser.getGoogleId(),
+                googleUser.getEmail(),
+                googleUser.getFullname(),
+                googleUser.getPicture()
             );
             
             if (user != null) {

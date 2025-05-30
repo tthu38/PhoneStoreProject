@@ -296,51 +296,48 @@
         }
     </style>
 </head>
-<body>
-    <div class="header-main">
-        <div class="header-topbar">
-            <span class="hotline-mini d-none d-lg-flex"><i class="fa fa-headset"></i> Hỗ trợ 24/7</span>
-            <a href="tel:18001060" class="hotline"><i class="fa fa-phone-volume"></i> 1800 1060</a>
-            <a href="/account" class="header-icon-link" title="Tài khoản">
-                <i class="fa fa-user-circle"></i>
+<body style="margin:0; padding:0; background:#f8f9fa;">
+    <header style="position:sticky;top:0;z-index:1000;width:100vw;background:#FFD600;box-shadow:0 2px 12px 0 rgba(234,109,34,0.10);border-radius:0 0 1.2rem 1.2rem;">
+        <div style="max-width:1200px;margin:auto;display:flex;align-items:center;justify-content:space-between;padding:10px 24px 6px 24px;">
+            <!-- Logo -->
+            <a href="/" class="d-flex align-items-center text-decoration-none" style="gap:8px;">
+                <img src="/images/logo.png" alt="Ocean SmartPhone" style="height:38px;width:auto;object-fit:contain;">
+                <span style="font-size:1.45rem;font-weight:700;color:#222;letter-spacing:1px;">Ocean SmartPhone</span>
             </a>
-            <a href="/cart" class="header-icon-link position-relative" title="Giỏ hàng">
-                <i class="fa fa-shopping-cart"></i>
-                <span class="header-badge" id="cartBadge">2</span>
-            </a>
-        </div>
-        <div class="header-content">
-            <a href="/" class="header-logo text-decoration-none">
-                <i class="fa-solid fa-mobile-screen-button"></i>
-                Ocean SmartPhone
-                <span class="logo-slogan d-none d-md-inline">Công nghệ trong tầm tay bạn</span>
-            </a>
-            <div class="header-search">
-                <form class="search-bar" action="/search" method="get" autocomplete="off">
-                    <input class="form-control" type="search" name="q" id="searchInput" placeholder="Tìm kiếm sản phẩm, hãng, phụ kiện..." aria-label="Search">
-                    <button class="btn d-flex align-items-center justify-content-center" type="submit" tabindex="-1">
-                        <i class="fa fa-search"></i>
-                    </button>
-                </form>
+            <!-- Search -->
+            <form style="flex:1;max-width:500px;margin:0 32px;" action="/search" method="get" autocomplete="off">
+                <div style="display:flex;align-items:center;background:#fff;border-radius:2rem;padding:2px 12px;box-shadow:0 1px 4px 0 rgba(0,0,0,0.04);">
+                    <input class="form-control border-0" type="search" name="q" id="searchInput" placeholder="Tìm kiếm sản phẩm, hãng, phụ kiện..." aria-label="Search" style="background:transparent;color:#222;font-size:1.08rem;padding:0.5rem 0.7rem;box-shadow:none;outline:none;border:none;flex:1;min-width:0;::placeholder{color:#aaa;}">
+                    <button class="btn border-0 bg-white rounded-pill" type="submit" tabindex="-1" style="color:#222;font-size:1.3rem;"><i class="fa fa-search"></i></button>
+                </div>
+            </form>
+            <!-- Icons -->
+            <div class="d-flex align-items-center gap-3">
+                <a href="/account" class="d-flex flex-column align-items-center text-decoration-none" style="color:#222;font-size:1.25rem;">
+                    <i class="fa fa-user-circle"></i>
+                    <span style="font-size:0.85rem;font-weight:500;">Tài khoản</span>
+                </a>
+                <a href="/cart" class="d-flex flex-column align-items-center text-decoration-none position-relative" style="color:#222;font-size:1.25rem;">
+                    <i class="fa fa-shopping-cart"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="cartBadge" style="font-size:0.8rem;">2</span>
+                    <span style="font-size:0.85rem;font-weight:500;">Giỏ hàng</span>
+                </a>
             </div>
         </div>
-        <div class="main-menu-bar">
-            <ul class="nav main-menu flex-wrap">
-                <li class="nav-item"><a class="nav-link active" href="/"><i class="fa fa-home"></i> Trang chủ</a></li>
-                <li class="nav-item"><a class="nav-link" href="/category"><i class="fa fa-th-large"></i> Tất cả sản phẩm</a></li>
-                <li class="nav-item"><a class="nav-link" href="/promo"><i class="fa fa-gift"></i> Khuyến mãi</a></li>
-                <li class="nav-item"><a class="nav-link" href="/guide"><i class="fa fa-book"></i> Hướng dẫn</a></li>
-                <li class="nav-item"><a class="nav-link" href="/about"><i class="fa fa-info-circle"></i> Giới thiệu</a></li>
-                <li class="nav-item"><a class="nav-link" href="/contact"><i class="fa fa-phone"></i> Liên hệ</a></li>
-            </ul>
-        </div>
-        <div class="mini-banner">
-            <span><i class="fa fa-truck"></i> Freeship toàn quốc</span>
-            <span><i class="fa fa-credit-card"></i> Trả góp 0%</span>
-            <span><i class="fa fa-shield-alt"></i> Bảo hành 12 tháng</span>
-            <span><i class="fa fa-sync-alt"></i> Đổi trả 30 ngày</span>
-        </div>
-    </div>
+        <!-- Main menu -->
+        <nav class="main-menu-bar" style="background:#FFD600;border-radius:0 0 1.2rem 1.2rem;box-shadow:0 1px 4px 0 rgba(234,109,34,0.06);">
+            <div style="max-width:1200px;margin:auto;">
+                <ul class="nav main-menu flex-nowrap justify-content-center" style="gap:0.2rem;padding:0.2rem 0;margin:0;">
+                    <li class="nav-item"><a class="nav-link" href="/" style="color:#222;font-weight:450;">Trang chủ</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/category?type=phone" style="color:#222;font-weight:450;">Điện thoại</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/category?type=accessory" style="color:#222;font-weight:450;">Phụ kiện</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/promo" style="color:#222;font-weight:450;">Khuyến mãi</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/faq" style="color:#222;font-weight:450;">Hỏi đáp</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/contact" style="color:#222;font-weight:450;">Liên hệ</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
     // Placeholder động cho thanh tìm kiếm
