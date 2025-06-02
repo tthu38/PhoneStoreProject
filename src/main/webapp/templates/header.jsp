@@ -5,6 +5,7 @@
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@ page import="model.User" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -67,11 +68,15 @@
             position: relative;
             box-shadow: 0 2px 8px 0 rgba(234,109,34,0.08);
             transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            text-decoration: none;
+            z-index: 2;
         }
         .header-topbar .header-icon-link:hover {
             background: #EA6D22;
             color: #fff;
             box-shadow: 0 4px 16px 0 rgba(234,109,34,0.18);
+            text-decoration: none;
         }
         .header-badge {
             position: absolute;
@@ -294,9 +299,102 @@
         .header-icon-link {
             text-decoration: none !important;
         }
+        /* Thêm CSS cho dropdown menu */
+        .user-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background-color: #fff;
+            min-width: 250px;
+            box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+            z-index: 1000;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 10px;
+        }
+
+        .user-dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .user-details {
+            flex: 1;
+        }
+
+        .user-name {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .user-email {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .dropdown-menu {
+            list-style: none;
+            padding: 0;
+            margin: 10px 0 0 0;
+        }
+
+        .dropdown-menu li {
+            padding: 8px 15px;
+        }
+
+        .dropdown-menu li a {
+            color: #333;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .dropdown-menu li a:hover {
+            color: #EA6D22;
+        }
+
+        .logout-btn {
+            display: block;
+            width: 100%;
+            padding: 8px;
+            background-color: #EA6D22;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .logout-btn:hover {
+            background-color: #d15d1b;
+        }
     </style>
 </head>
 <body style="margin:0; padding:0; background:#f8f9fa;">
+    <% 
+        User currentUser = (User) session.getAttribute("user");
+    %>
     <header style="position:sticky;top:0;z-index:1000;width:100vw;background:#FFD600;box-shadow:0 2px 12px 0 rgba(234,109,34,0.10);border-radius:0 0 1.2rem 1.2rem;">
         <div style="max-width:1200px;margin:auto;display:flex;align-items:center;justify-content:space-between;padding:10px 24px 6px 24px;">
             <!-- Logo -->
@@ -313,10 +411,42 @@
             </form>
             <!-- Icons -->
             <div class="d-flex align-items-center gap-3">
-                <a href="/account" class="d-flex flex-column align-items-center text-decoration-none" style="color:#222;font-size:1.25rem;">
-                    <i class="fa fa-user-circle"></i>
-                    <span style="font-size:0.85rem;font-weight:500;">Tài khoản</span>
-                </a>
+                <div class="user-dropdown">
+                    <% if (currentUser != null) { %>
+                        <a href="<%=request.getContextPath()%>/user/profile" class="header-icon-link">
+                            <i class="fa-solid fa-user"></i>
+                        </a>
+                        <div class="dropdown-content">
+                            <div class="user-info">
+                                <% if (currentUser.getPicture() != null) { %>
+                                    <img src="<%= currentUser.getPicture() %>" alt="Avatar" class="user-avatar">
+                                <% } else { %>
+                                    <i class="fa-solid fa-user-circle fa-3x"></i>
+                                <% } %>
+                                <div class="user-details">
+                                    <div class="user-name"><%= currentUser.getFullname() %></div>
+                                    <div class="user-email"><%= currentUser.getEmail() %></div>
+                                </div>
+                            </div>
+                            <ul class="dropdown-menu">
+                                <li><a href="<%=request.getContextPath()%>/user/profile"><i class="fa-solid fa-user-pen"></i> Thông tin tài khoản</a></li>
+                                <li><a href="#"><i class="fa-solid fa-clock-rotate-left"></i> Lịch sử đơn hàng</a></li>
+                                <% if (currentUser.isAdmin()) { %>
+                                    <li><a href="<%=request.getContextPath()%>/admin/dashboard"><i class="fa-solid fa-gauge"></i> Quản trị</a></li>
+                                <% } %>
+                            </ul>
+                            <form action="<%=request.getContextPath()%>/logout" method="post">
+                                <button type="submit" class="logout-btn">
+                                    <i class="fa-solid fa-sign-out-alt"></i> Đăng xuất
+                                </button>
+                            </form>
+                        </div>
+                    <% } else { %>
+                        <a href="<%=request.getContextPath()%>/oauth2/google" class="header-icon-link">
+                            <i class="fa-solid fa-user"></i>
+                        </a>
+                    <% } %>
+                </div>
                 <a href="/cart" class="d-flex flex-column align-items-center text-decoration-none position-relative" style="color:#222;font-size:1.25rem;">
                     <i class="fa fa-shopping-cart"></i>
                     <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="cartBadge" style="font-size:0.8rem;">2</span>

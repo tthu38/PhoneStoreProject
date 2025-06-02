@@ -188,6 +188,12 @@ CREATE TABLE [AITraining] (
   FOREIGN KEY ([ProductBaseID]) REFERENCES [ProductBase]([ProductBaseID]),
   FOREIGN KEY ([VariantID]) REFERENCES [ProductVariants]([VariantID])
 );
+ALTER TABLE Users
+ADD GoogleId NVARCHAR(50),
+    VerifiedEmail BIT DEFAULT (0),
+    GivenName NVARCHAR(100),
+    FamilyName NVARCHAR(100),
+    GoogleLink NVARCHAR(255);
 
 CREATE TRIGGER trg_Insert_AITraining
 ON ProductVariants
@@ -231,3 +237,31 @@ BEGIN
   JOIN Categories c ON pb.CategoryID = c.CategoryID;
 END;
 
+SET IDENTITY_INSERT Roles ON;
+INSERT INTO Roles (RoleID, RoleName) VALUES 
+(1, 'Admin'),
+(2, 'Customer');
+SET IDENTITY_INSERT Roles OFF;
+GO
+
+INSERT INTO Users (Email, Password, FullName, PhoneNumber, IsActive, RoleID, IsOauthUser, VerifiedEmail) VALUES 
+('admin@phonestore.com', '$2a$10$VNb6EGbXMF.ZHv7GlRFbG.EB0QA8GEzBxYlGgYHZqkJoZVYyRCLOi', N'Admin User', '0123456789', 1, 1, 0, 1),
+('customer@gmail.com', '$2a$10$VNb6EGbXMF.ZHv7GlRFbG.EB0QA8GEzBxYlGgYHZqkJoZVYyRCLOi', N'Customer User', '0987654321', 1, 2, 0, 1);
+
+SELECT 
+    UserID,
+    Email,
+    FullName,
+    PhoneNumber,
+    IsActive,
+    RoleID,
+    IsOauthUser,
+    OauthProvider,
+    GoogleId,
+    Picture,
+    VerifiedEmail,
+    GivenName,
+    FamilyName,
+    GoogleLink,
+    CreatedAt
+FROM Users; 

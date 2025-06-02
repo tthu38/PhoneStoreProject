@@ -19,12 +19,12 @@ import org.hibernate.annotations.Nationalized;
         @NamedQuery(name = "User.findAll", query = "SELECT u FROM User u"),
         @NamedQuery(name = "User.findById", query = "SELECT u FROM User u WHERE u.id = :id"),
         @NamedQuery(name = "User.findByEmail", query = "SELECT u FROM User u WHERE u.email LIKE :email"),
-        @NamedQuery(name = "User.findByStatus", query = "SELECT u FROM User u WHERE u.status = :status"),
-        @NamedQuery(name = "User.findByRole", query = "SELECT u FROM User u WHERE u.role = :role"),
+        @NamedQuery(name = "User.findByIsActive", query = "SELECT u FROM User u WHERE u.isActive = :isActive"),
+        @NamedQuery(name = "User.findByRole", query = "SELECT u FROM User u WHERE u.RoleID = :RoleID"),
         @NamedQuery(name = "User.findByName", query = "SELECT u FROM User u WHERE u.name LIKE :name"),
         @NamedQuery(name = "User.findByPhone", query = "SELECT u FROM User u WHERE u.phone = :phone"),
         @NamedQuery(name = "User.findByRememberToken",
-                query = "SELECT u FROM User u WHERE u.rememberToken = :token AND u.status = 'ACTIVE'")
+                query = "SELECT u FROM User u WHERE u.rememberToken = :token AND u.isActive = true")
 })
 @Table(name = "Users")
 public class User {
@@ -52,18 +52,15 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserAddress> address;
     
-    @ColumnDefault("'ACTIVE'")
-    @Column(name = "Status", nullable = false, length = 15)
-    private String status;
+    @Column(name = "IsActive", nullable = false)
+    private Boolean isActive = true;
     
     @ColumnDefault("getdate()")
-    @Column(name = "CreateAt")
+    @Column(name = "CreatedAt")
     private Instant createDate;
     
-    @Nationalized
-    @ColumnDefault("'Customer'")
-    @Column(name = "Role", length = 15)
-    private String role;
+    @Column(name = "RoleID", nullable = false)
+    private Integer roleId;
     
     @Column(name = "RememberToken")
     private String rememberToken;
@@ -71,27 +68,25 @@ public class User {
     @Column(name = "Picture")
     private String picture;
     
-    @ColumnDefault("0")
-    @Column(name = "is_oauth_user")
-    private Boolean isOauthUser;
+    @Column(name = "IsOauthUser")
+    private Boolean isOauthUser = false;
     
-    @Column(name = "oauth_provider", length = 50)
+    @Column(name = "OauthProvider", length = 50)
     private String oauthProvider;
 
-    // Google OAuth specific fields
-    @Column(name = "google_id")
+    @Column(name = "GoogleId")
     private String googleId;
 
-    @Column(name = "verified_email")
+    @Column(name = "VerifiedEmail")
     private boolean verifiedEmail;
 
-    @Column(name = "given_name")
+    @Column(name = "GivenName")
     private String givenName;
 
-    @Column(name = "family_name")
+    @Column(name = "FamilyName")
     private String familyName;
 
-    @Column(name = "google_link")
+    @Column(name = "GoogleLink")
     private String googleLink;
 
     public User() {
@@ -153,12 +148,12 @@ public class User {
         this.address = address;
     }
 
-    public String getStatus() {
-        return status;
+    public Boolean getIsActive() {
+        return isActive;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
+    public void setIsActive(Boolean isActive) {
+        this.isActive = isActive;
     }
 
     public Instant getCreateDate() {
@@ -169,12 +164,12 @@ public class User {
         this.createDate = createDate;
     }
 
-    public String getRole() {
-        return role;
+    public Integer getRoleId() {
+        return roleId;
     }
 
-    public void setRole(String role) {
-        this.role = role;
+    public void setRoleId(Integer roleId) {
+        this.roleId = roleId;
     }
 
     public String getRememberToken() {
@@ -247,5 +242,17 @@ public class User {
 
     public void setGoogleLink(String googleLink) {
         this.googleLink = googleLink;
+    }
+
+    public boolean isActive() {
+        return isActive != null && isActive;
+    }
+
+    public boolean isAdmin() {
+        return roleId != null && roleId == 1; // Giả sử Admin có ID = 1
+    }
+
+    public boolean isCustomer() {
+        return roleId != null && roleId == 2; // Giả sử Customer có ID = 2
     }
 }

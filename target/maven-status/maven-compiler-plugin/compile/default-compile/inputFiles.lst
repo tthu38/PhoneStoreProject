@@ -2,6 +2,7 @@ C:\asski3\PhoneStoreProject\src\main\java\utils\Validation.java
 C:\asski3\PhoneStoreProject\src\main\java\model\User.java
 C:\asski3\PhoneStoreProject\src\main\java\controller\InventoryServlet.java
 C:\asski3\PhoneStoreProject\src\main\java\controller\LoginGoogleServlet.java
+C:\asski3\PhoneStoreProject\src\main\java\controller\ProfileServlet.java
 C:\asski3\PhoneStoreProject\src\main\java\model\ProductVariant.java
 C:\asski3\PhoneStoreProject\src\main\java\dao\UserDAO.java
 C:\asski3\PhoneStoreProject\src\main\java\model\Category.java
@@ -17,8 +18,6 @@ C:\asski3\PhoneStoreProject\src\main\java\utils\DBUtils.java
 C:\asski3\PhoneStoreProject\src\main\java\controller\CartServlet.java
 C:\asski3\PhoneStoreProject\src\main\java\model\ProductBrand.java
 C:\asski3\PhoneStoreProject\src\main\java\controller\UserServlet.java
-C:\asski3\PhoneStoreProject\src\main\java\service\GoogleService.java
-C:\asski3\PhoneStoreProject\src\main\java\controller\GoogleLoginServlet.java
 C:\asski3\PhoneStoreProject\src\main\java\service\ProductVariantService.java
 C:\asski3\PhoneStoreProject\src\main\java\UserDAO\UserDao.java
 C:\asski3\PhoneStoreProject\src\main\java\controller\MailServlet.java

@@ -7,6 +7,7 @@ import org.apache.http.client.fluent.Form;
 import org.apache.http.client.fluent.Request;
 
 public class GoogleUtils {
+
     public static String getToken(String code) throws Exception {
         String response = Request.Post(GoogleConstants.GOOGLE_LINK_GET_TOKEN)
                 .bodyForm(Form.form()
@@ -17,9 +18,10 @@ public class GoogleUtils {
                         .add("grant_type", GoogleConstants.GOOGLE_GRANT_TYPE)
                         .build())
                 .execute().returnContent().asString();
-        
+
         JsonObject jobj = new Gson().fromJson(response, JsonObject.class);
-        return jobj.get("access_token").getAsString();
+        String accessToken = jobj.get("access_token").getAsString();
+        return accessToken;
     }
 
     public static User getUserInfo(String accessToken) throws Exception {
@@ -39,4 +41,4 @@ public class GoogleUtils {
         user.setPicture(json.has("picture") ? json.get("picture").getAsString() : null);
         return user;
     }
-} 
+}

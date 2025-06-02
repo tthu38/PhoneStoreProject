@@ -7,6 +7,7 @@ import java.sql.SQLException;
 
 public class UserService implements IUserService {
     private UserDAO userDAO;
+    private static final int CUSTOMER_ROLE_ID = 2;  
 
     public UserService() {
         userDAO = new UserDAO();
@@ -14,19 +15,16 @@ public class UserService implements IUserService {
 
     @Override
     public boolean register(User user) throws SQLException {
-        // Validate user data
         if (user.getEmail() == null || user.getEmail().trim().isEmpty() ||
             user.getPassword() == null || user.getPassword().trim().isEmpty() ||
             user.getFullname() == null || user.getFullname().trim().isEmpty()) {
             return false;
         }
 
-        // Hash password before saving
         user.setPassword(BCrypt.hashpw(user.getPassword(), BCrypt.gensalt()));
         
-        // Set default values
-        user.setStatus("ACTIVE");
-        user.setRole("Customer");
+        user.setIsActive(true);
+        user.setRoleId(CUSTOMER_ROLE_ID); 
         user.setIsOauthUser(false);
         
         return userDAO.register(user);
@@ -35,7 +33,7 @@ public class UserService implements IUserService {
     @Override
     public User login(String email, String password) throws SQLException {
         User user = userDAO.findByEmail(email);
-        if (user != null && BCrypt.checkpw(password, user.getPassword())) {
+        if (user != null && user.isActive() && BCrypt.checkpw(password, user.getPassword())) {
             return user;
         }
         return null;
@@ -56,14 +54,13 @@ public class UserService implements IUserService {
         User user = userDAO.findByEmail(email);
         
         if (user == null) {
-            // Create new user for Google login
             user = new User();
             user.setEmail(email);
             user.setFullname(name);
             user.setGoogleId(googleId);
             user.setPicture(picture);
-            user.setStatus("ACTIVE");
-            user.setRole("Customer");
+            user.setIsActive(true);
+            user.setRoleId(CUSTOMER_ROLE_ID); 
             user.setIsOauthUser(true);
             user.setOauthProvider("GOOGLE");
             user.setVerifiedEmail(true);
@@ -72,7 +69,6 @@ public class UserService implements IUserService {
                 return null;
             }
         } else {
-            // Update existing user's Google info
             user.setGoogleId(googleId);
             user.setPicture(picture);
             user.setIsOauthUser(true);
@@ -80,6 +76,6 @@ public class UserService implements IUserService {
             userDAO.updateUser(user);
         }
         
-        return user;
+        return user.isActive() ? user : null;
     }
 } 

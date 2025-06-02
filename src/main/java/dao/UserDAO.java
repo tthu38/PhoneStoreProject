@@ -2,7 +2,6 @@ package dao;
 
 import model.User;
 import utils.DBUtils;
-import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -11,7 +10,7 @@ import java.sql.SQLException;
 
 public class UserDAO {
     public boolean register(User user) throws SQLException {
-        String sql = "INSERT INTO Users (Email, Password, FullName, PhoneNumber, Status, Role, IsOauthUser, OauthProvider, GoogleId, Picture, VerifiedEmail) " +
+        String sql = "INSERT INTO Users (Email, Password, FullName, PhoneNumber, IsActive, RoleID, IsOauthUser, OauthProvider, GoogleId, Picture, VerifiedEmail) " +
                      "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         
         try (Connection conn = DBUtils.getConnection();
@@ -26,8 +25,8 @@ public class UserDAO {
             ps.setString(2, user.getPassword());
             ps.setString(3, user.getFullname());
             ps.setString(4, user.getPhone());
-            ps.setString(5, user.getStatus());
-            ps.setString(6, user.getRole());
+            ps.setBoolean(5, user.getIsActive());
+            ps.setInt(6, user.getRoleId());
             ps.setBoolean(7, user.getIsOauthUser());
             ps.setString(8, user.getOauthProvider());
             ps.setString(9, user.getGoogleId());
@@ -55,7 +54,7 @@ public class UserDAO {
     }
     
     public User findByEmail(String email) throws SQLException {
-        String sql = "SELECT * FROM Users WHERE email = ?";
+        String sql = "SELECT * FROM Users WHERE Email = ?";
         
         try (Connection conn = DBUtils.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -84,7 +83,7 @@ public class UserDAO {
     }
 
     public boolean updateUser(User user) throws SQLException {
-        String sql = "UPDATE Users SET FullName = ?, PhoneNumber = ?, Status = ?, Role = ?, " +
+        String sql = "UPDATE Users SET FullName = ?, PhoneNumber = ?, IsActive = ?, RoleID = ?, " +
                     "IsOauthUser = ?, OauthProvider = ?, GoogleId = ?, Picture = ?, VerifiedEmail = ? " +
                     "WHERE Email = ?";
         
@@ -93,8 +92,8 @@ public class UserDAO {
             
             ps.setString(1, user.getFullname());
             ps.setString(2, user.getPhone());
-            ps.setString(3, user.getStatus());
-            ps.setString(4, user.getRole());
+            ps.setBoolean(3, user.getIsActive());
+            ps.setInt(4, user.getRoleId());
             ps.setBoolean(5, user.getIsOauthUser());
             ps.setString(6, user.getOauthProvider());
             ps.setString(7, user.getGoogleId());
@@ -113,8 +112,8 @@ public class UserDAO {
         user.setPassword(rs.getString("Password"));
         user.setFullname(rs.getString("FullName"));
         user.setPhone(rs.getString("PhoneNumber"));
-        user.setStatus(rs.getString("Status"));
-        user.setRole(rs.getString("Role"));
+        user.setIsActive(rs.getBoolean("IsActive"));
+        user.setRoleId(rs.getInt("RoleID"));
         user.setIsOauthUser(rs.getBoolean("IsOauthUser"));
         user.setOauthProvider(rs.getString("OauthProvider"));
         user.setGoogleId(rs.getString("GoogleId"));
