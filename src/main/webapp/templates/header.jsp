@@ -21,8 +21,8 @@
     <header class="header-main">
         <div class="header-container">
             <!-- Logo -->
-            <a href="/" class="brand-logo">
-                <img src="/images/logo.png" alt="Ocean SmartPhone">
+            <a href="#" class="brand-logo">
+                <img src="/images/logo.png">
                 <span class="brand-name">Ocean SmartPhone</span>
             </a>
 

@@ -12,6 +12,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
 
@@ -19,7 +20,7 @@ import java.io.PrintWriter;
  *
  * @author ThienThu
  */
-@WebServlet(urlPatterns = {"/login", "/login-google", "/oauth2/google"})
+@WebServlet(urlPatterns = {"/login", "/login-google", "/oauth2/google", "/update-profile"})
 public class LoginServlet extends HttpServlet {
     private UserService userService;
 
@@ -97,7 +98,7 @@ public class LoginServlet extends HttpServlet {
                 if (googleUser != null) {
                     userService.setupUserSession(request, response, googleUser);
                     request.getSession().setAttribute("userObject", googleUser);
-                    response.sendRedirect(request.getContextPath() + "/product/productlist.jsp");                    
+                    response.sendRedirect(request.getContextPath() + "/user/userupdate.jsp");
                 } else {
                     request.setAttribute("error", "Không thể đăng nhập bằng Google. Email này chưa được đăng ký hoặc tài khoản đã bị khóa.");
                     request.getRequestDispatcher("/user/login.jsp").forward(request, response);
@@ -123,6 +124,24 @@ public class LoginServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        String servletPath = request.getServletPath();
+        if ("/update-profile".equals(servletPath)) {
+            HttpSession session = request.getSession(false);
+            if (session == null || session.getAttribute("userObject") == null) {
+                response.sendRedirect(request.getContextPath() + "/user/login.jsp");
+                return;
+            }
+            User user = (User) session.getAttribute("userObject");
+            String fullname = request.getParameter("fullname");
+            String phone = request.getParameter("phone");
+            // Nếu có các trường khác, lấy thêm ở đây
+            user.setFullname(fullname);
+            user.setPhone(phone);
+            userService.updateUser(user);
+            session.setAttribute("userObject", user);
+            response.sendRedirect(request.getContextPath() + "/index.jsp");
+            return;
+        }
         String email = request.getParameter("email");
         String password = request.getParameter("password");
 
@@ -130,9 +149,7 @@ public class LoginServlet extends HttpServlet {
         if (user != null) {
             userService.setupUserSession(request, response, user);
             request.getSession().setAttribute("userObject", user);
-            //goi ham servlet chinh sua va them thong tin dang nhap 
-            
-            response.sendRedirect(request.getContextPath() + "/product/productlist.jsp");
+            response.sendRedirect(request.getContextPath() + "/index.jsp");
         } else {
             request.setAttribute("error", "Invalid email or password");
             request.getRequestDispatcher("/user/login.jsp").forward(request, response);

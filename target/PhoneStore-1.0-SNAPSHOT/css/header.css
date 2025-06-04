@@ -114,6 +114,7 @@ body {
 }
 
 .header-icon-link:hover {
+    transition-delay: 0.5s;
     background: var(--primary-color);
     color: #fff;
     box-shadow: var(--shadow-md);

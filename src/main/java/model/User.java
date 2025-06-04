@@ -64,8 +64,9 @@ public class User implements Serializable {
     @Column(name = "CreatedAt")
     private Instant createDate;
     
+    @Nationalized
     @Column(name = "RoleID", nullable = false)
-    private Integer roleId;
+    private Integer roleId;// đỏi thành string 
     
     @Column(name = "RememberToken")
     private String rememberToken;
@@ -262,3 +263,4 @@ public class User implements Serializable {
     }
 
 }
+         
