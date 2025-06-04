@@ -225,6 +225,11 @@ body {
     font-weight: 500;
 }
 
+.login-text {
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
 .main-nav {
     background: #FFD600;
     border-radius: 0 0 1.2rem 1.2rem;
@@ -267,4 +272,60 @@ body {
         flex-wrap: wrap;
         justify-content: center;
     }
-} 
+}
+
+.header-login-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0 18px;
+    height: 40px;
+    background: rgba(255,255,255,0.85);
+    border: 1.5px solid #ea1d25;
+    border-radius: 18px;
+    color: #ea1d25;
+    font-weight: 600;
+    font-size: 1.08rem;
+    text-decoration: none;
+    transition: background 0.18s, box-shadow 0.18s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.header-login-btn i {
+    font-size: 1.25rem;
+    color: #ea1d25;
+}
+.header-login-btn span {
+    color: #ea1d25;
+    font-weight: 600;
+    font-size: 1.08rem;
+    line-height: 1;
+}
+.header-login-btn:hover {
+    background: #ffeaea;
+    text-decoration: none;
+}
+.profile-modal-backdrop {
+    position: fixed; z-index: 9999; left: 0; top: 0; width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.18); display: flex; align-items: center; justify-content: center;
+    backdrop-filter: blur(2px);
+}
+.profile-modal-box {
+    pointer-events: auto;
+    background: #fff; border-radius: 18px; box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+    padding: 2.2rem 2.5rem 1.5rem 2.5rem; min-width: 320px; position: relative; display: flex; flex-direction: column; align-items: stretch;
+    gap: 1.1rem;
+}
+.profile-modal-option {
+    display: flex; align-items: center; gap: 0.7rem;
+    font-size: 1.15rem; color: #ea1d25; font-weight: 600; text-decoration: none;
+    background: #fff6f6; border: none; border-radius: 10px; padding: 0.7rem 1.2rem; margin-bottom: 0.2rem;
+    transition: background 0.18s;
+    cursor: pointer;
+    justify-content: flex-start;
+}
+.profile-modal-option:hover {
+    background: #ffeaea;
+    color: #b71c1c;
+}
+.profile-modal-close {
+    position: absolute; top: 10px; right: 18px; background: none; border: none; font-size: 1.5rem; color: #888; cursor: pointer;} 

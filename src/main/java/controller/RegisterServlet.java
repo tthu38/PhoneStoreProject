@@ -36,8 +36,8 @@ public class RegisterServlet extends HttpServlet {
         User user = new User();
         user.setEmail(email);
         user.setPassword(password);
-        user.setFullname(fullName);
-        user.setPhone(phoneNumber);
+        user.setFullName(fullName);
+        user.setPhoneNumber(phoneNumber);
         
         if (userService.register(user)) {
             response.sendRedirect(request.getContextPath() + "/login");

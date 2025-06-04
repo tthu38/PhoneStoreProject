@@ -92,14 +92,26 @@ public class LoginServlet extends HttpServlet {
                 return;
             }
             try {
-                request.getParameterMap().forEach((k, v) -> System.out.println(k + ": " + java.util.Arrays.toString(v)));
+                System.out.println("Google code: " + code);
                 String accessToken = utils.GoogleUtils.getToken(code);
-                User googleUser = userService.getUserInfoFromGoogle(accessToken);
+                System.out.println("AccessToken: " + accessToken);
+                User googleUserInfo = utils.GoogleUtils.getUserInfo(accessToken);
+                System.out.println("GoogleUserInfo: " + googleUserInfo);
+                // Lưu hoặc cập nhật user vào DB
+                User googleUser = userService.findOrCreateGoogleUser(
+                    googleUserInfo.getEmail(),
+                    googleUserInfo.getFullName(),
+                    googleUserInfo.getPicture(),
+                    "GOOGLE", // oauthProvider
+                    true // isOauthUser
+                );
+                System.out.println("GoogleUser (DB): " + googleUser);
                 if (googleUser != null) {
                     userService.setupUserSession(request, response, googleUser);
                     request.getSession().setAttribute("userObject", googleUser);
                     response.sendRedirect(request.getContextPath() + "/user/userupdate.jsp");
                 } else {
+                    System.out.println("Google user null hoặc bị khóa!");
                     request.setAttribute("error", "Không thể đăng nhập bằng Google. Email này chưa được đăng ký hoặc tài khoản đã bị khóa.");
                     request.getRequestDispatcher("/user/login.jsp").forward(request, response);
                 }
@@ -132,11 +144,10 @@ public class LoginServlet extends HttpServlet {
                 return;
             }
             User user = (User) session.getAttribute("userObject");
-            String fullname = request.getParameter("fullname");
-            String phone = request.getParameter("phone");
-            // Nếu có các trường khác, lấy thêm ở đây
-            user.setFullname(fullname);
-            user.setPhone(phone);
+            String fullName = request.getParameter("fullname");
+            String phoneNumber = request.getParameter("phone");
+            user.setFullName(fullName);
+            user.setPhoneNumber(phoneNumber);
             userService.updateUser(user);
             session.setAttribute("userObject", user);
             response.sendRedirect(request.getContextPath() + "/index.jsp");

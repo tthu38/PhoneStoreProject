@@ -42,14 +42,14 @@
             <div class="row mb-3">
                 <div class="col">
                     <label class="form-label">Họ và tên</label>
-                    <input type="text" class="form-control" name="fullname" value="<%= user.getFullname() %>" required>
+                    <input type="text" class="form-control" name="fullname" value="<%= user.getFullName() %>" required>
                 </div>
                 
             </div>
             <div class="row mb-3">
                 <div class="col">
                     <label class="form-label">Số điện thoại</label>
-                    <input type="text" class="form-control" name="phone" value="<%= user.getPhone() != null ? user.getPhone() : "" %>">
+                    <input type="text" class="form-control" name="phone" value="<%= user.getPhoneNumber() != null ? user.getPhoneNumber() : "" %>">
                 </div>
                 <div class="col">
                     <label class="form-label">Email</label>

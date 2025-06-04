@@ -32,7 +32,7 @@ public class UserService {
     }
 
     public boolean addUser(User user) {
-        user.setCreateDate(Instant.now());
+        user.setCreatedAt(Instant.now());
         user.setIsActive(true);
         return userDao.insert(user);
     }
@@ -118,55 +118,51 @@ public class UserService {
         saveRememberToken(userId, null);
     }
 
-    public User processGoogleUserInfo(String userInfoJson) {
+    public User findOrCreateGoogleUser(String email, String fullName, String picture, String oauthProvider, boolean isOauthUser) {
+        EntityManager em = emf.createEntityManager();
         try {
-            JSONObject userInfo = new JSONObject(userInfoJson);
-            String email = userInfo.optString("email");
-            String fullname = userInfo.optString("name");
-            if (email.isEmpty() || fullname.isEmpty()) return null;
-
-            EntityManager em = emf.createEntityManager();
-            try {
-                em.getTransaction().begin();
-                TypedQuery<User> query = em.createNamedQuery("User.findByEmail", User.class);
-                query.setParameter("email", email);
-                List<User> users = query.getResultList();
-                User user;
-                if (users.isEmpty()) {
-                    user = new User();
-                    user.setEmail(email);
-                    user.setFullname(fullname);
-                    user.setIsActive(true);
-                    user.setRoleId(2); 
-                    user.setCreateDate(Instant.now());
-                    user.setPassword("GOOGLE_OAUTH");
-                    em.persist(user);
-                } else {
-                    user = users.get(0);
-                    user.setFullname(fullname);
-                    em.merge(user);
-                }
-                user.setRememberToken("token"); 
+            em.getTransaction().begin();
+            TypedQuery<User> query = em.createNamedQuery("User.findByEmail", User.class);
+            query.setParameter("email", email);
+            List<User> users = query.getResultList();
+            User user;
+            if (users.isEmpty()) {
+                user = new User();
+                user.setEmail(email);
+                user.setFullName(fullName);
+                user.setPicture(picture);
+                user.setIsOauthUser(isOauthUser);
+                user.setOauthProvider(oauthProvider);
+                user.setIsActive(true);
+                user.setRole("CUSTOMER");
+                user.setCreatedAt(Instant.now());
+                user.setPassword("GOOGLE_OAUTH");
+                em.persist(user);
+            } else {
+                user = users.get(0);
+                user.setFullName(fullName);
+                user.setPicture(picture);
+                user.setIsOauthUser(isOauthUser);
+                user.setOauthProvider(oauthProvider);
+                user.setIsActive(true);
                 em.merge(user);
-                em.getTransaction().commit();
-                return user;
-            } catch (Exception e) {
-                if (em.getTransaction().isActive()) em.getTransaction().rollback();
-                return null;
-            } finally {
-                em.close();
             }
+            em.getTransaction().commit();
+            return user;
         } catch (Exception e) {
+            if (em.getTransaction().isActive()) em.getTransaction().rollback();
             return null;
+        } finally {
+            em.close();
         }
     }
 
     public void setupUserSession(HttpServletRequest request, HttpServletResponse response, User user) {
         HttpSession session = request.getSession();
         session.setAttribute("userId", user.getId());
-        session.setAttribute("userFullname", user.getFullname());
+        session.setAttribute("userFullName", user.getFullName());
         session.setAttribute("userEmail", user.getEmail());
-        session.setAttribute("userRole", user.getRoleId());
+        session.setAttribute("userRole", user.getRole());
         session.setAttribute("loggedIn", true);
         if (user.getRememberToken() != null) {
             Cookie rememberCookie = new Cookie("remember_token", user.getRememberToken());
@@ -214,22 +210,9 @@ public class UserService {
         if (getUserByEmail(user.getEmail()).isPresent()) {
             return false;
         }
-        user.setCreateDate(Instant.now());
+        user.setCreatedAt(Instant.now());
         user.setIsActive(true);
-        user.setRoleId(2);
+        user.setRole("CUSTOMER");
         return addUser(user);
-    }
-
-    public User getUserInfoFromGoogle(String accessToken) throws Exception {
-        String link = utils.GoogleUtils.getConfig("google.userinfo.url") + accessToken;
-        String response = org.apache.http.client.fluent.Request.Get(link).execute().returnContent().asString();
-        com.google.gson.JsonObject googleUser = new com.google.gson.Gson().fromJson(response, com.google.gson.JsonObject.class);
-        User user = new User();
-        user.setEmail(googleUser.get("email").getAsString());
-        user.setVerifiedEmail(googleUser.get("verified_email").getAsBoolean());
-        user.setFullname(googleUser.get("name").getAsString());
-        user.setPicture(googleUser.get("picture").getAsString());
-        user.setGoogleId(googleUser.get("id").getAsString());
-        return user;
     }
 } 

@@ -34,4 +34,3 @@ utils\ValidationUtils.class
 controller\LogoutServlet.class
 utils\SecurityUtils.class
 controller\RegisterServlet.class
-utils\Validation.class

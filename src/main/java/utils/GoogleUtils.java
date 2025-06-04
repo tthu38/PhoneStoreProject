@@ -39,10 +39,10 @@ public class GoogleUtils {
         
         User user = new User();
         user.setEmail(googleUser.get("email").getAsString());
-        user.setVerifiedEmail(googleUser.get("verified_email").getAsBoolean());
-        user.setFullname(googleUser.get("name").getAsString());
+        user.setFullName(googleUser.get("name").getAsString());
         user.setPicture(googleUser.get("picture").getAsString());
-        user.setGoogleId(googleUser.get("id").getAsString());
+        user.setIsOauthUser(true);
+        user.setOauthProvider("GOOGLE");
         
         return user;
     }

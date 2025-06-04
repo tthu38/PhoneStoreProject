@@ -160,14 +160,8 @@
             <% } %>
             
             <div class="profile-title">
-                <h1 class="profile-name"><%= user.getFullname() %></h1>
+                <h1 class="profile-name"><%= user.getFullName() %></h1>
                 <div class="profile-email"><%= user.getEmail() %></div>
-                <% if (user.isVerifiedEmail()) { %>
-                    <div class="profile-verified">
-                        <i class="fas fa-check-circle"></i>
-                        Email đã xác thực
-                    </div>
-                <% } %>
             </div>
         </div>
         
@@ -176,22 +170,22 @@
             <div class="info-grid">
                 <div class="info-item">
                     <div class="info-label">Họ và tên</div>
-                    <div class="info-value"><%= user.getFullname() %></div>
+                    <div class="info-value"><%= user.getFullName() %></div>
                 </div>
                 <div class="info-item">
                     <div class="info-label">Email</div>
                     <div class="info-value"><%= user.getEmail() %></div>
                 </div>
-                <% if (user.getPhone() != null && !user.getPhone().isEmpty()) { %>
+                <% if (user.getPhoneNumber() != null && !user.getPhoneNumber().isEmpty()) { %>
                     <div class="info-item">
                         <div class="info-label">Số điện thoại</div>
-                        <div class="info-value"><%= user.getPhone() %></div>
+                        <div class="info-value"><%= user.getPhoneNumber() %></div>
                     </div>
                 <% } %>
                 <div class="info-item">
                     <div class="info-label">Loại tài khoản</div>
                     <div class="info-value">
-                        <% if (user.isAdmin()) { %>
+                        <% if (user.getRole() != null && user.getRole().equalsIgnoreCase("ADMIN")) { %>
                             <span class="badge bg-danger">Admin</span>
                         <% } else { %>
                             <span class="badge bg-primary">Khách hàng</span>
@@ -207,28 +201,10 @@
                 <div class="google-info">
                     <div class="info-grid">
                         <div class="info-item">
-                            <div class="info-label">Google ID</div>
-                            <div class="info-value"><%= user.getGoogleId() %></div>
+                            <div class="info-label">Tài khoản Google</div>
+                            <div class="info-value">Đã liên kết</div>
                         </div>
-                        <% if (user.getGivenName() != null) { %>
-                            <div class="info-item">
-                                <div class="info-label">Tên</div>
-                                <div class="info-value"><%= user.getGivenName() %></div>
-                            </div>
-                        <% } %>
-                        <% if (user.getFamilyName() != null) { %>
-                            <div class="info-item">
-                                <div class="info-label">Họ</div>
-                                <div class="info-value"><%= user.getFamilyName() %></div>
-                            </div>
-                        <% } %>
                     </div>
-                    <% if (user.getGoogleLink() != null) { %>
-                        <a href="<%= user.getGoogleLink() %>" target="_blank" class="google-link">
-                            <i class="fab fa-google"></i>
-                            Xem trang Google của tôi
-                        </a>
-                    <% } %>
                 </div>
             </div>
         <% } %>

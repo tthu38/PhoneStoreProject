@@ -16,8 +16,8 @@
         <jsp:include page="/templates/header.jsp" />
 
         <div class="container mt-5">
-            <h1 class="text-center">Chào mừng bạn đến với Ocean SmartPhone!</h1>
-            <p class="text-center">Đây là trang chủ demo. Bạn có thể tuỳ ý thay đổi nội dung ở đây.</p>
+            <h1 class="text-center">MỜI EM VỀ STU CỤA ANH</h1>
+            <h1 class="text-center">NGAY Ở KHU NHÀ ANHHHH</h1>
         </div>
 
         <%-- Include footer --%>

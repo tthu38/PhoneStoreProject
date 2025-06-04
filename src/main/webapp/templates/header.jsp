@@ -20,13 +20,11 @@
     
     <header class="header-main">
         <div class="header-container">
-            <!-- Logo -->
-            <a href="#" class="brand-logo">
+            <a href="${pageContext.request.contextPath}/" class="brand-logo">
                 <img src="/images/logo.png">
-                <span class="brand-name">Ocean SmartPhone</span>
+                <span class="brand-name">Thế Giới Công NghệNghệ</span>
             </a>
 
-            <!-- Search -->
             <form class="search-form" action="/search" method="get" autocomplete="off">
                 <div class="search-input-group">
                     <input class="search-input" type="search" name="q" id="searchInput" 
@@ -37,45 +35,27 @@
                 </div>
             </form>
 
-            <!-- Actions -->
             <div class="header-actions">
-                <!-- User Dropdown -->
                 <div class="user-dropdown">
                     <% if (currentUser != null) { %>
-                        <a href="<%=request.getContextPath()%>/user/profile.jsp" class="header-icon-link">
+                        <a href="#" id="profileAvatarBtn" class="header-login-btn">
                             <i class="fa-solid fa-user"></i>
+                            <span>Trang cá nhân</span>
                         </a>
-                        <div class="dropdown-content">
-                            <div class="user-info">
-                                <% if (currentUser.getPicture() != null) { %>
-                                    <img src="<%= currentUser.getPicture() %>" alt="Avatar" class="user-avatar">
-                                <% } else { %>
-                                    <i class="fa-solid fa-user-circle fa-3x"></i>
-                                <% } %>
-                                <div class="user-details">
-                                    <div class="user-name"><%= currentUser.getFullname() %></div>
-                                    <div class="user-email"><%= currentUser.getEmail() %></div>
-                                </div>
+                        <div id="profileModal" class="profile-modal-backdrop" style="display:none;">
+                            <div class="profile-modal-box">
+                                <button class="profile-modal-close" onclick="closeProfileModal()">&times;</button>
+                                <a href="<%=request.getContextPath()%>/user/profile.jsp" class="profile-modal-option"><i class="fa-solid fa-user-pen"></i> Thông tin tài khoản</a>
+                                <form action="<%=request.getContextPath()%>/logout" method="post" style="margin:0;">
+                                    <button type="submit" class="profile-modal-option"><i class="fa-solid fa-sign-out-alt"></i> Đăng xuất</button>
+                                </form>
                             </div>
-                            <ul class="dropdown-menu">
-                                <li><a href="<%=request.getContextPath()%>/user/profile.jsp">
-                                    <i class="fa-solid fa-user-pen"></i> Thông tin tài khoản</a></li>
-                                <li><a href="#"><i class="fa-solid fa-clock-rotate-left"></i> Lịch sử đơn hàng</a></li>
-                                <% if (currentUser.isAdmin()) { %>
-                                    <li><a href="<%=request.getContextPath()%>/admin/dashboard">
-                                        <i class="fa-solid fa-gauge"></i> Quản trị</a></li>
-                                <% } %>
-                            </ul>
-                            <form action="<%=request.getContextPath()%>/logout" method="post">
-                                <button type="submit" class="logout-btn">
-                                    <i class="fa-solid fa-sign-out-alt"></i> Đăng xuất
-                                </button>
-                            </form>
                         </div>
                     <% } else { %>
-                        <a href="<%=request.getContextPath()%>/oauth2/google" class="header-icon-link">
+                        <button type="button" id="openAuthModalBtn" class="header-login-btn" style="border:none;background:none;padding:0;">
                             <i class="fa-solid fa-user"></i>
-                        </a>
+                            <span>Đăng nhập</span>
+                        </button>
                     <% } %>
                 </div>
 
@@ -105,7 +85,6 @@
     </header>
 
     <script>
-    // Placeholder động cho thanh tìm kiếm
     const placeholders = [
         "Tìm kiếm sản phẩm, hãng, phụ kiện...",
         "iPhone 16 Pro Max, Samsung S25, Xiaomi 14T...",
@@ -124,6 +103,25 @@
     setInterval(rotatePlaceholder, 2500);
     </script>
     
+    <% if (currentUser == null) { %>
+        <!-- Modal đăng nhập/đăng ký -->
+        <div id="authModal" class="profile-modal-backdrop" style="display:none;">
+            <div class="profile-modal-box" style="align-items:center; text-align:center; max-width:340px;">
+                <button class="profile-modal-close" onclick="closeAuthModal()">&times;</button>
+                <img src="https://cdn.cellphones.com.vn/media/logo/smember.png" alt="Logo" style="height:54px; margin-bottom:0.7rem;"/>
+                <div style="font-size:1.5rem; color:#ea1d25; font-weight:700; margin-bottom:0.7rem;">Smember</div>
+                <div style="color:#333; font-size:1.08rem; margin-bottom:1.2rem;">Vui lòng đăng nhập tài khoản Smember để xem ưu đãi và thanh toán dễ dàng hơn.</div>
+                <div style="display:flex; gap:1rem; justify-content:center;">
+                    <a href="${pageContext.request.contextPath}/user/register.jsp" class="profile-modal-option" style="border:1.5px solid #ea1d25; background:#fff; color:#ea1d25; text-align:center;">Đăng ký</a>
+                    <a href="${pageContext.request.contextPath}/user/login.jsp" class="profile-modal-option" style="background:#ea1d25; color:#fff; text-align:center;">Đăng nhập</a>
+                </div>
+            </div>
+        </div>
+    <% } %>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="${pageContext.request.contextPath}/js/header.js"></script>
+
+    
 </body>
 </html>
