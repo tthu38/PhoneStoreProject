@@ -154,7 +154,7 @@
 
                     <div class="social-login">
                         <p class="text-center text-muted mb-4">Hoặc đăng nhập bằng</p>
-                        <a href="${pageContext.request.contextPath}/oauth2/google" class="btn btn-google w-100">
+                        <a href="${pageContext.request.contextPath}/login-google" class="btn btn-google w-100">
                             <img src="https://www.google.com/favicon.ico" alt="Google" width="20" class="me-2">
                             Đăng nhập với Google
                         </a>

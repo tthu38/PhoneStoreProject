@@ -5,10 +5,15 @@
 package model;
 
 import jakarta.persistence.*;
+import java.io.Serializable;
 import java.time.Instant;
 import java.util.List;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Nationalized;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import org.apache.http.client.fluent.Request;
+import java.util.ResourceBundle;
 
 /**
  *
@@ -20,18 +25,18 @@ import org.hibernate.annotations.Nationalized;
         @NamedQuery(name = "User.findById", query = "SELECT u FROM User u WHERE u.id = :id"),
         @NamedQuery(name = "User.findByEmail", query = "SELECT u FROM User u WHERE u.email LIKE :email"),
         @NamedQuery(name = "User.findByIsActive", query = "SELECT u FROM User u WHERE u.isActive = :isActive"),
-        @NamedQuery(name = "User.findByRole", query = "SELECT u FROM User u WHERE u.RoleID = :RoleID"),
-        @NamedQuery(name = "User.findByName", query = "SELECT u FROM User u WHERE u.name LIKE :name"),
+        @NamedQuery(name = "User.findByRole", query = "SELECT u FROM User u WHERE u.roleId = :roleId"),
+        @NamedQuery(name = "User.findByName", query = "SELECT u FROM User u WHERE u.fullname LIKE :name"),
         @NamedQuery(name = "User.findByPhone", query = "SELECT u FROM User u WHERE u.phone = :phone"),
         @NamedQuery(name = "User.findByRememberToken",
                 query = "SELECT u FROM User u WHERE u.rememberToken = :token AND u.isActive = true")
 })
 @Table(name = "Users")
-public class User {
+public class User implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "UserID", nullable = false)
-    private int id;
+    private Long id;
     
     @Nationalized
     @Column(name = "FullName", nullable = false, length = 100)
@@ -100,11 +105,11 @@ public class User {
         this.address = address;
     }
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -255,4 +260,5 @@ public class User {
     public boolean isCustomer() {
         return roleId != null && roleId == 2; // Giả sử Customer có ID = 2
     }
+
 }

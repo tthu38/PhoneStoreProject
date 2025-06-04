@@ -1,0 +1,269 @@
+:root {
+    --primary-color: #EA6D22;
+    --secondary-color: #ffb86c;
+    --bg-light: #fffbe7;
+    --shadow-sm: 0 2px 8px 0 rgba(234,109,34,0.08);
+    --shadow-md: 0 4px 16px 0 rgba(234,109,34,0.18);
+}
+
+body { 
+    background: #f8f9fa;
+    margin: 0;
+    padding: 0;
+}
+
+.header-main {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    width: 100vw;
+    background: #FFD600;
+    box-shadow: var(--shadow-sm);
+    border-radius: 0 0 1.2rem 1.2rem;
+}
+
+.header-container {
+    max-width: 1200px;
+    margin: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 24px 6px 24px;
+}
+
+.brand-logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+}
+
+.brand-logo img {
+    height: 38px;
+    width: auto;
+    object-fit: contain;
+}
+
+.brand-name {
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: #222;
+    letter-spacing: 1px;
+}
+
+.search-form {
+    flex: 1;
+    max-width: 500px;
+    margin: 0 32px;
+}
+
+.search-input-group {
+    display: flex;
+    align-items: center;
+    background: #fff;
+    border-radius: 2rem;
+    padding: 2px 12px;
+    box-shadow: 0 1px 4px 0 rgba(0,0,0,0.04);
+}
+
+.search-input {
+    background: transparent;
+    color: #222;
+    font-size: 1.08rem;
+    padding: 0.5rem 0.7rem;
+    box-shadow: none;
+    outline: none;
+    border: none;
+    flex: 1;
+    min-width: 0;
+}
+
+.search-input::placeholder {
+    color: #aaa;
+}
+
+.search-btn {
+    color: #222;
+    font-size: 1.3rem;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.user-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.header-icon-link {
+    background: #fff;
+    color: var(--primary-color);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s;
+    text-decoration: none;
+}
+
+.header-icon-link:hover {
+    background: var(--primary-color);
+    color: #fff;
+    box-shadow: var(--shadow-md);
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 100%;
+    background: #fff;
+    min-width: 250px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-top: 10px;
+    z-index: 1000;
+}
+
+.user-dropdown:hover .dropdown-content {
+    display: block;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.user-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.user-details {
+    flex: 1;
+}
+
+.user-name {
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.user-email {
+    color: #666;
+    font-size: 0.9em;
+}
+
+.dropdown-menu {
+    list-style: none;
+    padding: 0;
+    margin: 10px 0 0 0;
+}
+
+.dropdown-menu li {
+    padding: 8px 15px;
+}
+
+.dropdown-menu li a {
+    color: #333;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.dropdown-menu li a:hover {
+    color: var(--primary-color);
+}
+
+.logout-btn {
+    display: block;
+    width: 100%;
+    padding: 8px;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background 0.2s;
+}
+
+.logout-btn:hover {
+    background: #d15d1b;
+}
+
+.cart-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: #222;
+    font-size: 1.25rem;
+    position: relative;
+}
+
+.cart-badge {
+    font-size: 0.8rem;
+}
+
+.cart-text {
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.main-nav {
+    background: #FFD600;
+    border-radius: 0 0 1.2rem 1.2rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.nav-container {
+    max-width: 1200px;
+    margin: auto;
+}
+
+.main-menu {
+    gap: 0.2rem;
+    padding: 0.2rem 0;
+    margin: 0;
+}
+
+.nav-link {
+    color: #222 !important;
+    font-weight: 450;
+}
+
+@media (max-width: 991px) {
+    .header-container {
+        flex-direction: column;
+        padding: 10px;
+    }
+    
+    .search-form {
+        margin: 10px 0;
+        width: 100%;
+    }
+    
+    .header-actions {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .main-menu {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+} 

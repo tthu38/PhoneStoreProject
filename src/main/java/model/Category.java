@@ -16,9 +16,9 @@ import org.hibernate.annotations.Nationalized;
  */
 @Entity
 @NamedQueries({
-    @NamedQuery(name = "Product.findAll",query = "SELECT p FROM Product p WHERE p.isDeleted = false"),
-    @NamedQuery(name = "Product.findByCategoryId",query = "SELECT p FROM Product p WHERE p.category.id = :categoryId AND p.isDeleted = false"),
-    @NamedQuery(name = "Product.findByName",query = "SELECT p FROM Product p WHERE p.name LIKE :name AND p.isDeleted = false")
+//    @NamedQuery(name = "Product.findAll",query = "SELECT p FROM Product p WHERE p.isDeleted = false"),
+//    @NamedQuery(name = "Product.findByCategoryId",query = "SELECT p FROM Product p WHERE p.category.id = :categoryId AND p.isDeleted = false"),
+//    @NamedQuery(name = "Product.findByName",query = "SELECT p FROM Product p WHERE p.name LIKE :name AND p.isDeleted = false")
 })
 @Table(name = "Categories")
 public class Category {

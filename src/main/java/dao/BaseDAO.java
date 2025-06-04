@@ -4,20 +4,17 @@
  */
 package dao;
 
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 import java.util.List;
 
-/**
- *
- * @author ThienThu
- */
 public abstract class BaseDAO<T> {
     public static final EntityManagerFactory emf = Persistence.createEntityManagerFactory("PhoneStorePU");
+    
     public abstract List<T> getAll();
     public abstract T findById(int id);
-    public abstract boolean insert(T t) ;
-    public abstract boolean update(T t) ;
-    public abstract boolean delete(int id) ;
-
+    public abstract boolean insert(T t);
+    public abstract boolean update(T t);
+    public abstract boolean delete(int id);
 }
