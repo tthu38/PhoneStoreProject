@@ -9,12 +9,10 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.sql.SQLException;
-import service.IUserService;
 
 @WebServlet("/register")
 public class RegisterServlet extends HttpServlet {
-    private IUserService userService;
+    private UserService userService;
 
     @Override
     public void init() throws ServletException {
@@ -24,7 +22,7 @@ public class RegisterServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
-        request.getRequestDispatcher("/register.jsp").forward(request, response);
+        request.getRequestDispatcher("/user/register.jsp").forward(request, response);
     }
 
     @Override
@@ -37,21 +35,15 @@ public class RegisterServlet extends HttpServlet {
         
         User user = new User();
         user.setEmail(email);
-        user.setPassword(password); // Service will hash this
-        user.setFullname(fullName);
-        user.setPhone(phoneNumber);
+        user.setPassword(password);
+        user.setFullName(fullName);
+        user.setPhoneNumber(phoneNumber);
         
-        try {
-            if (userService.register(user)) {
-                response.sendRedirect(request.getContextPath() + "/login");
-            } else {
-                request.setAttribute("error", "Email already exists");
-                request.getRequestDispatcher("/register.jsp").forward(request, response);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            request.setAttribute("error", "Database error occurred");
-            request.getRequestDispatcher("/register.jsp").forward(request, response);
+        if (userService.register(user)) {
+            response.sendRedirect(request.getContextPath() + "/login");
+        } else {
+            request.setAttribute("error", "Email already exists");
+            request.getRequestDispatcher("/user/register.jsp").forward(request, response);
         }
     }
 } 

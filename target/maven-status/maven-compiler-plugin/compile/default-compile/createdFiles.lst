@@ -5,11 +5,14 @@ model\Warehouse.class
 service\UserService.class
 model\UserAddress.class
 controller\MailServlet.class
+utils\DBUtils.class
 model\Product.class
 service\CategoryService.class
 service\OrderService.class
 service\ProductService.class
+utils\GoogleUtils.class
 controller\UserServlet.class
+controller\ProfileServlet.class
 dao\GenericDAO.class
 model\ProductVariant.class
 model\User.class
@@ -27,5 +30,7 @@ model\Order.class
 service\ProductVariantService.class
 model\ProductBrand.class
 model\Category.class
+utils\ValidationUtils.class
 controller\LogoutServlet.class
-utils\Validation.class
+utils\SecurityUtils.class
+controller\RegisterServlet.class

@@ -1,0 +1,101 @@
+body { background: #f8f9fa; margin: 0; }
+.login-container {
+    display: flex;
+    min-height: 100vh;
+    align-items: stretch;
+    justify-content: center;
+}
+.login-left {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: #fff6f6;
+    border-radius: 0;
+    padding: 0 0 0 0;
+    border-right: 2px solid #f2f2f2;
+}
+.login-left-inner {
+    max-width: 520px;
+    width: 100%;
+    padding: 3.5rem 2.5rem;
+}
+.login-right {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: #fff;
+    border-radius: 0;
+    padding: 0 0 0 0;
+}
+.login-right-inner {
+    max-width: 520px;
+    width: 100%;
+    padding: 3.5rem 2.5rem;
+    box-shadow: 0 0 32px rgba(0,0,0,0.10);
+    border-radius: 18px;
+}
+.login-title {
+    color: #ea1d25;
+    font-weight: bold;
+    font-size: 2.8rem;
+    margin-bottom: 2.2rem;
+    text-align: center;
+}
+.benefit-list {
+    list-style: none;
+    padding: 1.5rem 1.5rem 1.5rem 1.5rem;
+    margin: 0 0 2.2rem 0;
+    background: #ffff;
+    border-radius: 18px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.07);
+}
+.benefit-list li {
+    margin-bottom: 1.1rem;
+    font-size: 1.35rem;
+    color: #333;
+    display: flex;
+    align-items: center;
+    background: #f9f9f9;
+    border-radius: 12px;
+    padding: 0.6rem 1rem;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+}
+.benefit-list li:last-child { margin-bottom: 0; }
+.benefit-list li i {
+    color: #ea1d25;
+    margin-right: 16px;
+    font-size: 1.6rem;
+}
+.login-illustration {
+    display: block;
+    margin: 2rem auto 0 auto;
+    max-width: 80%;
+}
+.login-form .form-label { font-weight: 600; font-size: 1.25rem; }
+.login-form .form-control { font-size: 1.25rem; padding: 1.1rem 1.3rem; border-radius: 12px; }
+.login-form .btn-primary { background: #ea1d25; border: none; font-weight: 700; font-size: 1.25rem; padding: 0.9rem 0; border-radius: 12px; }
+.login-form .btn-primary:hover { background: #b71c1c; }
+.login-form .btn-outline-secondary { border: 1px solid #ccc; }
+.social-btn {
+    width: 48%;
+    font-weight: 600;
+    font-size: 1.18rem;
+    margin-bottom: 1.2rem;
+    padding: 0.8rem 0;
+    border-radius: 10px;
+}
+.social-btn.google { background: #fff; color: #ea1d25; border: 1.5px solid #ea1d25; }
+.social-btn.zalo { background: #fff; color: #1976d2; border: 1.5px solid #1976d2; }
+.social-btn i { margin-right: 12px; font-size: 1.3rem; }
+@media (max-width: 900px) {
+    .login-container { flex-direction: column; }
+    .login-left, .login-right { border-radius: 24px; min-width: unset; width: 100%; padding: 2rem 1rem; }
+    .login-left-inner, .login-right-inner { padding: 2rem 0.5rem; }
+    .login-title { font-size: 2rem; }
+    .benefit-list li { font-size: 1.05rem; }
+    .login-form .form-label, .login-form .form-control, .login-form .btn-primary, .social-btn { font-size: 1rem; }
+} 

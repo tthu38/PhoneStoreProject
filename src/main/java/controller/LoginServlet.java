@@ -15,16 +15,14 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.sql.SQLException;
-import service.IUserService;
 
 /**
  *
  * @author ThienThu
  */
-@WebServlet("/login")
+@WebServlet(urlPatterns = {"/login", "/login-google", "/oauth2/google", "/update-profile"})
 public class LoginServlet extends HttpServlet {
-    private IUserService userService;
+    private UserService userService;
 
     @Override
     public void init() throws ServletException {
@@ -69,7 +67,62 @@ public class LoginServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        request.getRequestDispatcher("/login.jsp").forward(request, response);
+        String servletPath = request.getServletPath();
+        if ("/login-google".equals(servletPath)) {
+            String googleLoginUrl = "https://accounts.google.com/o/oauth2/auth?"
+                    + "client_id=" + utils.GoogleUtils.getConfig("google.client.id")
+                    + "&redirect_uri=" + utils.GoogleUtils.getConfig("google.redirect.uri")
+                    + "&response_type=code"
+                    + "&scope=email%20profile"
+                    + "&access_type=offline";
+            System.out.println("Google Login URL: " + googleLoginUrl);
+            response.sendRedirect(googleLoginUrl);
+            return;
+        } else if ("/oauth2/google".equals(servletPath)) {
+            String error = request.getParameter("error");
+            if (error != null) {
+                request.setAttribute("error", "Bạn đã từ chối cấp quyền cho ứng dụng hoặc có lỗi xác thực: " + error);
+                request.getRequestDispatcher("/user/login.jsp").forward(request, response);
+                return;
+            }
+            String code = request.getParameter("code");
+            if (code == null || code.isEmpty()) {
+                request.setAttribute("error", "Không nhận được mã xác thực từ Google. Vui lòng thử lại.");
+                request.getRequestDispatcher("/user/login.jsp").forward(request, response);
+                return;
+            }
+            try {
+                System.out.println("Google code: " + code);
+                String accessToken = utils.GoogleUtils.getToken(code);
+                System.out.println("AccessToken: " + accessToken);
+                User googleUserInfo = utils.GoogleUtils.getUserInfo(accessToken);
+                System.out.println("GoogleUserInfo: " + googleUserInfo);
+                // Lưu hoặc cập nhật user vào DB
+                User googleUser = userService.findOrCreateGoogleUser(
+                    googleUserInfo.getEmail(),
+                    googleUserInfo.getFullName(),
+                    googleUserInfo.getPicture(),
+                    "GOOGLE", // oauthProvider
+                    true // isOauthUser
+                );
+                System.out.println("GoogleUser (DB): " + googleUser);
+                if (googleUser != null) {
+                    userService.setupUserSession(request, response, googleUser);
+                    request.getSession().setAttribute("userObject", googleUser);
+                    response.sendRedirect(request.getContextPath() + "/user/userupdate.jsp");
+                } else {
+                    System.out.println("Google user null hoặc bị khóa!");
+                    request.setAttribute("error", "Không thể đăng nhập bằng Google. Email này chưa được đăng ký hoặc tài khoản đã bị khóa.");
+                    request.getRequestDispatcher("/user/login.jsp").forward(request, response);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                request.setAttribute("error", "Lỗi khi đăng nhập bằng Google: " + e.getMessage());
+                request.getRequestDispatcher("/user/login.jsp").forward(request, response);
+            }
+            return;
+        }
+        request.getRequestDispatcher("/user/login.jsp").forward(request, response);
     }
 
     /**
@@ -83,23 +136,34 @@ public class LoginServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        String servletPath = request.getServletPath();
+        if ("/update-profile".equals(servletPath)) {
+            HttpSession session = request.getSession(false);
+            if (session == null || session.getAttribute("userObject") == null) {
+                response.sendRedirect(request.getContextPath() + "/user/login.jsp");
+                return;
+            }
+            User user = (User) session.getAttribute("userObject");
+            String fullName = request.getParameter("fullname");
+            String phoneNumber = request.getParameter("phone");
+            user.setFullName(fullName);
+            user.setPhoneNumber(phoneNumber);
+            userService.updateUser(user);
+            session.setAttribute("userObject", user);
+            response.sendRedirect(request.getContextPath() + "/index.jsp");
+            return;
+        }
         String email = request.getParameter("email");
         String password = request.getParameter("password");
-        
-        try {
-            User user = userService.login(email, password);
-            if (user != null) {
-                HttpSession session = request.getSession();
-                session.setAttribute("user", user);
-                response.sendRedirect(request.getContextPath() + "/home");
-            } else {
-                request.setAttribute("error", "Invalid email or password");
-                request.getRequestDispatcher("/login.jsp").forward(request, response);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            request.setAttribute("error", "Database error occurred");
-            request.getRequestDispatcher("/login.jsp").forward(request, response);
+
+        User user = userService.login(email, password);
+        if (user != null) {
+            userService.setupUserSession(request, response, user);
+            request.getSession().setAttribute("userObject", user);
+            response.sendRedirect(request.getContextPath() + "/index.jsp");
+        } else {
+            request.setAttribute("error", "Invalid email or password");
+            request.getRequestDispatcher("/user/login.jsp").forward(request, response);
         }
     }
 
