@@ -17,9 +17,9 @@ body { background: #f8f9fa; margin: 0; }
     border-right: 2px solid #f2f2f2;
 }
 .login-left-inner {
-    max-width: 650px;
+    max-width: 520px;
     width: 100%;
-    padding: 4.5rem 3.5rem;
+    padding: 3.5rem 2.5rem;
 }
 .login-right {
     flex: 1 1 0;
@@ -32,17 +32,18 @@ body { background: #f8f9fa; margin: 0; }
     padding: 0 0 0 0;
 }
 .login-right-inner {
-    max-width: 650px;
+    max-width: 520px;
     width: 100%;
-    padding: 4.5rem 3.5rem;
+    padding: 3.5rem 2.5rem;
     box-shadow: 0 0 32px rgba(0,0,0,0.10);
     border-radius: 18px;
 }
 .login-title {
     color: #ea1d25;
     font-weight: bold;
-    font-size: 2rem;
+    font-size: 2.8rem;
     margin-bottom: 2.2rem;
+    text-align: center;
 }
 .benefit-list {
     list-style: none;
@@ -76,36 +77,19 @@ body { background: #f8f9fa; margin: 0; }
 }
 .login-form .form-label { font-weight: 600; font-size: 1.25rem; }
 .login-form .form-control { font-size: 1.25rem; padding: 1.1rem 1.3rem; border-radius: 12px; }
-.login-form .btn-primary {
-    width: 100%;
-    margin-top: 1rem;
-    background: #ea1d25;
-    border: none;
-    font-weight: 700;
-    font-size: 1.25rem;
-    padding: 0.9rem 0;
-    border-radius: 12px;
-}
+.login-form .btn-primary { background: #ea1d25; border: none; font-weight: 700; font-size: 1.25rem; padding: 0.9rem 0; border-radius: 12px; }
 .login-form .btn-primary:hover { background: #b71c1c; }
 .login-form .btn-outline-secondary { border: 1px solid #ccc; }
-.login-options {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 1rem;
-}
 .social-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 60%;
-    margin: 0 auto 1.2rem auto;
+    width: 48%;
     font-weight: 600;
     font-size: 1.18rem;
+    margin-bottom: 1.2rem;
     padding: 0.8rem 0;
     border-radius: 10px;
 }
 .social-btn.google { background: #fff; color: #ea1d25; border: 1.5px solid #ea1d25; }
+.social-btn.zalo { background: #fff; color: #1976d2; border: 1.5px solid #1976d2; }
 .social-btn i { margin-right: 12px; font-size: 1.3rem; }
 @media (max-width: 900px) {
     .login-container { flex-direction: column; }
@@ -114,7 +98,4 @@ body { background: #f8f9fa; margin: 0; }
     .login-title { font-size: 2rem; }
     .benefit-list li { font-size: 1.05rem; }
     .login-form .form-label, .login-form .form-control, .login-form .btn-primary, .social-btn { font-size: 1rem; }
-}
-.d-flex.justify-content-center .social-btn {
-    margin: 0 auto 1.2rem auto;
 } 

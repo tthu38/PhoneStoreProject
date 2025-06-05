@@ -20,16 +20,4 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeAuthModal(); });
     }
-
-    const closeAuthModalBtn = document.querySelector('.profile-modal-close');
-    if (closeAuthModalBtn && authModal) {
-        closeAuthModalBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            closeAuthModal();
-        });
-    }
-});
-
-function closeModal() {
-  document.getElementById('modalId').style.display = 'none';
-} 
+}); 
