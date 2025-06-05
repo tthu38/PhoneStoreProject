@@ -11,6 +11,10 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.List;
+import model.Product;
+import service.ProductService;
+import service.ProductVariantService;
 
 /**
  *
@@ -18,6 +22,16 @@ import jakarta.servlet.http.HttpServletResponse;
  */
 @WebServlet(name = "ProductServlet", urlPatterns = {"/products"})
 public class ProductServlet extends HttpServlet {
+    
+    ProductService productService;
+    ProductVariantService productVariantService;
+
+    public void init() {
+        productService = new ProductService();
+        productVariantService = new ProductVariantService();
+
+    }
+
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -57,7 +71,17 @@ public class ProductServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        String action = request.getParameter("action");
+        if (action == null) {
+            action = "";
+        }
+        switch (action) {
+            case "create":
+                
+                break;
+            default:
+                listProducts(request,response);
+        }
     }
 
     /**
@@ -83,5 +107,12 @@ public class ProductServlet extends HttpServlet {
     public String getServletInfo() {
         return "Short description";
     }// </editor-fold>
+
+    private void listProducts(HttpServletRequest request, HttpServletResponse response) 
+            throws ServletException, IOException{
+        List<Product> products = productService.getAllProducts();
+        request.setAttribute("products", products);
+        request.getRequestDispatcher("product/ProductList.jsp").forward(request, response);
+    }
 
 }
