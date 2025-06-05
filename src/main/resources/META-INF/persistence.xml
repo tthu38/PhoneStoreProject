@@ -1,25 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<persistence version="2.2" 
-    xmlns="http://xmlns.jcp.org/xml/ns/persistence" 
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-    xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_2.xsd">
-    
-    <persistence-unit name="PhoneStorePU" transaction-type="RESOURCE_LOCAL">
-        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
-        <class>entity.User</class>
-        
-        <properties>
-            <property name="jakarta.persistence.jdbc.url" value="jdbc:sqlserver://localhost:1433;databaseName=PhoneSt;encrypt=false;trustServerCertificate=true"/>
-            <property name="jakarta.persistence.jdbc.user" value="sa"/>
-            <property name="jakarta.persistence.jdbc.password" value="123"/>
-            <property name="jakarta.persistence.jdbc.driver" value="com.microsoft.sqlserver.jdbc.SQLServerDriver"/>
-            
-            <property name="hibernate.show_sql" value="true"/>
-            <property name="hibernate.format_sql" value="true"/>
-            <property name="hibernate.dialect" value="org.hibernate.dialect.SQLServerDialect"/>
-            
-            <!-- Tự động cập nhật schema -->
-            <property name="hibernate.hbm2ddl.auto" value="update"/>
-        </properties>
-    </persistence-unit>
+<persistence xmlns="https://jakarta.ee/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd"
+             version="3.0">
+  <persistence-unit name="PhoneStorePU" transaction-type="RESOURCE_LOCAL">
+    <class>model.Product</class>
+    <class>model.Category</class>
+    <class>model.ProductBrand</class>
+    <class>model.User</class>
+    <class>model.Inventory</class>
+    <class>model.InventoryLog</class>
+    <class>model.Order</class>
+    <class>model.OrderDetail</class>
+    <class>model.ProductStock</class>
+    <class>model.ProductVariant</class>
+
+    <properties>
+      <!-- Cấu hình JDBC -->
+      <property name="jakarta.persistence.jdbc.driver" value="com.microsoft.sqlserver.jdbc.SQLServerDriver"/>
+      <property name="jakarta.persistence.jdbc.url" value="jdbc:sqlserver://localhost:1433;databaseName=PhoneStore;encrypt=true;trustServerCertificate=true"/>
+      <property name="jakarta.persistence.jdbc.user" value="sa"/>
+      <property name="jakarta.persistence.jdbc.password" value="123"/> <!-- Đảm bảo mật khẩu đúng -->
+
+      <!-- Cấu hình Hibernate -->
+      <property name="hibernate.dialect" value="org.hibernate.dialect.SQLServerDialect"/>
+      <property name="hibernate.hbm2ddl.auto" value="update"/> <!-- Tự động cập nhật schema -->
+      <property name="hibernate.show_sql" value="true"/> <!-- Hiển thị SQL trong log -->
+      <property name="hibernate.format_sql" value="true"/> <!-- Định dạng SQL trong log -->
+      <property name="hibernate.connection.autocommit" value="false"/> <!-- Tắt autocommit -->
+
+      <!-- Cấu hình logging -->
+      <property name="jakarta.persistence.logging.level" value="FINE"/>
+
+      <!-- Tắt tự động tạo schema nếu không cần -->
+      <property name="jakarta.persistence.schema-generation.database.action" value="none"/>
+    </properties>
+  </persistence-unit>
 </persistence>

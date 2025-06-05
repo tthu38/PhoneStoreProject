@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %> <!-- Thêm để định dạng ngày -->
 
 <html>
 <head>
@@ -35,16 +36,6 @@
             line-height: 1.6;
             padding: 0;
             margin: 0;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-
-        .header {
-            width: 100%;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
         }
 
         .container {
@@ -54,7 +45,6 @@
             padding: 30px;
             border-radius: var(--radius);
             box-shadow: var(--shadow);
-            flex: 1;
         }
 
         h2 {
@@ -141,7 +131,7 @@
         }
 
         th {
-            background: var(--primary便是-color);
+            background: var(--primary-color);
             color: var(--white);
             font-weight: 500;
             letter-spacing: 0.5px;
@@ -152,7 +142,7 @@
         }
 
         tr:hover {
-            background-color: rgba(211, 47, 47, 0.05); /* Tông đỏ nhạt khi hover */
+            background-color: rgba(211, 47, 47, 0.05);
         }
 
         .action-links {
@@ -171,7 +161,7 @@
         }
 
         .delete {
-            background: #c62828; /* Màu đỏ khác để tránh trùng với primary */
+            background: #c62828;
         }
 
         .delete:hover {
@@ -179,7 +169,7 @@
         }
 
         .restore {
-            background: #388e3c; /* Màu xanh lá cho Restore */
+            background: #388e3c;
         }
 
         .restore:hover {
@@ -232,11 +222,6 @@
             overflow-x: auto;
         }
 
-        .footer {
-            width: 100%;
-            margin-top: auto;
-        }
-
         @media (max-width: 768px) {
             .container {
                 padding: 20px 15px;
@@ -255,9 +240,10 @@
     </style>
 </head>
 <body>
-    
-
     <div class="container">
+        <c:if test="${not empty errorMessage}">
+            <div class="error-message">${errorMessage}</div>
+        </c:if>
         <p class="welcome-text"><i class="fas fa-user-circle"></i> Welcome, ${user.name}</p>
         <h2>Product List</h2>
 
@@ -267,49 +253,70 @@
             <a href="#" class="btn"><i class="fas fa-clipboard-list"></i> Inventory Log</a>
         </div>
 
-  
-
-
         <c:set var="products" value="${requestScope.products}"/>
         <c:set var="pageSize" value="10"/>
         <c:set var="currentPage" value="${param.page != null ? param.page : 1}"/>
         <c:set var="start" value="${(currentPage - 1) * pageSize}"/>
         <c:set var="end" value="${start + pageSize}"/>
-        <c:set var="totalProducts" value="${products.size()}"/>
-        <c:set var="totalPages" value="${Math.ceil(totalProducts / pageSize)}"/>
+        <c:set var="totalProducts" value="${products != null ? products.size() : 0}"/>
+        <c:set var="totalPages" value="${totalProducts > 0 ? Math.ceil(totalProducts / pageSize) : 0}"/>
 
         <div class="table-responsive">
             <table>
                 <tr>
                     <th>ID</th>
                     <th>Name</th>
+                    <th>Category</th> <!-- Sửa từ Categories thành Category -->
                     <th>Brand</th>
                     <th>Description</th>
+                    <th>Specifications</th>
+                    <th>Created At</th>
+                    <th>Active</th> <!-- Thêm cột IsActive -->
                     <th>Views</th>
                     <th>Actions</th>
                 </tr>
-                <c:forEach var="product" items="${products}" varStatus="status">
-                    <c:if test="${status.index >= start && status.index < end}">
-                        <tr>
-                            <td>${product.id}</td>
-                            <td>${product.name}</td>
-                            <td>${product.brand}</td>
-                            <td>${product.description}</td>
-                            <td>${applicationScope.productViewCount[product.id] != null ? applicationScope.productViewCount[product.id] : 0}</td>
-                            <td class="action-links">
-                                <a href="#" class="btn edit"><i class="fas fa-edit"></i> Edit</a>
-                                <c:choose>
-                                    <c:when test="${!product.isDeleted}">
-                                        <a href="#" class="btn delete"><i class="fas fa-trash"></i> Delete</a>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <a href="#" class="btn restore"><i class="fas fa-trash-restore"></i> Restore</a>
-                                    </c:otherwise>
-                                </c:choose>
-                            </td>
-                        </tr>
-                    </c:if>
-                </c:forEach>
+                <c:if test="${products != null and not empty products}">
+                    <c:forEach var="product" items="${products}" varStatus="status">
+                        <c:if test="${status.index >= start and status.index < end}">
+                            <tr>
+                                <td>${product.id}</td>
+                                <td>${product.name}</td>
+                                <td>${product.category.name}</td> <!-- Sửa từ categories thành category -->
+                                <td>${product.brand.name}</td>
+                                <td>${product.description}</td>
+                                <td>${product.specifications}</td>
+                                <td>
+                                    <c:choose>
+                                        <c:when test="${product.createAt != null}">
+                                            <fmt:formatDate value="${product.createAtAsDate}" pattern="yyyy-MM-dd HH:mm:ss" />
+                                        </c:when>
+                                        <c:otherwise>
+                                            N/A
+                                        </c:otherwise>
+                                    </c:choose>
+                                </td>
+                                <td>${product.isActive ? 'Yes' : 'No'}</td> <!-- Hiển thị IsActive -->
+                                <td>${applicationScope.productViewCount[product.id] != null ? applicationScope.productViewCount[product.id] : 0}</td>
+                                <td class="action-links">
+                                    <a href="${pageContext.request.contextPath}/products?action=edit&id=${product.id}" class="btn edit"><i class="fas fa-edit"></i> Edit</a>
+                                    <c:choose>
+                                        <c:when test="${!product.isDeleted}">
+                                            <a href="${pageContext.request.contextPath}/products?action=delete&id=${product.id}" class="btn delete"><i class="fas fa-trash"></i> Delete</a>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <a href="${pageContext.request.contextPath}/products?action=restore&id=${product.id}" class="btn restore"><i class="fas fa-trash-restore"></i> Restore</a>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </td>
+                            </tr>
+                        </c:if>
+                    </c:forEach>
+                </c:if>
+                <c:if test="${products == null or empty products}">
+                    <tr>
+                        <td colspan="10" style="text-align: center;">No products found.</td> <!-- Cập nhật colspan cho số cột mới -->
+                    </tr>
+                </c:if>
             </table>
         </div>
 
@@ -317,7 +324,6 @@
             <c:if test="${currentPage > 1}">
                 <a href="?page=${currentPage - 1}"><i class="fas fa-chevron-left"></i> Previous</a>
             </c:if>
-
             <c:forEach var="i" begin="1" end="${totalPages}">
                 <c:choose>
                     <c:when test="${currentPage == i}">
@@ -328,7 +334,6 @@
                     </c:otherwise>
                 </c:choose>
             </c:forEach>
-
             <c:if test="${currentPage < totalPages}">
                 <a href="?page=${currentPage + 1}">Next <i class="fas fa-chevron-right"></i></a>
             </c:if>
@@ -338,4 +343,3 @@
     <jsp:include page="/templates/footer.jsp" />
 </body>
 </html>
-
