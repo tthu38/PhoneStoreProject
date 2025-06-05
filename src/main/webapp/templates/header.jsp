@@ -104,7 +104,6 @@
     </script>
     
     <% if (currentUser == null) { %>
-        <!-- Modal đăng nhập/đăng ký -->
         <div id="authModal" class="profile-modal-backdrop" style="display:none;">
             <div class="profile-modal-box" style="align-items:center; text-align:center; max-width:340px;">
                 <button class="profile-modal-close" onclick="closeAuthModal()">&times;</button>
