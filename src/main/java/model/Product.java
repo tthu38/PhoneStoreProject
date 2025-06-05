@@ -1,32 +1,20 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package model;
 
 import jakarta.persistence.*;
 import java.time.Instant;
-import java.util.List;
+import java.util.Date;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Nationalized;
 
-/**
- *
- * @author ThienThu
- */
 @Entity
-@NamedQueries({
-    @NamedQuery(name = "Product.findAll",query = "SELECT p FROM Product p WHERE p.isDeleted = false"),
-    @NamedQuery(name = "Product.findByName", query = "SELECT p FROM Product p WHERE p.name LIKE :name AND p.isDeleted = false"),
-    @NamedQuery(name = "Product.findByBrandId",
-                query = "SELECT p FROM Product p WHERE p.brand.id = :brandId AND p.isDeleted = false"),
-    @NamedQuery(name = "Product.findByCategoryId",
-                query = "SELECT p FROM Product p JOIN p.categories c WHERE c.id = :categoryId AND p.isDeleted = false"),
-    @NamedQuery(name = "Product.findActiveByBrandName",
-                query = "SELECT p FROM Product p WHERE p.brand.name = :brandName AND p.isDeleted = false"
-    )
-})
 @Table(name = "ProductBase")
+@NamedQueries({
+    @NamedQuery(name = "Product.findAll", query = "SELECT p FROM Product p WHERE p.isDeleted = false"),
+    @NamedQuery(name = "Product.findByName", query = "SELECT p FROM Product p WHERE p.name LIKE :name AND p.isDeleted = false"),
+    @NamedQuery(name = "Product.findByBrandId", query = "SELECT p FROM Product p WHERE p.brand.id = :brandId AND p.isDeleted = false"),
+    @NamedQuery(name = "Product.findByCategoryId", query = "SELECT p FROM Product p WHERE p.category.id = :categoryId AND p.isDeleted = false"),
+    @NamedQuery(name = "Product.findActiveByBrandName", query = "SELECT p FROM Product p WHERE p.brand.name = :brandName AND p.isDeleted = false")
+})
 public class Product {
 
     @Id
@@ -35,16 +23,12 @@ public class Product {
     private int id;
 
     @Nationalized
-    @Column(name = "Name", nullable = false, length = 200)
+    @Column(name = "ProductName", nullable = false, length = 200) // Sửa từ "Name" thành "ProductName"
     private String name;
 
-    @OneToMany
-    @JoinTable(
-            name = "ProductsCategories",
-            joinColumns = @JoinColumn(name = "ProductBaseID"),
-            inverseJoinColumns = @JoinColumn(name = "categoryID")
-    )
-    private List<Category> categories;
+    @ManyToOne
+    @JoinColumn(name = "CategoryID", nullable = false) // Sửa thành @ManyToOne, ánh xạ trực tiếp với cột CategoryID
+    private Category category;
 
     @ManyToOne
     @JoinColumn(name = "BrandID", nullable = false)
@@ -64,10 +48,15 @@ public class Product {
     @Column(name = "IsDeleted", nullable = false)
     private boolean isDeleted;
 
+    @ColumnDefault("1")
+    @Column(name = "IsActive", nullable = false) // Thêm ánh xạ cho cột IsActive
+    private boolean isActive;
+
     @ColumnDefault("getdate()")
     @Column(name = "CreatedAt")
     private Instant createAt;
 
+    // Getters và setters
     public int getId() {
         return id;
     }
@@ -84,12 +73,12 @@ public class Product {
         this.name = name;
     }
 
-    public List<Category> getCategories() {
-        return categories;
+    public Category getCategory() {
+        return category;
     }
 
-    public void setCategories(List<Category> categories) {
-        this.categories = categories;
+    public void setCategory(Category category) {
+        this.category = category;
     }
 
     public ProductBrand getBrand() {
@@ -99,9 +88,6 @@ public class Product {
     public void setBrand(ProductBrand brand) {
         this.brand = brand;
     }
-    
-    
-
 
     public String getDescription() {
         return description;
@@ -127,11 +113,24 @@ public class Product {
         this.isDeleted = isDeleted;
     }
 
+    public boolean getIsActive() {
+        return isActive;
+    }
+
+    public void setIsActive(boolean isActive) {
+        this.isActive = isActive;
+    }
+
     public Instant getCreateAt() {
         return createAt;
     }
 
     public void setCreateAt(Instant createAt) {
         this.createAt = createAt;
+    }
+
+    // Getter để chuyển Instant thành Date an toàn
+    public Date getCreateAtAsDate() {
+        return createAt != null ? Date.from(createAt) : null;
     }
 }

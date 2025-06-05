@@ -1,13 +1,7 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package model;
 
 import jakarta.persistence.*;
-import java.time.Instant;
 import java.util.List;
-import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Nationalized;
 
 /**
@@ -16,9 +10,8 @@ import org.hibernate.annotations.Nationalized;
  */
 @Entity
 @NamedQueries({
-//    @NamedQuery(name = "Product.findAll",query = "SELECT p FROM Product p WHERE p.isDeleted = false"),
-//    @NamedQuery(name = "Product.findByCategoryId",query = "SELECT p FROM Product p WHERE p.category.id = :categoryId AND p.isDeleted = false"),
-//    @NamedQuery(name = "Product.findByName",query = "SELECT p FROM Product p WHERE p.name LIKE :name AND p.isDeleted = false")
+    @NamedQuery(name = "Category.findAll", query = "SELECT c FROM Category c"),
+    @NamedQuery(name = "Category.findByName", query = "SELECT c FROM Category c WHERE c.name LIKE :name")
 })
 @Table(name = "Categories")
 public class Category {
@@ -31,7 +24,7 @@ public class Category {
     @Column(name = "CategoryName", nullable = false, length = 100)
     private String name;
 
-    @OneToMany(mappedBy = "categories")
+    @OneToMany(mappedBy = "category") // Sửa từ "categories" thành "category"
     private List<Product> products;
     
     @Nationalized
@@ -70,5 +63,4 @@ public class Category {
     public void setDescription(String description) {
         this.description = description;
     }
-
 }
