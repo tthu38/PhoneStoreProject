@@ -7,7 +7,7 @@
     <title>Welcome</title>
 
     <!-- Bootstrap CSS -->
-    <link href="${pageContext.request.contextPath}/css/bootstrap.min.css" rel="stylesheet">
+    <link href="${pageContext.request.contextPath}/css/bootstrap/bootstrap.min.css" rel="stylesheet">
     
     <style>
         .carousel-item {
