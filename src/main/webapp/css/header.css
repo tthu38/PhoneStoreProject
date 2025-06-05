@@ -17,18 +17,22 @@ body {
     top: 0;
     z-index: 1000;
     width: 100vw;
-    background: #FFD600;
+    background: #EA1D25;
     box-shadow: var(--shadow-sm);
-    border-radius: 0 0 1.2rem 1.2rem;
+    border-radius: 0 0 0.5rem 0.5rem;
+    padding-top: 0;
+    padding-bottom: 0;
 }
 
 .header-container {
     max-width: 1200px;
-    margin: auto;
+    margin: 0 auto;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 10px 24px 6px 24px;
+    padding: 4px 18px 4px 18px;
+    min-height: 48px;
+    gap: 18px;
 }
 
 .brand-logo {
@@ -36,25 +40,26 @@ body {
     align-items: center;
     gap: 8px;
     text-decoration: none;
+    margin-right: 12px;
 }
 
 .brand-logo img {
-    height: 38px;
+    height: 30px;
     width: auto;
     object-fit: contain;
 }
 
 .brand-name {
-    font-size: 1.45rem;
+    font-size: 1.5rem;
     font-weight: 700;
-    color: #222;
+    color: white;
     letter-spacing: 1px;
 }
 
 .search-form {
     flex: 1;
-    max-width: 500px;
-    margin: 0 32px;
+    max-width: 420px;
+    margin: 0 12px 0 0;
 }
 
 .search-input-group {
@@ -62,15 +67,15 @@ body {
     align-items: center;
     background: #fff;
     border-radius: 2rem;
-    padding: 2px 12px;
+    padding: 1px 8px;
     box-shadow: 0 1px 4px 0 rgba(0,0,0,0.04);
 }
 
 .search-input {
     background: transparent;
     color: #222;
-    font-size: 1.08rem;
-    padding: 0.5rem 0.7rem;
+    font-size: 1rem;
+    padding: 0.3rem 0.5rem;
     box-shadow: none;
     outline: none;
     border: none;
@@ -83,14 +88,15 @@ body {
 }
 
 .search-btn {
-    color: #222;
+    color: #888;
     font-size: 1.3rem;
 }
 
 .header-actions {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 10px;
+    margin-left: 8px;
 }
 
 .user-dropdown {
@@ -214,6 +220,8 @@ body {
     color: #222;
     font-size: 1.25rem;
     position: relative;
+    height: 32px;
+    padding: 0 10px;
 }
 
 .cart-badge {
@@ -221,34 +229,45 @@ body {
 }
 
 .cart-text {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     font-weight: 500;
+    color: white;
 }
 
 .login-text {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     font-weight: 500;
+    color: white;
 }
 
 .main-nav {
-    background: #FFD600;
-    border-radius: 0 0 1.2rem 1.2rem;
+    background: #EA1D25;
+    border-radius: 0 0 0.5rem 0.5rem;
     box-shadow: var(--shadow-sm);
+    margin-top: 0;
 }
 
 .nav-container {
     max-width: 1200px;
-    margin: auto;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    padding: 0 18px;
 }
 
 .main-menu {
-    gap: 0.2rem;
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 28px;
     padding: 0.2rem 0;
     margin: 0;
+    height: 48px;
 }
 
 .nav-link {
-    color: #222 !important;
+    color: white !important;
     font-weight: 450;
 }
 
@@ -292,10 +311,10 @@ body {
 }
 .header-login-btn i {
     font-size: 1.25rem;
-    color: #ea1d25;
+    color: #fff;
 }
 .header-login-btn span {
-    color: #ea1d25;
+    color: #fff;
     font-weight: 600;
     font-size: 1.08rem;
     line-height: 1;
@@ -308,6 +327,7 @@ body {
     position: fixed; z-index: 9999; left: 0; top: 0; width: 100vw; height: 100vh;
     background: rgba(0,0,0,0.18); display: flex; align-items: center; justify-content: center;
     backdrop-filter: blur(2px);
+    z-index: 9999 !important;
 }
 .profile-modal-box {
     pointer-events: auto;
@@ -328,4 +348,16 @@ body {
     color: #b71c1c;
 }
 .profile-modal-close {
-    position: absolute; top: 10px; right: 18px; background: none; border: none; font-size: 1.5rem; color: #888; cursor: pointer;} 
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    font-size: 2rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #888;
+    z-index: 10000;
+}
+.cart-link i {
+    color: #fff;
+} 

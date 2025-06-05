@@ -67,8 +67,23 @@ public class LoginServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        if (request.getSession().getAttribute("userObject") == null) {
+            java.util.Optional<User> rememberedUser = userService.checkRememberToken(request);
+            if (rememberedUser.isPresent()) {
+                userService.setupUserSession(request, response, rememberedUser.get());
+                request.getSession().setAttribute("userObject", rememberedUser.get());
+                response.sendRedirect(request.getContextPath() + "/index.jsp");
+                return;
+            }
+        }
         String servletPath = request.getServletPath();
         if ("/login-google".equals(servletPath)) {
+            String rememberMe = request.getParameter("rememberMe");
+            if ("true".equals(rememberMe)) {
+                request.getSession().setAttribute("rememberMe", true);
+            } else {
+                request.getSession().removeAttribute("rememberMe");
+            }
             String googleLoginUrl = "https://accounts.google.com/o/oauth2/auth?"
                     + "client_id=" + utils.GoogleUtils.getConfig("google.client.id")
                     + "&redirect_uri=" + utils.GoogleUtils.getConfig("google.redirect.uri")
@@ -92,26 +107,34 @@ public class LoginServlet extends HttpServlet {
                 return;
             }
             try {
-                System.out.println("Google code: " + code);
                 String accessToken = utils.GoogleUtils.getToken(code);
-                System.out.println("AccessToken: " + accessToken);
                 User googleUserInfo = utils.GoogleUtils.getUserInfo(accessToken);
-                System.out.println("GoogleUserInfo: " + googleUserInfo);
-                // Lưu hoặc cập nhật user vào DB
                 User googleUser = userService.findOrCreateGoogleUser(
                     googleUserInfo.getEmail(),
                     googleUserInfo.getFullName(),
                     googleUserInfo.getPicture(),
-                    "GOOGLE", // oauthProvider
-                    true // isOauthUser
+                    "GOOGLE",
+                    true
                 );
-                System.out.println("GoogleUser (DB): " + googleUser);
                 if (googleUser != null) {
+                    Boolean rememberMe = (Boolean) request.getSession().getAttribute("rememberMe");
+                    if (Boolean.TRUE.equals(rememberMe)) {
+                        String token = java.util.UUID.randomUUID().toString();
+                        userService.saveRememberToken(googleUser.getId(), token);
+                        jakarta.servlet.http.Cookie rememberCookie = new jakarta.servlet.http.Cookie("remember_token", token);
+                        rememberCookie.setMaxAge(60 * 60 * 24 * 30); // 30 ngày
+                        rememberCookie.setPath("/");
+                        rememberCookie.setHttpOnly(true);
+                        response.addCookie(rememberCookie);
+                    }
+                    request.getSession().removeAttribute("rememberMe");
+
                     userService.setupUserSession(request, response, googleUser);
                     request.getSession().setAttribute("userObject", googleUser);
-                    response.sendRedirect(request.getContextPath() + "/user/userupdate.jsp");
+
+                    response.sendRedirect(request.getContextPath() + "/index.jsp");
+                    return;
                 } else {
-                    System.out.println("Google user null hoặc bị khóa!");
                     request.setAttribute("error", "Không thể đăng nhập bằng Google. Email này chưa được đăng ký hoặc tài khoản đã bị khóa.");
                     request.getRequestDispatcher("/user/login.jsp").forward(request, response);
                 }
