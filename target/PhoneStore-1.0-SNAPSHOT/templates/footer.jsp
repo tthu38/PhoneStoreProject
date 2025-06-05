@@ -135,7 +135,7 @@
             .vnpay-icon {
                 width: 32px;
                 height: 32px;
-/*                padding-top: 2px;*/
+                /*                padding-top: 2px;*/
                 margin-left: -2px;
                 margin-top: -5px;
                 object-fit: cover;
@@ -208,11 +208,11 @@
 
                 <!-- Cột 4 -->
                 <div class="footer-col">
-                                    <div class="footer-col">
-                    <h3>THANH TOÁN</h3>
-                    <a href="#"><img src="${pageContext.request.contextPath}/images/VNPAY.png" alt="TikTok" class="vnpay-icon"></a>
+                    <div class="footer-col">
+                        <h3>THANH TOÁN</h3>
+                        <a href="#"><img src="${pageContext.request.contextPath}/images/VNPAY.png" alt="TikTok" class="vnpay-icon"></a>
 
-                </div>
+                    </div>
                     <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3835.8561678280007!2d108.2608913!3d15.968885900000002!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3142116949840599%3A0x365b35580f52e8d5!2sFPT%20University%20Danang!5e0!3m2!1sen!2s!4v1748509098035!5m2!1sen!2s" 
                             width="300" height="200px"; style="border:0; margin-top: 10px" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
 
