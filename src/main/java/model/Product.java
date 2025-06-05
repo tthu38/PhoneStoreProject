@@ -119,7 +119,7 @@ public class Product {
         this.specifications = specifications;
     }
 
-    public boolean isIsDeleted() {
+    public boolean getIsDeleted() {
         return isDeleted;
     }
 
