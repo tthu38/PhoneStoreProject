@@ -110,6 +110,20 @@ public class GenericDAO<T> extends BaseDAO<T>{
             em.close();
         }
     }
+    
+        public boolean hasNextPage(int page, int pageSize) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            List<T> result = em.createQuery("SELECT e FROM " + entityClass.getSimpleName() + " e", entityClass)
+                    .setFirstResult(page * pageSize) // Lấy từ offset của trang tiếp theo
+                    .setMaxResults(1) // Chỉ cần lấy 1 bản ghi để kiểm tra
+                    .getResultList();
+
+            return !result.isEmpty(); // Nếu có ít nhất 1 bản ghi, có trang tiếp theo
+        } finally {
+            em.close();
+        }
+    }
 
     
 }
