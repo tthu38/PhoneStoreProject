@@ -63,6 +63,8 @@ public class User implements Serializable {
     @Column(name = "CreatedAt")
     private Instant createdAt;
 
+    private Integer userID;
+
     public User() {}
 
     // Getters and setters
@@ -101,5 +103,8 @@ public class User implements Serializable {
 
     public Instant getCreatedAt() { return createdAt; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+
+    public Integer getUserID() {
+        return userID;
+    }
 }
-         
