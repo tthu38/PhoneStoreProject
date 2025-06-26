@@ -4,13 +4,14 @@
  */
 package controller;
 
-import java.io.IOException;
-import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.*;
+import model.User;
+import service.UserService;
+
+import java.io.IOException;
+import java.io.PrintWriter;
 
 /**
  *
@@ -18,6 +19,7 @@ import jakarta.servlet.http.HttpServletResponse;
  */
 @WebServlet(name = "UserServlet", urlPatterns = {"/users"})
 public class UserServlet extends HttpServlet {
+    private UserService userService = new UserService();
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -71,7 +73,29 @@ public class UserServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        String action = request.getParameter("action");
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("userObject") == null) {
+            response.sendRedirect(request.getContextPath() + "/user/login.jsp");
+            return;
+        }
+
+        if ("update-profile".equals(action)) {
+            User user = (User) session.getAttribute("userObject");
+            String fullName = request.getParameter("fullname");
+            String phoneNumber = request.getParameter("phone");
+
+            user.setFullName(fullName);
+            user.setPhoneNumber(phoneNumber);
+
+            userService.updateUser(user);
+            session.setAttribute("userObject", user);
+
+            response.sendRedirect(request.getContextPath() + "/user/profile.jsp");
+            return;
+        }
+
+        // ...xử lý các action khác...
     }
 
     /**

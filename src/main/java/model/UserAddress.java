@@ -18,15 +18,15 @@ import org.hibernate.annotations.Nationalized;
 @NamedQueries({
     @NamedQuery(
         name = "UserAddress.findByUserId",
-        query = "SELECT ua FROM UserAddress ua WHERE ua.user.id = :userId"
+        query = "SELECT ua FROM UserAddress ua WHERE ua.user.userID = :userId"
     ),
     @NamedQuery(
         name = "UserAddress.findDefaultByUserId",
-        query = "SELECT ua FROM UserAddress ua WHERE ua.user.id = :userId AND ua.isDefault = true"
+        query = "SELECT ua FROM UserAddress ua WHERE ua.user.userID = :userId AND ua.isDefault = true"
     ),
     @NamedQuery(
         name = "UserAddress.findActiveByUserId",
-        query = "SELECT ua FROM UserAddress ua WHERE ua.user.id = :userId AND ua.isActive = true"
+        query = "SELECT ua FROM UserAddress ua WHERE ua.user.userID = :userId AND ua.isActive = true"
     )
 })
 
