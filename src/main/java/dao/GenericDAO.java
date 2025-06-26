@@ -8,12 +8,14 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceException;
 import java.util.Collections;
 import java.util.List;
+import utils.DaoUtils;
 
 /**
  *
  * @author ThienThu
  */
-public class GenericDAO<T> extends BaseDAO<T>{
+public class GenericDAO<T> extends BaseDAO<T> {
+
     private final Class<T> entityClass;
 
     public GenericDAO(Class<T> entityClass) {
@@ -22,15 +24,14 @@ public class GenericDAO<T> extends BaseDAO<T>{
 
     @Override
     public List<T> getAll() {
-        EntityManager em = emf.createEntityManager();
+        EntityManager em = emf.createEntityManager();  // tạo EntityManager để kết nối DB
         try {
             return em.createNamedQuery(entityClass.getSimpleName() + ".findAll", entityClass)
-                    .getResultList();
+                    .getResultList();   // gọi NamedQuery động
         } finally {
-            em.close();
+            em.close(); // luôn đóng EntityManager sau khi dùng
         }
     }
-
 
     @Override
     public boolean insert(T t) {
@@ -42,15 +43,13 @@ public class GenericDAO<T> extends BaseDAO<T>{
             return true;
         } catch (Exception e) {
             em.getTransaction().rollback(); // Rollback nếu có  lỗi
-            System.out.println("LỖI INSERT: " + e.getMessage()); // In lỗi ra console
-            e.printStackTrace(); // In toàn bộ lỗi
+            System.out.println("LỖI INSERT: " + e.getMessage()); 
+            e.printStackTrace(); 
             return false;
         } finally {
             em.close();
         }
     }
-
-
 
     @Override
     public boolean update(T t) {
@@ -62,16 +61,15 @@ public class GenericDAO<T> extends BaseDAO<T>{
             return true;
         } catch (Exception e) {
             em.getTransaction().rollback();
-            e.printStackTrace(); // In lỗi ra console để debug
+            e.printStackTrace(); 
             return false;
         } finally {
             em.close();
         }
     }
 
-
     @Override
-    public boolean delete(int id)  {
+    public boolean delete(int id) {
         EntityManager em = emf.createEntityManager();
         try {
             em.getTransaction().begin();
@@ -100,6 +98,7 @@ public class GenericDAO<T> extends BaseDAO<T>{
             em.close();
         }
     }
+
     public List<T> findByName(String name) {
         EntityManager em = emf.createEntityManager();
         try {
@@ -110,20 +109,48 @@ public class GenericDAO<T> extends BaseDAO<T>{
             em.close();
         }
     }
-    
-        public boolean hasNextPage(int page, int pageSize) {
-        EntityManager em = emf.createEntityManager();
-        try {
-            List<T> result = em.createQuery("SELECT e FROM " + entityClass.getSimpleName() + " e", entityClass)
-                    .setFirstResult(page * pageSize) // Lấy từ offset của trang tiếp theo
-                    .setMaxResults(1) // Chỉ cần lấy 1 bản ghi để kiểm tra
-                    .getResultList();
 
-            return !result.isEmpty(); // Nếu có ít nhất 1 bản ghi, có trang tiếp theo
+    public boolean hasNextPage(int currentPage, int pageSize) {
+    EntityManager em = emf.createEntityManager();
+    try {
+        // Trang tiếp theo sẽ bắt đầu từ offset = currentPage * pageSize
+        List<T> result = em.createQuery("SELECT e FROM " + entityClass.getSimpleName() + " e", entityClass)
+                .setFirstResult(currentPage * pageSize) // offset trang kế tiếp
+                .setMaxResults(1) // Chỉ cần 1 bản ghi để kiểm tra
+                .getResultList();
+
+        return !result.isEmpty(); // Có bản ghi => có trang tiếp theo
+    } finally {
+        em.close();
+    }
+}
+
+
+    //tìm kiếm các bản ghi (entities) trong cơ sở dữ liệu theo 
+    //một thuộc tính bất kỳ bằng Named Query trong JPA.
+    public List<T> findByAttribute(String attributeName, Object value) {
+        EntityManager em = emf.createEntityManager();
+        List<T> resultList = Collections.emptyList(); 
+        try {
+            
+            String queryName = entityClass.getSimpleName() + ".findBy" + DaoUtils.capitalizeFirstLetter(attributeName);
+            System.out.println("Executing NamedQuery: " + queryName + " with value: " + value);
+
+           
+            resultList = em.createNamedQuery(queryName, entityClass)
+                    .setParameter(attributeName, value)
+                    .getResultList();
+        } catch (IllegalArgumentException e) {
+            System.err.println("ERROR: NamedQuery '" + attributeName + "' không tồn tại hoặc tham số không hợp lệ: " + e.getMessage());
+        } catch (PersistenceException e) {
+            System.err.println("Database Error khi thực thi query: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Unexpected Error trong findByAttribute: " + e.getMessage());
         } finally {
             em.close();
         }
+        return resultList;
     }
 
-    
+
 }

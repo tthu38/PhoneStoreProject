@@ -6,14 +6,14 @@ import java.util.Date;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Nationalized;
 
-@Entity
+@Entity(name = "Product")
 @Table(name = "ProductBase")
 @NamedQueries({
-    @NamedQuery(name = "Product.findAll", query = "SELECT p FROM Product p WHERE p.isDeleted = false"),
-    @NamedQuery(name = "Product.findByName", query = "SELECT p FROM Product p WHERE p.name LIKE :name AND p.isDeleted = false"),
-    @NamedQuery(name = "Product.findByBrandId", query = "SELECT p FROM Product p WHERE p.brand.id = :brandId AND p.isDeleted = false"),
-    @NamedQuery(name = "Product.findByCategoryId", query = "SELECT p FROM Product p WHERE p.category.id = :categoryId AND p.isDeleted = false"),
-    @NamedQuery(name = "Product.findActiveByBrandName", query = "SELECT p FROM Product p WHERE p.brand.name = :brandName AND p.isDeleted = false")
+    @NamedQuery(name = "Product.findAll", query = "SELECT p FROM Product p WHERE p.isActive = true"),
+    @NamedQuery(name = "Product.findByName", query = "SELECT p FROM Product p WHERE p.name LIKE :name AND p.isActive = true"),
+    @NamedQuery(name = "Product.findByBrandId", query = "SELECT p FROM Product p WHERE p.brand.id = :brandId AND p.isActive = true"),
+    @NamedQuery(name = "Product.findByCategoryId", query = "SELECT p FROM Product p WHERE p.category.id = :categoryId AND p.isActive = true"),
+    @NamedQuery(name = "Product.findActiveByBrandName", query = "SELECT p FROM Product p WHERE p.brand.name = :brandName AND p.isActive = true")
 })
 public class Product {
 
@@ -23,11 +23,11 @@ public class Product {
     private int id;
 
     @Nationalized
-    @Column(name = "ProductName", nullable = false, length = 200) // Sửa từ "Name" thành "ProductName"
+    @Column(name = "ProductName", nullable = false, length = 200)
     private String name;
 
     @ManyToOne
-    @JoinColumn(name = "CategoryID", nullable = false) // Sửa thành @ManyToOne, ánh xạ trực tiếp với cột CategoryID
+    @JoinColumn(name = "CategoryID", nullable = false)
     private Category category;
 
     @ManyToOne
@@ -40,23 +40,19 @@ public class Product {
     private String description;
 
     @Nationalized
-    @Lob
-    @Column(name = "Specifications")
-    private String specifications;
-
-    @ColumnDefault("0")
-    @Column(name = "IsDeleted", nullable = false)
-    private boolean isDeleted;
+    @Column(name = "ThumbnailImage") 
+    private String thumbnailImage;
 
     @ColumnDefault("1")
-    @Column(name = "IsActive", nullable = false) // Thêm ánh xạ cho cột IsActive
+    @Column(name = "IsActive", nullable = false)
     private boolean isActive;
 
     @ColumnDefault("getdate()")
     @Column(name = "CreatedAt")
     private Instant createAt;
 
-    // Getters và setters
+   
+
     public int getId() {
         return id;
     }
@@ -97,20 +93,12 @@ public class Product {
         this.description = description;
     }
 
-    public String getSpecifications() {
-        return specifications;
+    public String getThumbnailImage() {
+        return thumbnailImage;
     }
 
-    public void setSpecifications(String specifications) {
-        this.specifications = specifications;
-    }
-
-    public boolean getIsDeleted() {
-        return isDeleted;
-    }
-
-    public void setIsDeleted(boolean isDeleted) {
-        this.isDeleted = isDeleted;
+    public void setThumbnailImage(String thumbnailImage) {
+        this.thumbnailImage = thumbnailImage;
     }
 
     public boolean getIsActive() {
@@ -129,7 +117,6 @@ public class Product {
         this.createAt = createAt;
     }
 
-    // Getter để chuyển Instant thành Date an toàn
     public Date getCreateAtAsDate() {
         return createAt != null ? Date.from(createAt) : null;
     }

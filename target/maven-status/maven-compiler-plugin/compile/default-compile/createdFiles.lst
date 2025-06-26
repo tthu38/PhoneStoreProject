@@ -1,11 +1,11 @@
+service\ProductStockService.class
 model\CartItem.class
 controller\CartServlet.class
 model\Cart.class
-model\Warehouse.class
 service\UserService.class
+utils\DaoUtils.class
 model\UserAddress.class
 controller\MailServlet.class
-utils\DBUtils.class
 model\Product.class
 service\CategoryService.class
 service\OrderService.class
@@ -16,7 +16,10 @@ controller\ProfileServlet.class
 dao\GenericDAO.class
 model\ProductVariant.class
 model\User.class
+model\Inventory.class
+service\InventoryService.class
 controller\LoginServlet.class
+model\ProductStock.class
 service\InventoryLogService.class
 controller\InventoryServlet.class
 controller\ProductServlet.class
@@ -32,5 +35,6 @@ model\ProductBrand.class
 model\Category.class
 utils\ValidationUtils.class
 controller\LogoutServlet.class
+utils\ProductUtils.class
 utils\SecurityUtils.class
 controller\RegisterServlet.class

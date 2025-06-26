@@ -4,118 +4,132 @@
  */
 package model;
 
-import jakarta.persistence.*;
-import java.time.Instant;
-import org.hibernate.annotations.ColumnDefault;
+import jakarta.persistence.Basic;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.xml.bind.annotation.XmlRootElement;
+
+import java.util.Date;
 
 /**
  *
  * @author ThienThu
  */
 @Entity
+@Table(name = "InventoryLog")
+@XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "InventoryLog.findAll", query = "SELECT i FROM InventoryLog i"),
-    @NamedQuery(name = "InventoryLog.findByLogId", query = "SELECT i FROM InventoryLog i WHERE i.id = :id"),
-    @NamedQuery(name = "InventoryLog.findByWarehouse", query = "SELECT i FROM InventoryLog i WHERE i.warehouse.id = :warehouseId"),
-    @NamedQuery(name = "InventoryLog.findByVariant", query = "SELECT i FROM InventoryLog i WHERE i.variant.id = :variantId"),
+    @NamedQuery(name = "InventoryLog.findByLogID", query = "SELECT i FROM InventoryLog i WHERE i.logID = :logID"),
+    @NamedQuery(name = "InventoryLog.findByActionType", query = "SELECT i FROM InventoryLog i WHERE i.actionType = :actionType"),
+    @NamedQuery(name = "InventoryLog.findByQuantityChanged", query = "SELECT i FROM InventoryLog i WHERE i.quantityChanged = :quantityChanged"),
+    @NamedQuery(name = "InventoryLog.findByActionDate", query = "SELECT i FROM InventoryLog i WHERE i.actionDate = :actionDate"),
+    @NamedQuery(name = "InventoryLog.findByNote", query = "SELECT i FROM InventoryLog i WHERE i.note = :note")
 })
-
-@Table(name = "InventoryLogs")
-
 public class InventoryLog {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Basic(optional = false)
     @Column(name = "LogID")
-    private int id;
-    
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "WarehouseID", nullable = false)
-    private Warehouse warehouse;
-    
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "VariantID", nullable = false)
-    private ProductVariant variant;
+    private Integer logID;
 
-    @Column(name = "ChangeType", nullable = false, length = 20)
-    private String changeType;
-    
-    @Column(name = "Quantity", nullable = false)
-    private int quantity;
-    
-    @Column(name = "PreviousQuantity", nullable = false)
-    private int previousQuantity;
+    @Basic(optional = false)
+    @Column(name = "ActionType")
+    private String actionType;
 
-    @Column(name = "NewQuantity", nullable = false)
-    private int newQuantity;
-    
-    @ColumnDefault("getdate()")
-    @Column(name = "CreatedAt")
-    private Instant createAt;
+    @Basic(optional = false)
+    @Column(name = "QuantityChanged")
+    private int quantityChanged;
 
-    public int getId() {
-        return id;
+    @Column(name = "ActionDate")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date actionDate;
+
+    @Column(name = "Note")
+    private String note;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "InventoryID", referencedColumnName = "InventoryID")
+    private Inventory inventoryID;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "VariantID", referencedColumnName = "VariantID")
+    private ProductVariant variantID;
+
+    public InventoryLog() {
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public Integer getLogID() {
+        return logID;
     }
 
-    public Warehouse getWarehouse() {
-        return warehouse;
+    public void setLogID(Integer logID) {
+        this.logID = logID;
     }
 
-    public void setWarehouse(Warehouse warehouse) {
-        this.warehouse = warehouse;
+    public String getActionType() {
+        return actionType;
     }
 
-    public ProductVariant getVariant() {
-        return variant;
+    public void setActionType(String actionType) {
+        this.actionType = actionType;
     }
 
-    public void setVariant(ProductVariant variant) {
-        this.variant = variant;
+    public int getQuantityChanged() {
+        return quantityChanged;
     }
 
-    public String getChangeType() {
-        return changeType;
+    public void setQuantityChanged(int quantityChanged) {
+        this.quantityChanged = quantityChanged;
     }
 
-    public void setChangeType(String changeType) {
-        this.changeType = changeType;
+    public Date getActionDate() {
+        return actionDate;
     }
 
-    public int getQuantity() {
-        return quantity;
+    public void setActionDate(Date actionDate) {
+        this.actionDate = actionDate;
     }
 
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
+    public String getNote() {
+        return note;
     }
 
-    public int getPreviousQuantity() {
-        return previousQuantity;
+    public void setNote(String note) {
+        this.note = note;
     }
 
-    public void setPreviousQuantity(int previousQuantity) {
-        this.previousQuantity = previousQuantity;
+    public Inventory getInventoryID() {
+        return inventoryID;
     }
 
-    public int getNewQuantity() {
-        return newQuantity;
+    public void setInventoryID(Inventory inventoryID) {
+        this.inventoryID = inventoryID;
     }
 
-    public void setNewQuantity(int newQuantity) {
-        this.newQuantity = newQuantity;
+    public ProductVariant getVariantID() {
+        return variantID;
     }
 
-    public Instant getCreateAt() {
-        return createAt;
-    }
-
-    public void setCreateAt(Instant createAt) {
-        this.createAt = createAt;
+    public void setVariantID(ProductVariant variantID) {
+        this.variantID = variantID;
     }
     
-    
-    
+
+    @Override
+    public String toString() {
+        return "model.InventoryLog[ logID=" + logID + " ]";
+    }
+
 }
