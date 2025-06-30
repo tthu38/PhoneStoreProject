@@ -16,8 +16,18 @@ public class ProductStockService {
     static final EntityManagerFactory emf = Persistence.createEntityManagerFactory("PhoneStorePU");
 
     public ProductStock getProductStock(Integer productVariantId) {
-        return productStockDAO.findByAttribute("productVariantID", productVariantId).get(0);
+    List<ProductStock> list = productStockDAO.findByAttribute("variant", productVariantId);
+
+    // Nếu không có bản ghi, trả về ProductStock mặc định (số lượng 0)
+    if (list == null || list.isEmpty()) {
+        ProductStock emptyStock = new ProductStock();
+        emptyStock.setAmount(0);
+        return emptyStock;
     }
+
+    // Nếu có thì lấy bản ghi đầu tiên
+    return list.get(0);
+}
 
     public void updateProductStock(ProductStock productStock) {
         productStockDAO.update(productStock);
@@ -67,4 +77,23 @@ public class ProductStockService {
             em.close();
         }
     }
+    public ProductStock getStockByVariantId(Integer variantId) {
+    EntityManager em = emf.createEntityManager();
+    try {
+        List<ProductStock> results = em.createQuery(
+            "SELECT ps FROM ProductStock ps WHERE ps.variant.id = :variantId", ProductStock.class)
+            .setParameter("variantId", variantId)
+            .getResultList();
+
+        if (results.isEmpty()) {
+            ProductStock empty = new ProductStock();
+            empty.setAmount(0);
+            return empty;
+        }
+        return results.get(0);
+    } finally {
+        em.close();
+    }
+}
+
 }

@@ -9,18 +9,18 @@ import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @NamedQueries({
-    @NamedQuery(name = "ProductVariant.findAllActive",
-                query = "SELECT pv FROM ProductVariant pv WHERE pv.isActive = true"),
-    @NamedQuery(name = "ProductVariant.findByProductId",
-                query = "SELECT pv FROM ProductVariant pv WHERE pv.product.id = :productId AND pv.isActive = true"),
-    @NamedQuery(name = "ProductVariant.findWithDiscount",
-                query = "SELECT pv FROM ProductVariant pv WHERE pv.discountPrice IS NOT NULL AND pv.discountExpiry > CURRENT_TIMESTAMP"),
-    @NamedQuery(name = "ProductVariant.findByColor",
-                query = "SELECT pv FROM ProductVariant pv WHERE pv.color = :color AND pv.isActive = true"),
-    @NamedQuery(name = "ProductVariant.findByRom",
-                query = "SELECT pv FROM ProductVariant pv WHERE pv.rom = :rom AND pv.isActive = true"),
-    @NamedQuery(name = "ProductVariant.findByPriceRange",
-                query = "SELECT pv FROM ProductVariant pv WHERE pv.price BETWEEN :minPrice AND :maxPrice AND pv.isActive = true")
+        @NamedQuery(name = "ProductVariant.findAll", query = "SELECT pv FROM ProductVariant pv"),
+        
+        @NamedQuery(name = "ProductVariant.findWithDiscount", query = "SELECT pv FROM ProductVariant pv WHERE pv.discountPrice IS NOT NULL AND pv.discountExpiry > CURRENT_TIMESTAMP"),
+        @NamedQuery(name = "ProductVariant.findByColor", query = "SELECT pv FROM ProductVariant pv WHERE pv.color = :color AND pv.isActive = true"),
+        @NamedQuery(name = "ProductVariant.findByRom", query = "SELECT pv FROM ProductVariant pv WHERE pv.rom = :rom AND pv.isActive = true"),
+        @NamedQuery(name = "ProductVariant.findByPriceRange", query = "SELECT pv FROM ProductVariant pv WHERE pv.price BETWEEN :minPrice AND :maxPrice AND pv.isActive = true"),
+        @NamedQuery(name = "ProductVariant.findById",
+                query = "SELECT p FROM ProductVariant p WHERE p.id = :id"),
+
+        @NamedQuery(name = "ProductVariant.findByProductID",
+                query = "SELECT p FROM ProductVariant p WHERE p.product.id = :productBaseID"),
+
 })
 @Table(name = "ProductVariants")
 public class ProductVariant {
@@ -30,7 +30,7 @@ public class ProductVariant {
     @Column(name = "VariantID")
     private int id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "ProductBaseID", nullable = false)
     private Product product;
@@ -57,7 +57,6 @@ public class ProductVariant {
     @Column(name = "IsActive")
     @ColumnDefault("1")
     private Boolean isActive;
-
 
     public int getId() {
         return id;
@@ -130,4 +129,20 @@ public class ProductVariant {
     public void setIsActive(Boolean isActive) {
         this.isActive = isActive;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (!(o instanceof ProductVariant))
+            return false;
+        ProductVariant that = (ProductVariant) o;
+        return id == that.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Integer.hashCode(id);
+    }
+
 }

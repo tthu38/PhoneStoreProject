@@ -1,0 +1,167 @@
+/*
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/CascadeStyleSheet.css to edit this template
+*/
+/* 
+    Created on : Jun 19, 2025, 11:58:19 AM
+    Author     : dangt
+*/
+
+.profile-container {
+            max-width: 650px;           
+            margin: 60px auto 0 auto;   
+            background: #fff;
+            border-radius: 12px;
+            padding: 32px 28px 36px 28px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        
+        .profile-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin-right: 2rem;
+            object-fit: cover;
+            border: 3px solid #EA6D22;
+            padding: 3px;
+        }
+        
+        .profile-title {
+            flex: 1;
+        }
+        
+        .profile-name {
+            font-size: 2rem;
+            color: #333;
+            margin: 0;
+        }
+        
+        .profile-email {
+            color: #666;
+            margin: 0.5rem 0;
+        }
+        
+        .profile-verified {
+            display: inline-flex;
+            align-items: center;
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .profile-verified i {
+            margin-right: 5px;
+        }
+        
+        .profile-section {
+            margin-bottom: 2rem;
+        }
+        
+        .profile-section h3 {
+            color: #EA6D22;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+        
+        .info-item {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 10px;
+            border-left: 4px solid #EA6D22;
+        }
+        
+        .info-label {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 0.3rem;
+        }
+        
+        .info-value {
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .google-info {
+            background: #fff8e1;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-top: 1rem;
+        }
+        
+        .google-link {
+            color: #EA6D22;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            padding: 0.5rem 1rem;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .google-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+        
+        .edit-profile-btn {
+            background: #EA6D22;
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 25px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+        
+        .edit-profile-btn:hover {
+            background: #d15d1b;
+            transform: translateY(-2px);
+        }
+        
+        .profile-info .row {
+            margin-bottom: 18px;
+        }
+        
+        .profile-info label {
+            font-weight: 600;
+            margin-bottom: 6px;
+            display: block;
+        }
+        
+        .profile-info .form-control {
+            background: #f8f9fa;
+            border: none;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            font-size: 1.1rem;
+            padding: 16px 20px;
+            min-height: 48px;
+        }
+        
+        .profile-info button.btn-warning {
+            color: #fff;
+            font-weight: 600;
+            padding: 10px 28px;
+            font-size: 1.1rem;
+        }

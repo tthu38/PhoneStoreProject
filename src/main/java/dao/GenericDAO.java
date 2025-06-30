@@ -6,6 +6,8 @@ package dao;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceException;
+import model.Product;
+
 import java.util.Collections;
 import java.util.List;
 import utils.DaoUtils;
@@ -42,7 +44,7 @@ public class GenericDAO<T> extends BaseDAO<T> {
             em.getTransaction().commit();
             return true;
         } catch (Exception e) {
-            em.getTransaction().rollback(); // Rollback nếu có  lỗi
+            em.getTransaction().rollback(); // Rollback nếu có  lỗi, phục hồi lại trạng thái 
             System.out.println("LỖI INSERT: " + e.getMessage()); 
             e.printStackTrace(); 
             return false;
@@ -56,7 +58,7 @@ public class GenericDAO<T> extends BaseDAO<T> {
         EntityManager em = emf.createEntityManager();
         try {
             em.getTransaction().begin();
-            em.merge(t); // Hibernate sẽ kiểm tra ID, nếu có thì cập nhật, không có thì thêm mới
+            em.merge(t); 
             em.getTransaction().commit();
             return true;
         } catch (Exception e) {
@@ -77,13 +79,13 @@ public class GenericDAO<T> extends BaseDAO<T> {
             if (entity != null) {
                 em.remove(entity);
                 em.getTransaction().commit();
-                return true; // Xóa thành công
+                return true; 
             }
             em.getTransaction().rollback();
-            return false; // Không tìm thấy entity để xóa
+            return false; 
         } catch (Exception e) {
             em.getTransaction().rollback();
-            throw e; // Nếu có lỗi, ném exception để xử lý
+            throw e; 
         } finally {
             em.close();
         }
@@ -130,27 +132,37 @@ public class GenericDAO<T> extends BaseDAO<T> {
     //một thuộc tính bất kỳ bằng Named Query trong JPA.
     public List<T> findByAttribute(String attributeName, Object value) {
         EntityManager em = emf.createEntityManager();
-        List<T> resultList = Collections.emptyList(); 
+        List<T> resultList = Collections.emptyList(); // Tránh trả về null
         try {
-            
+            // Tạo tên NamedQuery dựa trên entity
             String queryName = entityClass.getSimpleName() + ".findBy" + DaoUtils.capitalizeFirstLetter(attributeName);
             System.out.println("Executing NamedQuery: " + queryName + " with value: " + value);
 
-           
+            // Thực thi NamedQuery
             resultList = em.createNamedQuery(queryName, entityClass)
                     .setParameter(attributeName, value)
                     .getResultList();
         } catch (IllegalArgumentException e) {
-            System.err.println("ERROR: NamedQuery '" + attributeName + "' không tồn tại hoặc tham số không hợp lệ: " + e.getMessage());
+            System.err.println(" ERROR: NamedQuery '" + attributeName + "' không tồn tại hoặc tham số không hợp lệ: " + e.getMessage());
         } catch (PersistenceException e) {
             System.err.println("Database Error khi thực thi query: " + e.getMessage());
         } catch (Exception e) {
-            System.err.println("Unexpected Error trong findByAttribute: " + e.getMessage());
+            System.err.println(" Unexpected Error trong findByAttribute: " + e.getMessage());
         } finally {
             em.close();
         }
         return resultList;
     }
+public List<T> findByNamedQuery(String queryName, String paramName, Object value) {
+    EntityManager em = emf.createEntityManager();
+    try {
+        return em.createNamedQuery(queryName, entityClass)
+                 .setParameter(paramName, value)
+                 .getResultList();
+    } finally {
+        em.close();
+    }
+}
 
 
 }

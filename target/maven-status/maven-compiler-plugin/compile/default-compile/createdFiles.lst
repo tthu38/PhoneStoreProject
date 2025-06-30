@@ -1,5 +1,7 @@
 service\ProductStockService.class
 model\CartItem.class
+controller\AddressServlet.class
+service\UserAddressService.class
 controller\CartServlet.class
 model\Cart.class
 service\UserService.class
@@ -36,5 +38,6 @@ model\Category.class
 utils\ValidationUtils.class
 controller\LogoutServlet.class
 utils\ProductUtils.class
+service\BrandService.class
 utils\SecurityUtils.class
 controller\RegisterServlet.class

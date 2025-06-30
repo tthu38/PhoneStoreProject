@@ -12,6 +12,16 @@ import jakarta.persistence.*;
  */
 @Entity
 @Table(name = "Brands")
+@NamedQueries({
+    @NamedQuery(
+        name = "ProductBrand.findAll",
+        query = "SELECT b FROM ProductBrand b WHERE b.isActive = true"
+    ),
+    @NamedQuery(
+        name = "ProductBrand.findById",
+        query = "SELECT b FROM ProductBrand b WHERE b.id = :id"
+    )
+})
 public class ProductBrand {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

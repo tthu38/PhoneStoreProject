@@ -6,7 +6,9 @@ D:\PRJ301\PhoneStore\src\main\java\controller\InventoryServlet.java
 D:\PRJ301\PhoneStore\src\main\java\controller\UserServlet.java
 D:\PRJ301\PhoneStore\src\main\java\model\Inventory.java
 D:\PRJ301\PhoneStore\src\main\java\utils\SecurityUtils.java
+D:\PRJ301\PhoneStore\src\main\java\controller\AddressServlet.java
 D:\PRJ301\PhoneStore\src\main\java\model\Product.java
+D:\PRJ301\PhoneStore\src\main\java\service\UserAddressService.java
 D:\PRJ301\PhoneStore\src\main\java\model\Category.java
 D:\PRJ301\PhoneStore\src\main\java\dao\GenericDAO.java
 D:\PRJ301\PhoneStore\src\main\java\service\ProductService.java
@@ -26,6 +28,7 @@ D:\PRJ301\PhoneStore\src\main\java\model\User.java
 D:\PRJ301\PhoneStore\src\main\java\utils\DaoUtils.java
 D:\PRJ301\PhoneStore\src\main\java\model\Cart.java
 D:\PRJ301\PhoneStore\src\main\java\service\InventoryService.java
+D:\PRJ301\PhoneStore\src\main\java\service\BrandService.java
 D:\PRJ301\PhoneStore\src\main\java\service\WarehouseService.java
 D:\PRJ301\PhoneStore\src\main\java\model\CartItem.java
 D:\PRJ301\PhoneStore\src\main\java\service\CategoryService.java

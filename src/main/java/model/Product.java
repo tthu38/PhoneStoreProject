@@ -9,7 +9,8 @@ import org.hibernate.annotations.Nationalized;
 @Entity(name = "Product")
 @Table(name = "ProductBase")
 @NamedQueries({
-    @NamedQuery(name = "Product.findAll", query = "SELECT p FROM Product p WHERE p.isActive = true"),
+    @NamedQuery(name = "Product.findAll", query = "SELECT p FROM Product p"),
+    @NamedQuery(name = "Product.findByProductBaseID", query = "SELECT p FROM Product p WHERE p.id = :productBaseID"),
     @NamedQuery(name = "Product.findByName", query = "SELECT p FROM Product p WHERE p.name LIKE :name AND p.isActive = true"),
     @NamedQuery(name = "Product.findByBrandId", query = "SELECT p FROM Product p WHERE p.brand.id = :brandId AND p.isActive = true"),
     @NamedQuery(name = "Product.findByCategoryId", query = "SELECT p FROM Product p WHERE p.category.id = :categoryId AND p.isActive = true"),
@@ -40,18 +41,16 @@ public class Product {
     private String description;
 
     @Nationalized
-    @Column(name = "ThumbnailImage") 
+    @Column(name = "ThumbnailImage")
     private String thumbnailImage;
 
     @ColumnDefault("1")
-    @Column(name = "IsActive", nullable = false)
+    @Column(name = "IsActive", nullable = false, insertable = true, updatable = true)
     private boolean isActive;
 
     @ColumnDefault("getdate()")
     @Column(name = "CreatedAt")
     private Instant createAt;
-
-   
 
     public int getId() {
         return id;
@@ -105,8 +104,8 @@ public class Product {
         return isActive;
     }
 
-    public void setIsActive(boolean isActive) {
-        this.isActive = isActive;
+    public void setIsActive(boolean actived) {
+        isActive = actived;
     }
 
     public Instant getCreateAt() {

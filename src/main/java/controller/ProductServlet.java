@@ -6,13 +6,18 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 import java.io.*;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import model.Category;
 import model.Product;
 import model.ProductBrand;
 import model.ProductStock;
 import model.ProductVariant;
+import service.BrandService;
 import service.InventoryService;
 import service.ProductService;
 import service.ProductStockService;
@@ -26,12 +31,14 @@ public class ProductServlet extends HttpServlet {
     private ProductService productService;
     private ProductVariantService productVariantService;
     private ProductStockService productStockService;
+    private BrandService brandService;
 
     @Override
     public void init() {
         productService = new ProductService();
         productVariantService = new ProductVariantService();
         productStockService = new ProductStockService();
+        brandService = new BrandService();
     }
 
     @Override
@@ -51,6 +58,12 @@ public class ProductServlet extends HttpServlet {
             case "delete":
                 deleteProduct(request, response);
                 break;
+            case "update":
+                sendToUpdateProduct(request, response);
+                break;
+            case "find":
+                searchProduct(request, response);
+                break;
             case "search":
                 searchProductsKeyWord(request, response);
                 break;
@@ -66,7 +79,7 @@ public class ProductServlet extends HttpServlet {
         request.setAttribute("products", products);
         ProductStockService stockService = new ProductStockService();
         var stockMap = stockService.getProductStockQuantities();
-        
+
         request.setAttribute("productStockQuantity", stockMap);
 
         request.getRequestDispatcher("product/ProductList.jsp").forward(request, response);
@@ -75,7 +88,7 @@ public class ProductServlet extends HttpServlet {
     private void deleteProduct(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
         try {
-            int id = Integer.parseInt(request.getParameter("productId"));
+            int id = Integer.parseInt(request.getParameter("id"));
             productService.deleteProduct(id);
             response.sendRedirect(request.getContextPath() + "/products");
         } catch (NumberFormatException e) {
@@ -83,12 +96,57 @@ public class ProductServlet extends HttpServlet {
         }
     }
 
+    private void sendToUpdateProduct(HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException {
+    try {
+        int productId = Integer.parseInt(request.getParameter("productId"));
+
+        // Lấy product
+        Product product = productService.getProductById(productId);
+        request.setAttribute("product", product);
+        
+        String formattedCreateAt = ProductUtils.formatInstantForDateTimeLocal(product.getCreateAt());
+        request.setAttribute("formattedCreateAt", formattedCreateAt);
+
+        // Lấy danh sách ProductVariant và số lượng
+        List<ProductVariant> productVariants = productVariantService.getAllProductVariants(productId);
+        HashMap<ProductVariant, Integer> productVariantQuantity = new HashMap<>();
+        for (ProductVariant productVariant : productVariants) {
+            ProductStock stock = productStockService.getStockByVariantId(productVariant.getId());
+            int amount = (stock == null) ? 0 : stock.getAmount();
+            productVariantQuantity.put(productVariant, amount);
+        }
+
+
+        // CHUYỂN SANG ENTRY LIST CHO JSP
+        List<Map.Entry<ProductVariant, Integer>> entryList = new ArrayList<>(productVariantQuantity.entrySet());
+        request.setAttribute("productVariantEntries", entryList);
+
+        // Lấy danh sách brand
+        List<ProductBrand> brands = brandService.getAllBrands(); 
+        request.setAttribute("brands", brands);
+
+        // Forward tới trang JSP
+        request.getRequestDispatcher("/product/UpdateProduct.jsp").forward(request, response);
+
+    } catch (NumberFormatException e) {
+        throw new NumberFormatException("ID phải là integer");
+    }
+}
+
+
+
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String action = request.getParameter("action");
-        if ("create".equals(action)) {
-            createProduct(request, response);
+        switch (action) {
+            case "create":
+                createProduct(request, response);
+                break;
+            case "update":
+                updateProduct(request, response);
+                break;
         }
     }
 
@@ -106,7 +164,6 @@ public class ProductServlet extends HttpServlet {
             Integer stock = Integer.parseInt(request.getParameter("stock"));
             String priceStr = request.getParameter("price");
 
-            // Kiểm tra bắt buộc
             if ((selectedProductId == null || selectedProductId.isEmpty())
                     && (productName == null || productName.trim().isEmpty())) {
                 throw new IllegalArgumentException("Vui lòng chọn sản phẩm có sẵn hoặc nhập tên sản phẩm mới.");
@@ -114,23 +171,15 @@ public class ProductServlet extends HttpServlet {
 
             int rom = Integer.parseInt(romStr);
             int brandID = Integer.parseInt(brandIDStr);
-
             BigDecimal price = new BigDecimal(priceStr);
 
             Part filePart = request.getPart("thumbnailImage");
-            String relativePath = null;
-            if (filePart != null && filePart.getSize() > 0) {
-                String contentType = filePart.getContentType();
-                if (!contentType.startsWith("image/")) {
-                    throw new IllegalArgumentException("Chỉ được tải lên tệp hình ảnh.");
-                }
-                relativePath = ProductUtils.saveImage(filePart, getServletContext(), "default.png");
-            }
+            String relativePath = ProductUtils.saveImage(filePart, getServletContext(), "default.png");
 
             Product product;
+            boolean isNewProduct = false;
 
             if (selectedProductId != null && !selectedProductId.isEmpty()) {
-                // Thêm biến thể vào sản phẩm có sẵn
                 int productId = Integer.parseInt(selectedProductId);
                 product = productService.getProductById(productId);
                 if (product == null) {
@@ -141,12 +190,12 @@ public class ProductServlet extends HttpServlet {
                 product = new Product();
                 product.setName(productName);
                 product.setDescription(description);
-                product.setThumbnailImage((relativePath != null) ? relativePath : "default.png");
+                product.setThumbnailImage(relativePath); // <-- Chỉ set khi là sản phẩm mới
                 product.setIsActive(true);
                 product.setCreateAt(Instant.now());
 
                 Category defaultCategory = new Category();
-                defaultCategory.setId(1); // Giả định có sẵn category ID = 1
+                defaultCategory.setId(1);
                 product.setCategory(defaultCategory);
 
                 ProductBrand brand = new ProductBrand();
@@ -154,9 +203,10 @@ public class ProductServlet extends HttpServlet {
                 product.setBrand(brand);
 
                 productService.addProduct(product);
+                isNewProduct = true;
             }
 
-            // Tạo biến thể
+// Tạo variant mới
             ProductVariant variant = new ProductVariant();
             variant.setProduct(product);
             variant.setColor(color);
@@ -164,8 +214,11 @@ public class ProductServlet extends HttpServlet {
             variant.setPrice(price);
             variant.setIsActive(true);
 
+// Lưu ảnh variant luôn trong cả 2 trường hợp
+            variant.setImageURLs(relativePath);
+
             productVariantService.addProductVariant(variant);
-            // Tạo bản ghi trong ProductStock
+
             ProductStock productStock = new ProductStock();
             productStock.setVariant(variant);
             productStock.setAmount(stock);
@@ -213,6 +266,78 @@ public class ProductServlet extends HttpServlet {
     @Override
     public String getServletInfo() {
         return "Servlet xử lý thêm sản phẩm và biến thể";
+    }
+
+    private void updateProduct(HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException {
+    try {
+        request.setCharacterEncoding("UTF-8"); // Đảm bảo mã hóa UTF-8
+
+        // Lấy các tham số
+        int productId = Integer.parseInt(request.getParameter("productId"));
+        String name = request.getParameter("name");
+        String description = request.getParameter("description");
+        int brandId = Integer.parseInt(request.getParameter("brandId"));
+
+        // Lấy mảng variant
+        String[] colors = request.getParameterValues("color[]");
+        String[] roms = request.getParameterValues("rom[]");
+        String[] prices = request.getParameterValues("prices[]");
+        String[] quantities = request.getParameterValues("quantities[]");
+
+        // Xử lý ảnh thumbnail
+        Part filePart = request.getPart("thumbnailImage");
+        String thumbnailPath = null;
+        if (filePart != null && filePart.getSize() > 0) {
+            thumbnailPath = ProductUtils.saveImage(filePart, getServletContext(), "default.png");
+        } else {
+            Product existingProduct = productService.getProductById(productId);
+            thumbnailPath = existingProduct.getThumbnailImage();
+        }
+
+        // Kiểm tra mảng variant
+        if (colors == null || roms == null || prices == null || quantities == null || 
+            colors.length != roms.length || colors.length != prices.length || colors.length != quantities.length) {
+            throw new IllegalArgumentException("Dữ liệu variant không hợp lệ hoặc không đồng bộ");
+        }
+
+        // Cập nhật sản phẩm
+        productService.updateProductDetails(productId, name, description, thumbnailPath, brandId, colors, roms, prices, quantities);
+
+        // Chuyển hướng về ProductList.jsp
+        response.sendRedirect(request.getContextPath() + "/products");
+
+    } catch (NumberFormatException e) {
+        request.setAttribute("error", "Dữ liệu không hợp lệ: " + e.getMessage());
+        request.getRequestDispatcher("/product/UpdateProduct.jsp").forward(request, response); // Sửa forward
+    } catch (IllegalArgumentException e) {
+        request.setAttribute("error", e.getMessage());
+        request.getRequestDispatcher("/product/UpdateProduct.jsp").forward(request, response); // Sửa forward
+    } catch (Exception e) {
+        request.setAttribute("error", "Lỗi khi cập nhật sản phẩm: " + e.getMessage());
+        request.getRequestDispatcher("/product/UpdateProduct.jsp").forward(request, response); // Sửa forward
+    }
+}
+
+    private void searchProduct(HttpServletRequest request, HttpServletResponse response)
+             throws ServletException, IOException{
+        int page = 1;
+        int pageSize = 8;
+        
+        String pageStr = request.getParameter("page");
+        String pageSizeStr = request.getParameter("pageSize");
+        if(pageStr != null){
+                page = Integer.parseInt(pageStr);
+            }
+
+            if(pageSizeStr != null){
+                pageSize = Integer.parseInt(pageSizeStr);
+            }
+        String categoryID = request.getParameter("categoryId");
+        String sort = request.getParameter("sort"); //giá
+        String searchName = request.getParameter("searchName");
+        
+        
     }
 
 }

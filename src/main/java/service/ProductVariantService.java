@@ -20,8 +20,11 @@ public class ProductVariantService {
 
     // Lấy tất cả variant của 1 product
     public List<ProductVariant> getAllProductVariants(int productID) {
-        return productVariantDao.findByAttribute("productID", productID);
-    }
+    return productVariantDao.findByNamedQuery(
+        "ProductVariant.findByProductID", "productBaseID", productID
+    );
+}
+
 
     public void addProductVariant(ProductVariant productVariant) {
         productVariantDao.insert(productVariant);

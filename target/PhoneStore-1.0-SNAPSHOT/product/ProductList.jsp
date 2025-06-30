@@ -10,12 +10,15 @@
 
         <style>
             :root {
-                --primary-color: #5b57d1;
-                --primary-dark: #4a45ba;
+                --primary-color: #d32f2f;
+                --primary-dark: #b71c1c;
                 --text-color: #333;
                 --light-gray: #f5f5f5;
                 --white: #fff;
                 --border-color: #e0e0e0;
+                --spacing-sm: 8px;
+                --spacing-md: 16px;
+                --spacing-lg: 24px;
             }
 
             body {
@@ -24,60 +27,80 @@
                 color: var(--text-color);
                 margin: 0;
                 padding: 0;
+                line-height: 1.6;
             }
 
             .container {
                 max-width: 1200px;
-                margin: 30px auto;
+                margin: var(--spacing-lg) auto;
                 background: var(--white);
-                padding: 20px;
-                border-radius: 8px;
-                box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+                padding: var(--spacing-md);
+                border-radius: 10px;
+                box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+                transition: box-shadow 0.3s ease;
+            }
+
+            .container:hover {
+                box-shadow: 0 8px 16px rgba(0,0,0,0.15);
             }
 
             .filters {
                 display: flex;
                 justify-content: space-between;
                 flex-wrap: wrap;
-                margin-bottom: 20px;
-                gap: 10px;
+                margin-bottom: var(--spacing-md);
+                gap: var(--spacing-sm);
+                align-items: center;
             }
 
             .filters select,
             .filters input {
-                padding: 8px 12px;
+                padding: var(--spacing-sm) var(--spacing-md);
                 border: 1px solid var(--border-color);
-                border-radius: 4px;
+                border-radius: 6px;
                 font-size: 14px;
                 background: var(--white);
+                transition: border-color 0.3s ease;
+            }
+
+            .filters select:focus,
+            .filters input:focus {
+                border-color: var(--primary-color);
+                outline: none;
             }
 
             .add-product-btn {
                 background: var(--primary-color);
                 color: white;
-                padding: 8px 16px;
-                border-radius: 4px;
+                padding: var(--spacing-sm) var(--spacing-md);
+                border-radius: 6px;
                 text-decoration: none;
                 font-weight: 500;
                 display: inline-flex;
                 align-items: center;
-                gap: 6px;
+                gap: var(--spacing-sm);
+                transition: background-color 0.3s ease;
+            }
+
+            .add-product-btn:hover {
+                background-color: var(--primary-dark);
             }
 
             .table-responsive {
                 overflow-x: auto;
+                margin-bottom: var(--spacing-md);
             }
 
             table {
                 width: 100%;
-                border-collapse: collapse;
+                border-collapse: separate;
+                border-spacing: 0;
             }
 
             th, td {
-                padding: 12px 15px;
+                padding: var(--spacing-sm) var(--spacing-md);
                 font-size: 14px;
                 text-align: center;
-                ;
                 border-bottom: 1px solid var(--border-color);
             }
 
@@ -85,6 +108,7 @@
                 background: var(--light-gray);
                 text-transform: uppercase;
                 font-size: 12px;
+                font-weight: 600;
             }
 
             td img.product-thumb {
@@ -92,24 +116,25 @@
                 height: 40px;
                 object-fit: cover;
                 border-radius: 6px;
-                margin-right: 10px;
+                margin-right: var(--spacing-sm);
             }
 
             td .product-info {
                 display: flex;
                 align-items: center;
+                gap: var(--spacing-sm);
             }
 
-            .status-badge {
+            .status-badge.active {
                 display: inline-flex;
                 align-items: center;
-                gap: 6px;
+                gap: var(--spacing-sm);
                 font-size: 13px;
                 font-weight: 500;
                 color: #4caf50;
             }
 
-            .status-badge::before {
+            .status-badge.active::before {
                 content: '';
                 width: 8px;
                 height: 8px;
@@ -117,20 +142,39 @@
                 background-color: #4caf50;
             }
 
+            .status-badge.inactive {
+                display: inline-flex;
+                align-items: center;
+                gap: var(--spacing-sm);
+                font-size: 13px;
+                font-weight: 500;
+                color: #d32f2f;
+            }
+
+            .status-badge.inactive::before {
+                content: '';
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                background-color: #d32f2f;
+            }
+
             .action-links {
                 display: flex;
-                gap: 8px;
+                gap: var(--spacing-sm);
                 justify-content: flex-end;
+                align-items: center;
             }
 
             .action-links a {
-                padding: 10px 12px;
+                padding: var(--spacing-sm) var(--spacing-md);
                 border-radius: 6px;
                 font-size: 14px;
                 text-decoration: none;
                 display: inline-flex;
                 align-items: center;
-                gap: 6px;
+                gap: var(--spacing-sm);
+                transition: background-color 0.3s ease;
             }
 
             .action-links .edit {
@@ -154,19 +198,21 @@
             .pagination {
                 display: flex;
                 justify-content: center;
-                margin-top: 20px;
-                gap: 8px;
+                margin-top: var(--spacing-md);
+                gap: var(--spacing-sm);
+                align-items: center;
             }
 
             .pagination a, .pagination strong {
-                width: 32px;
-                height: 32px;
+                width: 40px;
+                height: 40px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                border-radius: 4px;
+                border-radius: 6px;
                 text-decoration: none;
                 font-size: 14px;
+                transition: background-color 0.3s ease, color 0.3s ease;
             }
 
             .pagination a {
@@ -175,18 +221,23 @@
                 border: 1px solid var(--border-color);
             }
 
+            .pagination a:hover {
+                background: var(--light-gray);
+            }
+
             .pagination strong {
                 background: var(--primary-color);
                 color: white;
+                font-weight: 600;
             }
+
             .action-links {
                 display: flex;
-                align-items: center; /* Đảm bảo nút dọc giữa hàng */
-                gap: 8px;
+                align-items: center;
+                gap: var(--spacing-sm);
                 justify-content: flex-end;
                 height: 100%;
             }
-
         </style>
     </head>
     <body>
@@ -200,7 +251,7 @@
             <c:set var="totalPages" value="${Math.ceil(totalProducts / pageSize)}"/>
             <!-- Filters -->
             <div class="filters">
-                <div>
+                <div class="filter-group">
                     <select><option>Điện thoại</option></select>
                     <select>
                         <option>Tất cả trạng thái</option>
@@ -208,9 +259,11 @@
                         <option>INACTIVE</option>
                     </select>
                     <select><option>$50 - $100</option></select>
-                    <select><option>Tất cả các cửa hàng</option></select>
+                    <select>
+                        <option>Tất cả các cửa hàng</option>
+                    </select>
                 </div>
-                <div>
+                <div class="filter-actions">
                     <input type="text" placeholder="Search products..." />
                     <a href="${pageContext.request.contextPath}/product/ProductCreate.jsp" class="add-product-btn">
                         <i class="fas fa-plus"></i> Thêm sản phẩm mới
@@ -237,14 +290,13 @@
                     <tbody>
                         <c:if test="${products == null or empty products}">
                             <tr>
-                                <td colspan="9" style="text-align: center; color: red;">Không tìm thấy sản phẩm.</td>
+                                <td colspan="9" style="text-align: center; color: red; padding: var(--spacing-md);">Không tìm thấy sản phẩm.</td>
                             </tr>
                         </c:if>
 
                         <c:if test="${products != null and not empty products}">
                             <c:forEach var="product" items="${products}" varStatus="status">
                                 <c:if test="${status.index >= start && status.index < end}">
-
                                     <tr>
                                         <td><input type="checkbox" /></td>
                                         <td>${product.id}</td>
@@ -261,23 +313,23 @@
                                                 </c:when>
                                                 <c:otherwise>N/A</c:otherwise>
                                             </c:choose>
-                                    </td>
-                                    <td>${applicationScope.productViewCount[product.id] != null ? applicationScope.productViewCount[product.id] : 0}</td>
-                                    <td>${product.createAt}</td>
-                                    <td>${productStockQuantity[product.id] != null ? productStockQuantity[product.id] : 0}</td>
+                                        </td>
+                                        <td>${applicationScope.productViewCount[product.id] != null ? applicationScope.productViewCount[product.id] : 0}</td>
+                                        <td>${product.createAt}</td>
+                                        <td>${productStockQuantity[product.id] != null ? productStockQuantity[product.id] : 0}</td>
+                                        <td>
+                                            <span class="status-badge ${product.isActive ? 'active' : 'inactive'}">${product.isActive ? 'Active' : 'Inactive'}</span>
+                                        </td>
+                                       
+                                        <td class="action-links">
+                                            <a href="${pageContext.request.contextPath}/products?action=update&productId=${product.id}" class="edit">
 
-                                    <td>
-                                        <span class="status-badge">${product.isActive ? 'Active' : 'Inactive'}</span>
-                                    </td>
-                                    <td class="action-links">
-                                        <a href="${pageContext.request.contextPath}/products?action=edit&id=${product.id}" class="edit">
-                                            <i class="fas fa-edit"></i> Edit
-                                        </a>
-                                        <a href="${pageContext.request.contextPath}/products?action=delete&productId=${product.id}" class="delete">
-                                            <i class="fas fa-trash"></i>
-                                        </a>
-                                    </td>
-                                </tr>
+                                                <i class="fas fa-edit"></i> Edit
+                                            </a>
+                                            <a href="${pageContext.request.contextPath}/products?action=delete&id=${product.id}" class="delete"
+                                               onclick="return confirm('Are you sure you want to delete this product?');">Delete</a>
+                                        </td>
+                                    </tr>
                                 </c:if>
                             </c:forEach>
                         </c:if>
@@ -288,9 +340,10 @@
             <!-- Pagination -->
             <div class="pagination">
                 <c:if test="${currentPage > 1}">
-                    <a href="${pageContext.request.contextPath}/products?page=${currentPage - 1}"><i
-                            class="fas fa-chevron-left"></i> Previous</a>
-                    </c:if>
+                    <a href="${pageContext.request.contextPath}/products?page=${currentPage - 1}">
+                        <i class="fas fa-chevron-left"></i> Previous
+                    </a>
+                </c:if>
 
                 <c:forEach var="i" begin="1" end="${totalPages}">
                     <c:choose>
@@ -304,9 +357,11 @@
                 </c:forEach>
 
                 <c:if test="${currentPage < totalPages}">
-                    <a href="${pageContext.request.contextPath}/products?page=${currentPage + 1}">Next <i
-                            class="fas fa-chevron-right"></i></a>
-                    </c:if>
+                    <a href="${pageContext.request.contextPath}/products?page=${currentPage + 1}">
+                        Next <i class="fas fa-chevron-right"></i>
+                    </a>
+                </c:if>
             </div>
+        </div>
     </body>
 </html>
