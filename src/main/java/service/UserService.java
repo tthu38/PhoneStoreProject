@@ -3,21 +3,26 @@ package service;
 import dao.GenericDAO;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.Persistence;
+import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import model.User;
-import org.json.JSONObject;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import model.UserAddress;
 
 public class UserService {
+
     private final GenericDAO<User> userDao;
     private static final EntityManagerFactory emf = Persistence.createEntityManagerFactory("PhoneStorePU");
+    @PersistenceContext
+    private EntityManager entityManager;
 
     public UserService() {
         this.userDao = new GenericDAO<>(User.class);
@@ -27,8 +32,23 @@ public class UserService {
         return userDao.getAll();
     }
 
-    public Optional<User> getUserById(Long id) {
-        return Optional.ofNullable(userDao.findById(id.intValue()));
+    public Optional<User> getUserById(int id) {
+        return Optional.ofNullable(userDao.findById(id));
+    }
+
+    public boolean register(User user) {
+        if (getUserByEmail(user.getEmail()).isPresent()) {
+            return false;
+        }
+        user.setCreatedAt(Instant.now());
+        user.setIsActive(true);
+        user.setRoleID(2);
+        if (user.getFullName() == null || user.getFullName().trim().isEmpty()) {
+            String email = user.getEmail();
+            String tempName = email.contains("@") ? email.substring(0, email.indexOf("@")) : email;
+            user.setFullName(tempName);
+        }
+        return addUser(user);
     }
 
     public boolean addUser(User user) {
@@ -41,18 +61,22 @@ public class UserService {
         return userDao.update(user);
     }
 
-    public boolean deactivateUser(Long id) {
+    public boolean deactivateUser(int id) {
         return getUserById(id).map(user -> {
             user.setIsActive(false);
             return userDao.update(user);
         }).orElse(false);
     }
 
-    public boolean restoreUser(Long id) {
+    public boolean restoreUser(int id) {
         return getUserById(id).map(user -> {
             user.setIsActive(true);
             return userDao.update(user);
         }).orElse(false);
+    }
+
+    public boolean deleteUser(int id) {
+        return userDao.delete(id);
     }
 
     public List<User> searchUsersByName(String name) {
@@ -67,45 +91,44 @@ public class UserService {
     }
 
     public Optional<User> getUserByEmail(String email) {
-        EntityManager em = emf.createEntityManager();
-        try {
-            TypedQuery<User> query = em.createNamedQuery("User.findByEmail", User.class);
-            query.setParameter("email", email);
-            List<User> users = query.getResultList();
-            return users.isEmpty() ? Optional.empty() : Optional.of(users.get(0));
-        } finally {
-            em.close();
-        }
+        List<User> users = userDao.findByAttribute("email", email);
+        return users.isEmpty() ? Optional.empty() : Optional.of(users.get(0));
     }
 
     public boolean changePassword(User user, String newPassword, String confirmPassword) {
-        if (!newPassword.equals(confirmPassword)) return false;
+        if (!newPassword.equals(confirmPassword)) {
+            return false;
+        }
         user.setPassword(newPassword); // Thay bằng hash nếu có
         return updateUser(user);
     }
 
-    public void saveRememberToken(Long userId, String token) {
+    public void saveRememberToken(int userId, String token) {
         EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
         try {
-            em.getTransaction().begin();
+            tx.begin();
             User user = em.find(User.class, userId);
             if (user != null) {
                 user.setRememberToken(token);
                 em.merge(user);
             }
-            em.getTransaction().commit();
+            tx.commit();
         } catch (Exception e) {
-            if (em.getTransaction().isActive()) em.getTransaction().rollback();
+            if (tx.isActive()) {
+                tx.rollback();
+            }
+            throw e;
         } finally {
             em.close();
         }
     }
 
-    public boolean isValidToken(Long userId, String token) {
+    public boolean isValidToken(int userId, String token) {
         EntityManager em = emf.createEntityManager();
         try {
             TypedQuery<User> query = em.createQuery(
-                "SELECT u FROM User u WHERE u.id = :userId AND u.rememberToken = :token AND u.isActive = true", User.class);
+                    "SELECT u FROM User u WHERE u.id = :userId AND u.rememberToken = :token AND u.isActive = true", User.class);
             query.setParameter("userId", userId);
             query.setParameter("token", token);
             return !query.getResultList().isEmpty();
@@ -114,85 +137,59 @@ public class UserService {
         }
     }
 
-    public void clearRememberToken(Long userId) {
+    public void clearRememberToken(int userId) {
         saveRememberToken(userId, null);
     }
 
-    public User findOrCreateGoogleUser(String email, String fullName, String picture, String oauthProvider, boolean isOauthUser) {
-        EntityManager em = emf.createEntityManager();
-        try {
-            em.getTransaction().begin();
-            TypedQuery<User> query = em.createNamedQuery("User.findByEmail", User.class);
-            query.setParameter("email", email);
-            List<User> users = query.getResultList();
-            User user;
-            if (users.isEmpty()) {
-                user = new User();
-                user.setEmail(email);
-                user.setFullName(fullName);
-                user.setPicture(picture);
-                user.setIsOauthUser(isOauthUser);
-                user.setOauthProvider(oauthProvider);
-                user.setIsActive(true);
-                user.setRole("CUSTOMER");
-                user.setCreatedAt(Instant.now());
-                user.setPassword("GOOGLE_OAUTH");
-                em.persist(user);
-            } else {
-                user = users.get(0);
-                user.setFullName(fullName);
-                user.setPicture(picture);
-                user.setIsOauthUser(isOauthUser);
-                user.setOauthProvider(oauthProvider);
-                user.setIsActive(true);
-                em.merge(user);
+    public User findOrCreateGoogleUser(String email, String fullName, String picture, String provider, boolean isActive) {
+        Optional<User> existingUser = getUserByEmail(email);
+        if (existingUser.isPresent()) {
+            User user = existingUser.get();
+            boolean changed = false;
+
+            if (user.getOauthProvider() == null || !user.getOauthProvider().equals(provider)) {
+                user.setOauthProvider(provider);
+                changed = true;
             }
-            em.getTransaction().commit();
+
+            if (user.getFullName() == null || !user.getFullName().equals(fullName)) {
+                user.setFullName(fullName);
+                changed = true;
+            }
+
+            if (user.getPicture() == null || !user.getPicture().equals(picture)) {
+                user.setPicture(picture);
+                changed = true;
+            }
+
+            if (!Boolean.TRUE.equals(user.getIsOauthUser())) {
+                user.setIsOauthUser(true);
+                changed = true;
+            }
+
+            if (user.getPassword() == null || !user.getPassword().equals("GOOGLE_USER")) {
+                user.setPassword("GOOGLE_USER");
+                changed = true;
+            }
+
+            if (changed) {
+                updateUser(user);
+            }
+
             return user;
-        } catch (Exception e) {
-            if (em.getTransaction().isActive()) em.getTransaction().rollback();
-            return null;
-        } finally {
-            em.close();
         }
-    }
+        User newUser = new User();
+        newUser.setEmail(email);
+        newUser.setFullName(fullName);
+        newUser.setPicture(picture);
+        newUser.setOauthProvider(provider);
+        newUser.setIsOauthUser(true);
+        newUser.setIsActive(isActive);
+        newUser.setRoleID(2);
+        newUser.setPassword("GOOGLE_USER");
+        addUser(newUser);
 
-    public void setupUserSession(HttpServletRequest request, HttpServletResponse response, User user) {
-        HttpSession session = request.getSession();
-        session.setAttribute("userId", user.getId());
-        session.setAttribute("userFullName", user.getFullName());
-        session.setAttribute("userEmail", user.getEmail());
-        session.setAttribute("userRole", user.getRole());
-        session.setAttribute("loggedIn", true);
-        if (user.getRememberToken() != null) {
-            Cookie rememberCookie = new Cookie("remember_token", user.getRememberToken());
-            rememberCookie.setMaxAge(60 * 60 * 24 * 30);
-            rememberCookie.setPath("/");
-            rememberCookie.setHttpOnly(true);
-            response.addCookie(rememberCookie);
-        }
-    }
-
-    public Optional<User> checkRememberToken(HttpServletRequest request) {
-        Cookie[] cookies = request.getCookies();
-        if (cookies == null) return Optional.empty();
-        String token = null;
-        for (Cookie cookie : cookies) {
-            if ("remember_token".equals(cookie.getName())) {
-                token = cookie.getValue();
-                break;
-            }
-        }
-        if (token == null) return Optional.empty();
-        EntityManager em = emf.createEntityManager();
-        try {
-            TypedQuery<User> query = em.createNamedQuery("User.findByRememberToken", User.class);
-            query.setParameter("token", token);
-            List<User> users = query.getResultList();
-            return users.isEmpty() ? Optional.empty() : Optional.of(users.get(0));
-        } finally {
-            em.close();
-        }
+        return getUserByEmail(email).orElse(newUser);
     }
 
     public User login(String email, String password) {
@@ -206,13 +203,92 @@ public class UserService {
         return null;
     }
 
-    public boolean register(User user) {
-        if (getUserByEmail(user.getEmail()).isPresent()) {
-            return false;
+    public Optional<User> checkRememberToken(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies == null) {
+            return Optional.empty();
         }
-        user.setCreatedAt(Instant.now());
-        user.setIsActive(true);
-        user.setRole("CUSTOMER");
-        return addUser(user);
+        String token = null;
+        for (Cookie cookie : cookies) {
+            if ("remember_token".equals(cookie.getName())) {
+                token = cookie.getValue();
+                break;
+            }
+        }
+        if (token == null) {
+            return Optional.empty();
+        }
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<User> query = em.createNamedQuery("User.findByRememberToken", User.class);
+            query.setParameter("token", token);
+            List<User> users = query.getResultList();
+            return users.isEmpty() ? Optional.empty() : Optional.of(users.get(0));
+        } finally {
+            em.close();
+        }
     }
-} 
+
+    public boolean isTokenValid(String token) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            User user = em.createNamedQuery("User.findByRememberToken", User.class)
+                    .setParameter("token", token)
+                    .getSingleResult();
+            return user != null && user.getIsActive();
+        } catch (Exception e) {
+            return false;
+        } finally {
+            em.close();
+        }
+    }
+
+    public void invalidateToken(String token) {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            em.createNamedQuery("User.updateRememberToken")
+                    .setParameter("token", token)
+                    .executeUpdate();
+            tx.commit();
+        } catch (Exception e) {
+            if (tx.isActive()) {
+                tx.rollback();
+            }
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
+
+    public User getUserByToken(String token) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            return em.createNamedQuery("User.findByRememberToken", User.class)
+                    .setParameter("token", token)
+                    .getSingleResult();
+        } catch (Exception e) {
+            return null;
+        } finally {
+            em.close();
+        }
+    }
+
+    public List<UserAddress> getUserAddressesByUserId(int userId) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<UserAddress> query = em.createNamedQuery("UserAddress.findByUserId", UserAddress.class);
+            query.setParameter("userId", userId);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    public boolean hasAddress(int userId) {
+        List<UserAddress> addresses = getUserAddressesByUserId(userId);
+        return addresses != null && !addresses.isEmpty();
+    }
+
+}
