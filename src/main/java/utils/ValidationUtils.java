@@ -12,18 +12,16 @@ public class ValidationUtils {
     private static final Pattern NAME_PATTERN = Pattern.compile("^[\\p{L}\\s'-]{2,100}$");
     private static final Pattern URL_PATTERN = Pattern.compile("^(https?://)?([\\da-z.-]+)\\.([a-z.]{2,6})[/\\w .-]*/?$", Pattern.CASE_INSENSITIVE);
 
-    
     public static boolean isUserLoggedIn(HttpServletRequest request) {
         HttpSession session = request.getSession(false);
-        return session != null && session.getAttribute("user") != null;
+        return session != null && session.getAttribute("userObject") != null;
     }
 
-    
     public static boolean isAdmin(HttpServletRequest request) {
         HttpSession session = request.getSession(false);
         if (session != null) {
-            User user = (User) session.getAttribute("user");
-            return user != null && "ADMIN".equalsIgnoreCase(user.getRole());
+            User user = (User) session.getAttribute("userObject");
+            return user != null && user.getRoleID() == 1; // 1 is the roleID for ADMIN
         }
         return false;
     }
