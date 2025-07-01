@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app version="5.0" xmlns="https://jakarta.ee/xml/ns/jakartaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_5_0.xsd">
+    <listener>
+        <description>ServletContextListener</description>
+        <listener-class>listener.appStartupListener</listener-class>
+    </listener>
     <session-config>
         <session-timeout>
             30
@@ -8,4 +12,12 @@
     <welcome-file-list>
         <welcome-file>indexFirst.jsp</welcome-file>
     </welcome-file-list>
+    <context-param>
+        <param-name>email.sender</param-name>
+        <param-value>de180497luongdanghoangluu@gmail.com</param-value>
+    </context-param>    
+    <context-param>
+        <param-name>email.password</param-name>
+        <param-value>lryj mowk yoml wvhw</param-value>
+    </context-param>
 </web-app>

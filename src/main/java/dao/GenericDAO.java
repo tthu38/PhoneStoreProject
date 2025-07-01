@@ -6,7 +6,6 @@ package dao;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceException;
-import model.Product;
 
 import java.util.Collections;
 import java.util.List;
@@ -15,6 +14,7 @@ import utils.DaoUtils;
 /**
  *
  * @author ThienThu
+ * @param <T>
  */
 public class GenericDAO<T> extends BaseDAO<T> {
 
