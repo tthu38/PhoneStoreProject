@@ -78,7 +78,7 @@ public class AddressServlet extends HttpServlet {
                     Integer addressId = Integer.parseInt(idParam);
                     UserAddress address = addressService.getAddressById(addressId);
                     // Kiểm tra địa chỉ này có thuộc về user hiện tại không
-                    if (address != null && address.getUser().getUserID().equals(user.getUserID())) {
+                    if (address != null && address.getUser().equals(user)) {
                         request.setAttribute("userAddress", address);
                         request.getRequestDispatcher("/user/address-detail.jsp").forward(request, response);
                     } else {
@@ -137,7 +137,7 @@ public class AddressServlet extends HttpServlet {
                 try {
                     Integer addressId = Integer.parseInt(idParam);
                     UserAddress address = addressService.getAddressById(addressId);
-                    if (address != null && address.getUser().getUserID().equals(user.getUserID())) {
+                    if (address != null && address.getUser().equals(user)) {
                         address.setFullName(request.getParameter("fullName"));
                         address.setPhoneNumber(request.getParameter("phoneNumber"));
                         address.setAddress(request.getParameter("address"));
@@ -156,7 +156,7 @@ public class AddressServlet extends HttpServlet {
                 try {
                     Integer addressId = Integer.parseInt(idParam);
                     UserAddress address = addressService.getAddressById(addressId);
-                    if (address != null && address.getUser().getUserID().equals(user.getUserID())) {
+                    if (address != null && address.getUser().equals(user)) {
                         addressService.deleteAddress(addressId);
                         response.sendRedirect(request.getContextPath() + "/user/address");
                     } else {

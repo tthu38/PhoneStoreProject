@@ -15,6 +15,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.List;
+import model.UserAddress;
 
 /**
  *
@@ -22,6 +24,7 @@ import java.io.PrintWriter;
  */
 @WebServlet(urlPatterns = {"/login", "/login-google", "/oauth2/google", "/update-profile"})
 public class LoginServlet extends HttpServlet {
+
     private UserService userService;
 
     @Override
@@ -55,7 +58,8 @@ public class LoginServlet extends HttpServlet {
         }
     }
 
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
+    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the
+    // + sign on the left to edit the code.">
     /**
      * Handles the HTTP <code>GET</code> method.
      *
@@ -67,12 +71,11 @@ public class LoginServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        if (request.getSession().getAttribute("userObject") == null) {
+        if (request.getSession().getAttribute("user") == null) {
             java.util.Optional<User> rememberedUser = userService.checkRememberToken(request);
             if (rememberedUser.isPresent()) {
-                userService.setupUserSession(request, response, rememberedUser.get());
-                request.getSession().setAttribute("userObject", rememberedUser.get());
-                response.sendRedirect(request.getContextPath() + "/index.jsp");
+                request.getSession().setAttribute("user", rememberedUser.get());
+                response.sendRedirect(request.getContextPath() + "/indexFirst.jsp");
                 return;
             }
         }
@@ -110,32 +113,42 @@ public class LoginServlet extends HttpServlet {
                 String accessToken = utils.GoogleUtils.getToken(code);
                 User googleUserInfo = utils.GoogleUtils.getUserInfo(accessToken);
                 User googleUser = userService.findOrCreateGoogleUser(
-                    googleUserInfo.getEmail(),
-                    googleUserInfo.getFullName(),
-                    googleUserInfo.getPicture(),
-                    "GOOGLE",
-                    true
-                );
+                        googleUserInfo.getEmail(),
+                        googleUserInfo.getFullName(),
+                        googleUserInfo.getPicture(),
+                        "GOOGLE",
+                        true);
+
+                List<UserAddress> addresses = userService.getUserAddressesByUserId(googleUser.getUserID());
+                googleUser.setAddresses(addresses);
+
                 if (googleUser != null) {
+                    request.getSession().setAttribute("user", googleUser);
+                    request.getSession().setAttribute("userName", googleUser.getFullName());
+                    request.getSession().setAttribute("userEmail", googleUser.getEmail());
                     Boolean rememberMe = (Boolean) request.getSession().getAttribute("rememberMe");
                     if (Boolean.TRUE.equals(rememberMe)) {
                         String token = java.util.UUID.randomUUID().toString();
-                        userService.saveRememberToken(googleUser.getId(), token);
-                        jakarta.servlet.http.Cookie rememberCookie = new jakarta.servlet.http.Cookie("remember_token", token);
-                        rememberCookie.setMaxAge(60 * 60 * 24 * 30); // 30 ngày
+                        userService.saveRememberToken(googleUser.getUserID(), token);
+                        jakarta.servlet.http.Cookie rememberCookie = new jakarta.servlet.http.Cookie("remember_token",
+                                token);
+                        rememberCookie.setMaxAge(60 * 60 * 24 * 30);
                         rememberCookie.setPath("/");
                         rememberCookie.setHttpOnly(true);
                         response.addCookie(rememberCookie);
                     }
                     request.getSession().removeAttribute("rememberMe");
 
-                    userService.setupUserSession(request, response, googleUser);
-                    request.getSession().setAttribute("userObject", googleUser);
-
-                    response.sendRedirect(request.getContextPath() + "/index.jsp");
+                    if (googleUser.getPhoneNumber() == null || googleUser.getPhoneNumber().isEmpty()
+                            || !userService.hasAddress(googleUser.getUserID())) {
+                        response.sendRedirect(request.getContextPath() + "/user/userupdate.jsp");
+                    } else {
+                        response.sendRedirect(request.getContextPath() + "/indexFirst.jsp");
+                    }
                     return;
                 } else {
-                    request.setAttribute("error", "Không thể đăng nhập bằng Google. Email này chưa được đăng ký hoặc tài khoản đã bị khóa.");
+                    request.setAttribute("error",
+                            "Không thể đăng nhập bằng Google. Email này chưa được đăng ký hoặc tài khoản đã bị khóa.");
                     request.getRequestDispatcher("/user/login.jsp").forward(request, response);
                 }
             } catch (Exception e) {
@@ -160,30 +173,52 @@ public class LoginServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String servletPath = request.getServletPath();
+
         if ("/update-profile".equals(servletPath)) {
             HttpSession session = request.getSession(false);
-            if (session == null || session.getAttribute("userObject") == null) {
+            if (session == null || session.getAttribute("user") == null) {
                 response.sendRedirect(request.getContextPath() + "/user/login.jsp");
                 return;
             }
-            User user = (User) session.getAttribute("userObject");
+
+            User sessionUser = (User) session.getAttribute("user");
+            java.util.Optional<User> userOpt = userService.getUserById(sessionUser.getUserID());
+
+            if (!userOpt.isPresent()) {
+                response.sendRedirect(request.getContextPath() + "/user/login.jsp");
+                return;
+            }
+
+            User user = userOpt.get();
             String fullName = request.getParameter("fullname");
             String phoneNumber = request.getParameter("phone");
+
             user.setFullName(fullName);
             user.setPhoneNumber(phoneNumber);
+
             userService.updateUser(user);
-            session.setAttribute("userObject", user);
-            response.sendRedirect(request.getContextPath() + "/index.jsp");
+            session.setAttribute("user", user);
+
+            response.sendRedirect(request.getContextPath() + "/indexFirst.jsp");
             return;
         }
+
         String email = request.getParameter("email");
         String password = request.getParameter("password");
 
         User user = userService.login(email, password);
         if (user != null) {
-            userService.setupUserSession(request, response, user);
-            request.getSession().setAttribute("userObject", user);
-            response.sendRedirect(request.getContextPath() + "/index.jsp");
+            User latestUser = userService.getUserById(user.getUserID()).orElse(user);
+            request.getSession().setAttribute("user", latestUser);
+
+            boolean missingPhone = latestUser.getPhoneNumber() == null || latestUser.getPhoneNumber().isEmpty();
+            boolean missingAddress = !userService.hasAddress(latestUser.getUserID());
+
+            if (missingPhone || missingAddress) {
+                response.sendRedirect(request.getContextPath() + "/user/userupdate.jsp");
+            } else {
+                response.sendRedirect(request.getContextPath() + "/indexFirst.jsp");
+            }
         } else {
             request.setAttribute("error", "Invalid email or password");
             request.getRequestDispatcher("/user/login.jsp").forward(request, response);

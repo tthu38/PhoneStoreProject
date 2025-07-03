@@ -8,6 +8,7 @@ import org.apache.http.client.fluent.Request;
 import java.util.ResourceBundle;
 
 public class GoogleUtils {
+
     private static final ResourceBundle bundle = ResourceBundle.getBundle("application");
 
     public static String getToken(final String code) throws Exception {
@@ -34,16 +35,19 @@ public class GoogleUtils {
     public static User getUserInfo(final String accessToken) throws Exception {
         String link = bundle.getString("google.userinfo.url") + accessToken;
         String response = Request.Get(link).execute().returnContent().asString();
-        
+
         JsonObject googleUser = new Gson().fromJson(response, JsonObject.class);
-        
+
         User user = new User();
-        user.setEmail(googleUser.get("email").getAsString());
-        user.setFullName(googleUser.get("name").getAsString());
-        user.setPicture(googleUser.get("picture").getAsString());
+        System.out.println("Google EMAIL: " + googleUser.get("email"));
+        System.out.println("Google NAME: " + googleUser.get("name"));
+        System.out.println("Google PICTURE: " + googleUser.get("picture"));
+        user.setEmail(googleUser.has("email") ? googleUser.get("email").getAsString() : null);
+        user.setFullName(googleUser.has("name") ? googleUser.get("name").getAsString() : null);
+        user.setPicture(googleUser.has("picture") ? googleUser.get("picture").getAsString() : null);
         user.setIsOauthUser(true);
         user.setOauthProvider("GOOGLE");
-        
+
         return user;
     }
 
