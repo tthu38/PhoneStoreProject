@@ -9,11 +9,18 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.Persistence;
+import jakarta.persistence.TypedQuery;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import model.Product;
 import model.ProductBrand;
@@ -78,6 +85,133 @@ public class ProductService {
 
     public List<Product> getProductsByName(String name) {
         return productDAO.findByName(name);
+    }
+
+    //filter product
+    public List<Product> searchAndFilterProducts(String name, String categoryID, String sortType, int page, int pageSize) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            StringBuilder queryStr = new StringBuilder(
+                    "SELECT p, "
+                    + "COALESCE(MIN(CASE WHEN v.discountPrice IS NOT NULL AND v.discountExpiry >= CURRENT_TIMESTAMP THEN v.discountPrice END), NULL) AS minDiscountPrice, "
+                    + "MIN(v.price) AS minOriginalPrice, "
+                    + "COALESCE(MIN(v.color), NULL) AS displayStorage "
+                    + "FROM Product p "
+                    + "LEFT JOIN p.variants v ON v.isActive = true "
+                    + "LEFT JOIN p.categories c "
+                    + "WHERE p.isActive = true "
+            );
+            boolean hasCategoryFilter = categoryID != null && !categoryID.trim().isEmpty();
+            boolean hasNameFilter = name != null && !name.trim().isEmpty();
+
+            if (hasCategoryFilter) {
+                queryStr.append(" AND c.id = :categoryId");
+            }
+            if (hasNameFilter) {
+                queryStr.append(" AND LOWER(p.name) LIKE :name");
+            }
+
+            queryStr.append(" GROUP BY p");
+
+            if (sortType != null && !sortType.isEmpty()) {
+                switch (sortType) {
+                    case "name_asc":
+                        queryStr.append(" ORDER BY p.name ASC");
+                        break;
+                    case "name_desc":
+                        queryStr.append(" ORDER BY p.name DESC");
+                        break;
+                }
+            }
+
+            TypedQuery<Object[]> query = em.createQuery(queryStr.toString(), Object[].class);
+
+            if (hasCategoryFilter) {
+                query.setParameter("categoryId", Integer.parseInt(categoryID));
+            }
+            if (hasNameFilter) {
+                query.setParameter("name", "%" + name.trim().toLowerCase() + "%");
+            }
+
+            query.setFirstResult((page - 1) * pageSize);
+            query.setMaxResults(pageSize);
+
+            List<Object[]> results = query.getResultList();
+            List<Product> products = new ArrayList<>();
+
+            for (Object[] row : results) {
+                Product product = (Product) row[0];
+                BigDecimal minDiscountPrice = (BigDecimal) row[1];
+                BigDecimal minOriginalPrice = (BigDecimal) row[2];
+                String displayStorage = (String) row[3];
+
+                product.setOriginalPrice(minOriginalPrice);
+                product.setDiscountPrice(minDiscountPrice);
+                product.setDisplayStorage(displayStorage);
+
+                if (minDiscountPrice != null) {
+                    BigDecimal discount = minOriginalPrice.subtract(minDiscountPrice);
+                    BigDecimal percentage = discount.multiply(BigDecimal.valueOf(100))
+                            .divide(minOriginalPrice, 0, RoundingMode.HALF_UP);
+                    product.setDiscountPercent(percentage.intValue());
+                } else {
+                    product.setDiscountPercent(0);
+                }
+
+                products.add(product);
+            }
+            // Sắp xếp theo giá nếu cần
+            if (sortType != null) {
+                switch (sortType) {
+                    case "price_asc":
+                        products.sort(Comparator.comparing(p -> p.getDiscountPrice() != null ? p.getDiscountPrice() : p.getOriginalPrice()));
+                        break;
+                    case "price_desc":
+                        products.sort((p1, p2) -> {
+                            BigDecimal price1 = p1.getDiscountPrice() != null ? p1.getDiscountPrice() : p1.getOriginalPrice();
+                            BigDecimal price2 = p2.getDiscountPrice() != null ? p2.getDiscountPrice() : p2.getOriginalPrice();
+                            return price2.compareTo(price1);
+                        });
+                        break;
+                }
+            }
+
+            return products;
+
+        } finally {
+            em.close();
+        }
+    }
+
+    public List<Map<String, Object>> detailProduct(int id) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            String jpql = "SELECT p.id, p.name, p.thumbnailImage, p.description, pv.color, pv.rom, pv.price, pv.discountPrice, ps.amount "
+                    + "FROM Product p "
+                    + "JOIN ProductVariant pv ON p = pv.product "
+                    + "JOIN ProductStock ps ON pv = ps.productVariantID "
+                    + "WHERE p.id = :productId AND p.isActive = true AND pv.isActive = true ";
+
+            return em.createQuery(jpql, Object[].class)
+                    .setParameter("productId", id)
+                    .getResultStream()
+                    .map(row -> {
+                        Map<String, Object> result = new HashMap<>();
+                        result.put("productId", row[0]);
+                        result.put("productName", row[1]);
+                        result.put("thumbnailImage", row[2]);
+                        result.put("description", row[3]);
+                        result.put("color", row[4]);
+                        result.put("rom", row[5]);
+                        result.put("originalPrice", row[6]);
+                        result.put("discountPrice", row[7]);
+                        result.put("stock", row[8]);
+                        return result;
+                    })
+                    .collect(Collectors.toList());
+        } finally {
+            em.close();
+        }
     }
 
     public void updateProductDetails(int productId, String name, String description, String thumbnailImage,

@@ -1,6 +1,7 @@
 package model;
 
 import jakarta.persistence.*;
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Date;
 import org.hibernate.annotations.ColumnDefault;
@@ -51,7 +52,19 @@ public class Product {
     @ColumnDefault("getdate()")
     @Column(name = "CreatedAt")
     private Instant createAt;
+    
+    @Transient
+    private BigDecimal originalPrice;
+    
+    @Transient
+    private BigDecimal discountPrice;
 
+    @Transient
+    private int discountPercent;
+
+    @Transient
+    private String displayStorage;
+    
     public int getId() {
         return id;
     }
@@ -119,4 +132,38 @@ public class Product {
     public Date getCreateAtAsDate() {
         return createAt != null ? Date.from(createAt) : null;
     }
+
+    public BigDecimal getOriginalPrice() {
+        return originalPrice;
+    }
+
+    public void setOriginalPrice(BigDecimal originalPrice) {
+        this.originalPrice = originalPrice;
+    }
+
+    public BigDecimal getDiscountPrice() {
+        return discountPrice;
+    }
+
+    public void setDiscountPrice(BigDecimal discountPrice) {
+        this.discountPrice = discountPrice;
+    }
+
+    public int getDiscountPercent() {
+        return discountPercent;
+    }
+
+    public void setDiscountPercent(int discountPercent) {
+        this.discountPercent = discountPercent;
+    }
+
+    public String getDisplayStorage() {
+        return displayStorage;
+    }
+
+    public void setDisplayStorage(String displayStorage) {
+        this.displayStorage = displayStorage;
+    }
+    
+    
 }

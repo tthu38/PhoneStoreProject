@@ -291,17 +291,17 @@
     </div>
     <div class="product-info">
         <h1 class="product-title">${productDetails[0].productName}</h1>
-        <div class="rating">★ 4.9 (312 đánh giá)</div>
-        <div class="actions">
-            <button class="action-btn"><i class="fas fa-heart"></i> Yêu thích</button>
-            <button class="action-btn"><i class="fas fa-question-circle"></i> Hỏi đáp</button>
-            <button class="action-btn"><i class="fas fa-info-circle"></i> Thông số</button>
-            <button class="action-btn"><i class="fas fa-balance-scale"></i> So sánh</button>
-        </div>
-        <div class="product-price">
-            <span class="original-price">34.990.000đ</span>
-            <span class="discount-price">30.390.000đ</span>
-        </div>
+        <h2 class="product-price">
+                <c:choose>
+                    <c:when test="${productDetails[0].discountPrice != null}">
+                        <span class="original-price text-muted text-decoration-line-through me-2">${productDetails[0].originalPrice} VND</span>
+                        <span class="discount-price text-success fw-bold">${productDetails[0].discountPrice} VND</span>
+                    </c:when>
+                    <c:otherwise>
+                        <span class="original-price">${productDetails[0].originalPrice} VND</span>
+                    </c:otherwise>
+                </c:choose>
+            </h2>
         <div class="stock-info">Còn lại: ${productDetails[0].stock} sản phẩm</div>
 
         <form action="carts" method="get">

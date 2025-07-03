@@ -200,6 +200,7 @@
 <body>
     <jsp:include page="/templates/header.jsp"/>
     
+    
     <!-- Carousel -->
     <div class="content-frame">
         <div id="prodCar" class="carousel slide" data-bs-ride="carousel">
@@ -309,6 +310,8 @@
                         Xem Thêm Sản Phẩm <i class="bi bi-arrow-right"></i>
                     </a>
                 </div>
+                
+                
             </div>
         </section>
     </div>
