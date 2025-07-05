@@ -22,7 +22,8 @@ import java.util.List;
     @NamedQuery(name = "User.findByRoleID", query = "SELECT u FROM User u WHERE u.roleID = :roleID"),
     @NamedQuery(name = "User.findByName", query = "SELECT u FROM User u WHERE u.fullName LIKE :name"),
     @NamedQuery(name = "User.findByPhone", query = "SELECT u FROM User u WHERE u.phoneNumber = :phoneNumber"),
-    @NamedQuery(name = "User.findByRememberToken", query = "SELECT u FROM User u WHERE u.rememberToken = :token AND u.isActive = true")
+    @NamedQuery(name = "User.findByRememberToken", query = "SELECT u FROM User u WHERE u.rememberToken = :token AND u.isActive = true"),
+    @NamedQuery(name = "User.findByOauthId", query = "SELECT u FROM User u WHERE u.oauthId = :oauthId")
 })
 public class User implements Serializable {
     @Id
@@ -41,7 +42,7 @@ public class User implements Serializable {
     @Column(name = "PhoneNumber", length = 20)
     private String phoneNumber;
 
-    @Column(name = "Picture", length = 255)
+    @Column(name = "Picture", length = 1000)
     private String picture;
 
     @Column(name = "RoleID", nullable = false)
@@ -64,6 +65,13 @@ public class User implements Serializable {
 
     @Column(name = "CreatedAt")
     private Instant createdAt;
+
+    @Column(name = "OauthID", length = 100)
+    private String oauthId;
+
+    @Column(name = "Dob")
+    private java.time.LocalDate dob;
+
 
     public User() {}
 
@@ -106,4 +114,11 @@ public class User implements Serializable {
 
     public Instant getCreatedAt() { return createdAt; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+
+    public String getOauthId() { return oauthId; }
+    public void setOauthId(String oauthId) { this.oauthId = oauthId; }
+
+    public java.time.LocalDate getDob() { return dob; }
+    public void setDob(java.time.LocalDate dob) { this.dob = dob; }
+
 }

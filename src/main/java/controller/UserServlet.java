@@ -12,6 +12,7 @@ import service.UserService;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.List;
 
 /**
  *
@@ -75,27 +76,54 @@ public class UserServlet extends HttpServlet {
             throws ServletException, IOException {
         String action = request.getParameter("action");
         HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("userObject") == null) {
+        if (session == null || session.getAttribute("user") == null) {
             response.sendRedirect(request.getContextPath() + "/user/login.jsp");
             return;
         }
 
         if ("update-profile".equals(action)) {
-            User user = (User) session.getAttribute("userObject");
+            User user = (User) session.getAttribute("user");
             String fullName = request.getParameter("fullname");
             String phoneNumber = request.getParameter("phone");
+            String dobStr = request.getParameter("dob");
+            String address = request.getParameter("address");
+
+            if (fullName == null || fullName.trim().isEmpty() ||
+                phoneNumber == null || phoneNumber.trim().isEmpty()) {
+                request.setAttribute("error", "Vui lòng nhập đầy đủ họ tên và số điện thoại.");
+                request.getRequestDispatcher("/user/editprofile.jsp").forward(request, response);
+                return;
+            }
 
             user.setFullName(fullName);
             user.setPhoneNumber(phoneNumber);
+            if (dobStr != null && !dobStr.isEmpty()) {
+                user.setDob(java.time.LocalDate.parse(dobStr));
+            }
 
             userService.updateUser(user);
-            session.setAttribute("userObject", user);
+            session.setAttribute("user", user);
+
+            // Cập nhật địa chỉ
+            service.UserAddressService addressService = new service.UserAddressService();
+            List<model.UserAddress> addresses = addressService.getAllAddressesByUserId(user.getUserID());
+            model.UserAddress userAddress;
+            if (addresses != null && !addresses.isEmpty()) {
+                userAddress = addresses.get(0);
+                userAddress.setAddress(address);
+                addressService.updateAddress(userAddress);
+            } else {
+                userAddress = new model.UserAddress();
+                userAddress.setUser(user);
+                userAddress.setAddress(address);
+                userAddress.setIsDefault(true);
+                userAddress.setIsActive(true);
+                addressService.addAddress(userAddress);
+            }
 
             response.sendRedirect(request.getContextPath() + "/user/profile.jsp");
             return;
         }
-
-        // ...xử lý các action khác...
     }
 
     /**

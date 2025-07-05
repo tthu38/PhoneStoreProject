@@ -192,15 +192,22 @@ public class UserService {
         return getUserByEmail(email).orElse(newUser);
     }
 
-    public User login(String email, String password) {
-        Optional<User> userOpt = getUserByEmail(email);
-        if (userOpt.isPresent()) {
-            User user = userOpt.get();
-            if (user.getPassword().equals(password) && Boolean.TRUE.equals(user.getIsActive())) {
-                return user;
+    public User login(String phoneNumber, String password) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<User> query = em.createNamedQuery("User.findByPhone", User.class);
+            query.setParameter("phoneNumber", phoneNumber);
+            List<User> users = query.getResultList();
+            if (!users.isEmpty()) {
+                User user = users.get(0);
+                if (user.getPassword().equals(password) && Boolean.TRUE.equals(user.getIsActive())) {
+                    return user;
+                }
             }
+            return null;
+        } finally {
+            em.close();
         }
-        return null;
     }
 
     public Optional<User> checkRememberToken(HttpServletRequest request) {
@@ -289,6 +296,89 @@ public class UserService {
     public boolean hasAddress(int userId) {
         List<UserAddress> addresses = getUserAddressesByUserId(userId);
         return addresses != null && !addresses.isEmpty();
+    }
+
+    public User findOrCreateOauthUser(String email, String fullName, String picture, String oauthId, String provider, boolean isActive) {
+        // Tìm user theo OauthID trước
+        List<User> usersByOauthId = userDao.findByAttribute("oauthId", oauthId);
+        if (!usersByOauthId.isEmpty()) {
+            return usersByOauthId.get(0);
+        }
+        // Nếu chưa có, kiểm tra theo email (tránh trùng)
+        Optional<User> existingUser = getUserByEmail(email);
+        if (existingUser.isPresent()) {
+            User user = existingUser.get();
+            boolean changed = false;
+
+            if (user.getOauthId() == null || !user.getOauthId().equals(oauthId)) {
+                user.setOauthId(oauthId);
+                changed = true;
+            }
+            if (user.getOauthProvider() == null || !user.getOauthProvider().equals(provider)) {
+                user.setOauthProvider(provider);
+                changed = true;
+            }
+            if (user.getFullName() == null || !user.getFullName().equals(fullName)) {
+                user.setFullName(fullName);
+                changed = true;
+            }
+            if (user.getPicture() == null || !user.getPicture().equals(picture)) {
+                user.setPicture(picture);
+                changed = true;
+            }
+            if (!Boolean.TRUE.equals(user.getIsOauthUser())) {
+                user.setIsOauthUser(true);
+                changed = true;
+            }
+            if (user.getPassword() == null || !user.getPassword().equals(provider.toUpperCase() + "_USER")) {
+                user.setPassword(provider.toUpperCase() + "_USER");
+                changed = true;
+            }
+            if (changed) {
+                updateUser(user);
+            }
+            return user;
+        }
+        // Nếu chưa có user, tạo mới
+        User newUser = new User();
+        newUser.setEmail(email);
+        newUser.setFullName(fullName);
+        newUser.setPicture(picture);
+        newUser.setOauthId(oauthId);
+        newUser.setOauthProvider(provider);
+        newUser.setIsOauthUser(true);
+        newUser.setIsActive(isActive);
+        newUser.setRoleID(2); // Customer
+        newUser.setPassword(provider.toUpperCase() + "_USER");
+        addUser(newUser);
+
+        return getUserByEmail(email).orElse(newUser);
+    }
+
+    public void updateUserInfoFromFacebook(User user) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            em.getTransaction().begin();
+            em.merge(user); // Cập nhật thông tin user
+            em.getTransaction().commit();
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) em.getTransaction().rollback();
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
+
+    public Optional<User> getUserByOauthId(String oauthId) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            return em.createNamedQuery("User.findByOauthId", User.class)
+                     .setParameter("oauthId", oauthId)
+                     .getResultList()
+                     .stream().findFirst();
+        } finally {
+            em.close();
+        }
     }
 
 }

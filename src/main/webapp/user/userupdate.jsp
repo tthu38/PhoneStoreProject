@@ -44,7 +44,6 @@
                     <label class="form-label">Họ và tên</label>
                     <input type="text" class="form-control" name="fullname" value="<%= user.getFullName() %>" required>
                 </div>
-                
             </div>
             <div class="row mb-3">
                 <div class="col">
@@ -54,6 +53,12 @@
                 <div class="col">
                     <label class="form-label">Email</label>
                     <input type="email" class="form-control" style="min-width:260px;max-width:100%;" value="<%= user.getEmail() %>" readonly>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col">
+                    <label class="form-label">Địa chỉ</label>
+                    <input type="text" class="form-control" name="address" required placeholder="Nhập địa chỉ của bạn">
                 </div>
             </div>
             <div class="form-check mb-3">
@@ -73,4 +78,4 @@
     </div>
     <jsp:include page="/templates/footer.jsp"/>
 </body>
-</html> 
+</html>
