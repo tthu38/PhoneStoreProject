@@ -1,0 +1,70 @@
+/*
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/CascadeStyleSheet.css to edit this template
+*/
+/* 
+    Created on : Jul 5, 2025, 8:01:06 PM
+    Author     : dangt
+*/
+
+body {
+    background: #fff5f5;
+}
+
+.card {
+    box-shadow: 0 2px 16px rgba(255,0,0,0.08);
+    border-radius: 16px;
+    border: 1.5px solid #ea1d25;
+}
+
+.card-header {
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+    background: #ea1d25 !important;
+    color: #fff !important;
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    border-bottom: 1px solid #ea1d25 !important;
+}
+
+.card-body {
+    padding: 2rem;
+}
+
+.form-label {
+    font-weight: 500;
+    color: #ea1d25;
+}
+
+.form-control:focus {
+    border-color: #ea1d25;
+    box-shadow: 0 0 0 0.2rem rgba(234,29,37,0.15);
+}
+
+.btn-primary {
+    background: #ea1d25 !important;
+    border-color: #ea1d25 !important;
+}
+
+.btn-primary:hover, .btn-primary:focus {
+    background: #b71c1c !important;
+    border-color: #b71c1c !important;
+}
+
+.btn-secondary {
+    background: #fff0f0;
+    color: #ea1d25;
+    border: 1px solid #ea1d25;
+}
+
+.btn-secondary:hover {
+    background: #ea1d25;
+    color: #fff;
+}
+
+::selection {
+    background: #ea1d25;
+    color: #fff;
+}
+

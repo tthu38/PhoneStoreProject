@@ -35,7 +35,7 @@
                         <div class="login-title" style="font-size:1.7rem;">Đăng Nhập Thế Giới Công Nghệ</div>
                         <div class="mb-3">
                             <label class="form-label">Số điện thoại</label>
-                            <input type="text" class="form-control" name="email" placeholder="Nhập số điện thoại" required>
+                            <input type="text" class="form-control" name="phone" placeholder="Nhập số điện thoại" required>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Mật khẩu</label>

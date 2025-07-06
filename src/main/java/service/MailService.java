@@ -45,103 +45,126 @@ public class MailService {
         return validOtp != null && validOtp.equals(userInputOtp);
     }
 
-    private String buildOtpHtml(String otp, String purpose) {
-        return """
-        <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;border-radius:12px;
-                    border:1px solid #ddd;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.1);">
-            <div style="background:#b71c1c;padding:20px;text-align:center;">
-                <h2 style="color:#fff;margin:0;font-size:24px;">THEGIOICONGNGHE.COM</h2>
-                <p style="color:#fbc02d;margin:8px 0 0;font-weight:bold;">Xác minh tài khoản</p>
-            </div>
-            <div style="padding:30px 20px;background:#fff;">
-                <p style="font-size:16px;color:#333;">Chào bạn,</p>
-                <p style="font-size:16px;color:#333;">Mã OTP của bạn để <strong>%s</strong> là:</p>
-                <div style="text-align:center;margin:30px 0;">
-                    <span style="display:inline-block;background:#ffebee;color:#c62828;
-                                 font-size:32px;font-weight:bold;padding:14px 28px;
-                                 border-radius:8px;letter-spacing:6px;border:2px dashed #f44336;">
-                        %s
-                    </span>
-                </div>
-                <p style="font-size:14px;color:#555;text-align:center;">
-                    Mã này có hiệu lực trong <strong>5 phút</strong>. Không chia sẻ cho bất kỳ ai.
-                </p>
-                <div style="margin-top:30px;border-top:1px solid #eee;padding-top:15px;">
-                    <p style="font-size:12px;color:#888;text-align:center;">
-                        Đây là email tự động từ <strong>THEGIOICONGNGHE.COM</strong>.<br>
-                        Vui lòng không trả lời email này.
-                    </p>
-                </div>
-            </div>
-        </div>
-    """.formatted(purpose, otp);
-    }
-
     public boolean sendOtpForRegister(String recipientEmail, String otp) {
+    try {
         String subject = "🔐 Mã OTP đăng ký tài khoản - THEGIOICONGNGHE.COM";
-        String html = buildOtpHtml(otp, "tạo tài khoản");
-        return sendEmail(recipientEmail, subject, html);
-    }
-
-    public boolean sendOtpForResetPassword(String recipientEmail, String otp) {
-        String subject = "🔐 Mã OTP khôi phục mật khẩu - THEGIOICONGNGHE.COM";
-        String html = buildOtpHtml(otp, "khôi phục mật khẩu");
-        return sendEmail(recipientEmail, subject, html);
-    }
-
-    private boolean sendEmail(String recipientEmail, String subject, String htmlContent) {
-        try {
-            Properties props = new Properties();
-            props.put("mail.smtp.host", "smtp.gmail.com");
-            props.put("mail.smtp.port", "587");
-            props.put("mail.smtp.auth", "true");
-            props.put("mail.smtp.starttls.enable", "true");
-
-            Session session = Session.getInstance(props, new Authenticator() {
-                protected PasswordAuthentication getPasswordAuthentication() {
-                    return new PasswordAuthentication(EMAIL_SENDER, EMAIL_PASSWORD);
-                }
-            });
-
-            Message message = new MimeMessage(session);
-            message.setFrom(new InternetAddress(EMAIL_SENDER, "THEGIOICONGNGHE.COM"));
-            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipientEmail));
-            message.setSubject(subject);
-            message.setContent(htmlContent, "text/html; charset=utf-8");
-
-            Transport.send(message);
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-    public boolean sendLoginNotification(String recipientEmail, String fullName, String ipAddress, String loginTime) {
-    String subject = "📥 Thông báo đăng nhập từ tài khoản của bạn - THEGIOICONGNGHE.COM";
-    String html = """
-        <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;border-radius:12px;
-                    border:1px solid #ddd;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.1);">
-            <div style="background:#1e88e5;padding:20px;text-align:center;">
-                <h2 style="color:#fff;margin:0;font-size:24px;">THEGIOICONGNGHE.COM</h2>
-                <p style="color:#bbdefb;margin:8px 0 0;font-weight:bold;">Thông báo đăng nhập</p>
+        String htmlContent = """
+            <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;border-radius:12px;
+                        border:1px solid #ddd;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.1);">
+                <div style="background:#b71c1c;padding:20px;text-align:center;">
+                    <h2 style="color:#fff;margin:0;font-size:24px;">THEGIOICONGNGHE.COM</h2>
+                    <p style="color:#fbc02d;margin:8px 0 0;font-weight:bold;">Xác minh tài khoản</p>
+                </div>
+                <div style="padding:30px 20px;background:#fff;">
+                    <p style="font-size:16px;color:#333;">Chào bạn,</p>
+                    <p style="font-size:16px;color:#333;">Mã OTP của bạn để <strong>tạo tài khoản</strong> là:</p>
+                    <div style="text-align:center;margin:30px 0;">
+                        <span style="display:inline-block;background:#ffebee;color:#c62828;
+                                     font-size:32px;font-weight:bold;padding:14px 28px;
+                                     border-radius:8px;letter-spacing:6px;border:2px dashed #f44336;">
+                            %s
+                        </span>
+                    </div>
+                    <p style="font-size:14px;color:#555;text-align:center;">
+                        Mã này có hiệu lực trong <strong>5 phút</strong>. Không chia sẻ cho bất kỳ ai.
+                    </p>
+                    <div style="margin-top:30px;border-top:1px solid #eee;padding-top:15px;">
+                        <p style="font-size:12px;color:#888;text-align:center;">
+                            Đây là email tự động từ <strong>THEGIOICONGNGHE.COM</strong>.<br>
+                            Vui lòng không trả lời email này.
+                        </p>
+                    </div>
+                </div>
             </div>
-            <div style="padding:30px 20px;background:#fff;">
-                <p style="font-size:16px;color:#333;">Xin chào <strong>%s</strong>,</p>
-                <p style="font-size:16px;color:#333;">Tài khoản của bạn đã được đăng nhập thành công lúc:</p>
-                <ul style="font-size:16px;color:#333;">
-                    <li><strong>Thời gian:</strong> %s</li>
-                    <li><strong>Địa chỉ IP:</strong> %s</li>
-                </ul>
-                <p style="font-size:14px;color:#555;">
-                    Nếu đây không phải là bạn, vui lòng <strong>đổi mật khẩu ngay lập tức</strong>.
-                </p>
-                <p style="font-size:14px;color:#555;">Trân trọng,<br>Đội ngũ hỗ trợ THEGIOICONGNGHE.COM</p>
-            </div>
-        </div>
-    """.formatted(fullName, loginTime, ipAddress);
+            """.formatted(otp);
 
-    return sendEmail(recipientEmail, subject, html);
+        Properties props = new Properties();
+        props.put("mail.smtp.host", "smtp.gmail.com");
+        props.put("mail.smtp.port", "587");
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.starttls.enable", "true");
+
+        Session session = Session.getInstance(props, new Authenticator() {
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(EMAIL_SENDER, EMAIL_PASSWORD);
+            }
+        });
+
+        Message message = new MimeMessage(session);
+        message.setFrom(new InternetAddress(EMAIL_SENDER, "THEGIOICONGNGHE.COM"));
+        message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipientEmail));
+        message.setSubject(subject);
+        message.setContent(htmlContent, "text/html; charset=utf-8");
+
+        Transport.send(message);
+        return true;
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        return false;
+    }
 }
+
+public boolean sendOtpForResetPassword(String recipientEmail, String otp) {
+    try {
+        String subject = "🔐 Mã OTP khôi phục mật khẩu - THEGIOICONGNGHE.COM";
+        String htmlContent = """
+            <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;border-radius:12px;
+                        border:1px solid #ddd;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.1);">
+                <div style="background:#b71c1c;padding:20px;text-align:center;">
+                    <h2 style="color:#fff;margin:0;font-size:24px;">THEGIOICONGNGHE.COM</h2>
+                    <p style="color:#fbc02d;margin:8px 0 0;font-weight:bold;">Xác minh tài khoản</p>
+                </div>
+                <div style="padding:30px 20px;background:#fff;">
+                    <p style="font-size:16px;color:#333;">Chào bạn,</p>
+                    <p style="font-size:16px;color:#333;">Mã OTP của bạn để <strong>khôi phục mật khẩu</strong> là:</p>
+                    <div style="text-align:center;margin:30px 0;">
+                        <span style="display:inline-block;background:#ffebee;color:#c62828;
+                                     font-size:32px;font-weight:bold;padding:14px 28px;
+                                     border-radius:8px;letter-spacing:6px;border:2px dashed #f44336;">
+                            %s
+                        </span>
+                    </div>
+                    <p style="font-size:14px;color:#555;text-align:center;">
+                        Mã này có hiệu lực trong <strong>5 phút</strong>. Không chia sẻ cho bất kỳ ai.
+                    </p>
+                    <div style="margin-top:30px;border-top:1px solid #eee;padding-top:15px;">
+                        <p style="font-size:12px;color:#888;text-align:center;">
+                            Đây là email tự động từ <strong>THEGIOICONGNGHE.COM</strong>.<br>
+                            Vui lòng không trả lời email này.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            """.formatted(otp);
+
+        Properties props = new Properties();
+        props.put("mail.smtp.host", "smtp.gmail.com");
+        props.put("mail.smtp.port", "587");
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.starttls.enable", "true");
+
+        Session session = Session.getInstance(props, new Authenticator() {
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(EMAIL_SENDER, EMAIL_PASSWORD);
+            }
+        });
+
+        Message message = new MimeMessage(session);
+        message.setFrom(new InternetAddress(EMAIL_SENDER, "THEGIOICONGNGHE.COM"));
+        message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipientEmail));
+        message.setSubject(subject);
+        message.setContent(htmlContent, "text/html; charset=utf-8");
+
+        Transport.send(message);
+        return true;
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        return false;
+    }
+}
+
 
     public boolean sendOrderConfirmation(User user, Order order, int orderID, List<OrderDetails> orderDetails, BigDecimal totalAmount) throws UnsupportedEncodingException {
         // Kiểm tra email trước khi gửi
