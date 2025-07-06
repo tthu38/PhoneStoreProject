@@ -33,7 +33,6 @@ service\CategoryService.class
 service\OrderService.class
 service\ProductService.class
 utils\GoogleUtils.class
-controller\ProfileServlet.class
 dao\GenericDAO.class
 model\Inventory.class
 service\InventoryService.class
