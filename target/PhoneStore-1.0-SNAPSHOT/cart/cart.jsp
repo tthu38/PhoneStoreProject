@@ -1,0 +1,167 @@
+<%-- 
+    Document   : cart
+    Created on : Jul 5, 2025, 2:35:57 PM
+    Author     : ASUS
+--%>
+
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ page import="java.time.LocalDateTime" %>
+<%
+    // Set current time for discount checking
+    request.setAttribute("currentTime", LocalDateTime.now());
+    // Set current user if not already set
+    if (request.getAttribute("currentUser") == null) {
+        request.setAttribute("currentUser", session.getAttribute("user"));
+    }
+%>
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>Giỏ hàng - Thế Giới Công Nghệ</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/header.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/cart.css">
+    </head>
+    <body>
+        <jsp:include page="../templates/header.jsp" />
+        
+        <div class="cart-container">
+            <div class="cart-header">
+                <h1><i class="fas fa-shopping-cart"></i> Giỏ hàng của bạn</h1>
+                <p class="mb-0">Quản lý sản phẩm trong giỏ hàng</p>
+            </div>
+            
+            <div class="row">
+                <div class="col-lg-8">
+                    <c:choose>
+                        <c:when test="${empty cart.cartItems}">
+                            <div class="empty-cart">
+                                <i class="fas fa-shopping-cart"></i>
+                                <h3>Giỏ hàng trống</h3>
+                                <p>Bạn chưa có sản phẩm nào trong giỏ hàng</p>
+                                <a href="${pageContext.request.contextPath}/" class="continue-shopping">
+                                    <i class="fas fa-arrow-left"></i> Tiếp tục mua sắm
+                                </a>
+                            </div>
+                        </c:when>
+                        <c:otherwise>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h4>Sản phẩm (${cart.cartItems.size()} sản phẩm)</h4>
+                                <button class="clear-cart-btn">
+                                    <i class="fas fa-trash"></i> Xóa tất cả
+                                </button>
+                            </div>
+                            
+                            <c:forEach var="entry" items="${cart.cartItems}">
+                                <c:set var="variantId" value="${entry.key}" />
+                                <c:set var="item" value="${entry.value}" />
+                                <c:set var="product" value="${item.productVariant.product}" />
+                                <c:set var="variant" value="${item.productVariant}" />
+                                
+                                <div class="cart-item" id="cart-item-${variantId}">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-2 col-3">
+                                            <img src="${pageContext.request.contextPath}/images/${product.thumbnailImage}" 
+                                                 alt="${product.name}" class="product-image">
+                                        </div>
+                                        <div class="col-md-4 col-6">
+                                            <div class="product-info">
+                                                <h5>${product.name}</h5>
+                                                <div class="product-variant">
+                                                    <i class="fas fa-palette"></i> Màu: ${variant.color}
+                                                </div>
+                                                <div class="product-variant">
+                                                    <i class="fas fa-hdd"></i> ROM: ${variant.rom}GB
+                                                </div>
+                                <c:set var="hasDiscount" value="${not empty variant.discountPrice}" />
+                                <c:if test="${hasDiscount}">
+                                    <span class="discount-badge">
+                                        <i class="fas fa-tag"></i> Giảm giá
+                                    </span>
+                                </c:if>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2 col-3">
+                                            <div class="quantity-controls">
+                                                <button class="quantity-btn">
+                                                    <i class="fas fa-minus"></i>
+                                                </button>
+                                                <input type="number" class="quantity-input" value="${item.quantity}" 
+                                                       min="1" data-original-quantity="${item.quantity}">
+                                                <button class="quantity-btn">
+                                                    <i class="fas fa-plus"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 col-6">
+                                            <div class="price-info">
+                                                <c:choose>
+                                                    <c:when test="${hasDiscount}">
+                                                        <div class="original-price">
+                                                            <fmt:formatNumber value="${variant.price}" type="currency" currencySymbol="₫" />
+                                                        </div>
+                                                        <div class="current-price">
+                                                            <fmt:formatNumber value="${variant.discountPrice * item.quantity}" type="currency" currencySymbol="₫" />
+                                                        </div>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <div class="current-price">
+                                                            <fmt:formatNumber value="${variant.price * item.quantity}" type="currency" currencySymbol="₫" />
+                                                        </div>
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-1 col-3 text-end">
+                                            <button class="remove-btn">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </c:forEach>
+                        </c:otherwise>
+                    </c:choose>
+                </div>
+                
+                <div class="col-lg-4">
+                    <div class="cart-summary">
+                        <h4><i class="fas fa-calculator"></i> Tổng đơn hàng</h4>
+                        
+                        <c:if test="${not empty cart.cartItems}">
+                            <div class="summary-item">
+                                <span>Tạm tính:</span>
+                                <span><fmt:formatNumber value="${cart.totalPrice}" type="currency" currencySymbol="₫" /></span>
+                            </div>
+                            <div class="summary-item">
+                                <span>Phí vận chuyển:</span>
+                                <span>Miễn phí</span>
+                            </div>
+                            <div class="summary-item summary-total">
+                                <span>Tổng cộng:</span>
+                                <span><fmt:formatNumber value="${cart.totalPrice}" type="currency" currencySymbol="₫" /></span>
+                            </div>
+                            
+                            <button class="checkout-btn">
+                                <i class="fas fa-credit-card"></i> Tiến hành thanh toán
+                            </button>
+                            
+                            <div class="text-center mt-3">
+                                <small class="text-muted">
+                                    <i class="fas fa-shield-alt"></i> Bảo mật thanh toán
+                                </small>
+                            </div>
+                        </c:if>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="${pageContext.request.contextPath}/js/cart.js"></script>
+    </body>
+</html>

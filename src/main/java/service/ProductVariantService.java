@@ -62,7 +62,7 @@ public class ProductVariantService {
         try {
             TypedQuery<ProductVariant> query = em.createQuery(
                     "SELECT pv FROM ProductVariant pv JOIN FETCH pv.product "
-                    + "WHERE pv.product.id = :productId AND pv.color = :color AND (pv.isDeleted IS NULL OR pv.isDeleted = false)",
+                    + "WHERE pv.product.id = :productId AND pv.color = :color AND pv.isActive = true",
                     ProductVariant.class
             );
             query.setParameter("productId", productId);
@@ -85,7 +85,7 @@ public class ProductVariantService {
         try {
             TypedQuery<ProductVariant> query = em.createQuery(
                     "SELECT pv FROM ProductVariant pv JOIN FETCH pv.product "
-                    + "WHERE pv.product.id = :productId AND pv.rom = :rom AND (pv.isDeleted IS NULL OR pv.isDeleted = false)",
+                    + "WHERE pv.product.id = :productId AND pv.rom = :rom AND pv.isActive = true",
                     ProductVariant.class
             );
             query.setParameter("productId", productId);

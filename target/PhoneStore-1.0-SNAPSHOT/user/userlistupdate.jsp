@@ -6,7 +6,7 @@
 
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%
-    model.User user = (model.User) session.getAttribute("userObject");
+    model.User user = (model.User) session.getAttribute("user");
 %>
 <!DOCTYPE html>
 <html>
