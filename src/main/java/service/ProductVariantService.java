@@ -6,7 +6,6 @@ import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 import jakarta.persistence.TypedQuery;
 import java.util.List;
-import model.Product;
 import model.ProductVariant;
 
 public class ProductVariantService {
@@ -54,6 +53,19 @@ public class ProductVariantService {
             em.close();
         }
     }
+    public List<ProductVariant> getVariantsByProductId(int productId) {
+    EntityManager em = emf.createEntityManager();
+    try {
+        return em.createQuery(
+            "SELECT pv FROM ProductVariant pv WHERE pv.product.id = :productId AND pv.isActive = true",
+            ProductVariant.class)
+            .setParameter("productId", productId)
+            .getResultList();
+    } finally {
+        em.close();
+    }
+}
+
 
     // Lấy theo productId và color
     public ProductVariant getVariantByProductAndColor(int productId, String color) {

@@ -41,6 +41,7 @@ public class GenericDAO<T> extends BaseDAO<T> {
         try {
             em.getTransaction().begin();
             em.persist(t);
+            em.flush();
             em.getTransaction().commit();
             return true;
         } catch (Exception e) {
@@ -48,6 +49,23 @@ public class GenericDAO<T> extends BaseDAO<T> {
             System.out.println("LỖI INSERT: " + e.getMessage()); 
             e.printStackTrace(); 
             return false;
+        } finally {
+            em.close();
+        }
+    }
+     public T insertAndReturn(T t) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            em.getTransaction().begin();
+            em.persist(t);
+            em.flush(); // flush để sinh ID ngay
+            em.getTransaction().commit();
+            return t;
+        } catch (Exception e) {
+            em.getTransaction().rollback();
+            System.out.println("LỖI insertAndReturn: " + e.getMessage());
+            e.printStackTrace();
+            return null;
         } finally {
             em.close();
         }
