@@ -356,8 +356,8 @@
                                     </div>
                                 </a>
                             <div class="card-footer">
-                                <form action="AddToCartServlet" method="post">
-                                    <input type="hidden" name="productId" value="${product.id}">
+                                <form action="/carts?action=add" method="get">
+                                    <input type="hidden" name="variantId" value="${variantId.id}">
                                     <button type="submit" class="btn btn-primary w-100">Thêm vào giỏ hàng</button>
                                 </form>
                             </div>
