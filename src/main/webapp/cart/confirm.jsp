@@ -8,6 +8,8 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ page import="java.time.LocalDateTime" %>
+<%@ page import="model.Cart" %>
+<%@ page import="model.CartItem" %>
 <%
     // Set current time for discount checking
     request.setAttribute("currentTime", LocalDateTime.now());
@@ -15,6 +17,24 @@
     if (request.getAttribute("currentUser") == null) {
         request.setAttribute("currentUser", session.getAttribute("user"));
     }
+    
+    // Calculate selected total for confirm page
+    Cart cart = (Cart) session.getAttribute("cart");
+    double selectedTotal = 0;
+    if (cart != null && cart.getCartItems() != null) {
+        java.time.LocalDateTime now = java.time.LocalDateTime.now();
+        for (CartItem item : cart.getCartItems().values()) {
+            if (item.isSelected()) {
+                java.math.BigDecimal price = item.getProductVariant().getDiscountPrice() != null
+                        && item.getProductVariant().getDiscountExpiry() != null
+                        && item.getProductVariant().getDiscountExpiry().isAfter(now)
+                        ? item.getProductVariant().getDiscountPrice()
+                        : item.getProductVariant().getPrice();
+                selectedTotal += price.doubleValue() * item.getQuantity();
+            }
+        }
+    }
+    request.setAttribute("selectedTotal", selectedTotal);
 %>
 <!DOCTYPE html>
 <html>
@@ -368,34 +388,36 @@
                                 <c:set var="product" value="${item.productVariant.product}" />
                                 <c:set var="variant" value="${item.productVariant}" />
                                 
-                                <div class="order-item">
-                                    <img src="${pageContext.request.contextPath}/images/${product.thumbnailImage}" 
-                                         alt="${product.name}" class="order-item-image">
-                                    <div class="order-item-info">
-                                        <div class="order-item-name">${product.name}</div>
-                                        <div class="order-item-variant">
-                                            ${variant.color} - ${variant.rom}GB x ${item.quantity}
+                                <c:if test="${item.selected}">
+                                    <div class="order-item">
+                                        <img src="${pageContext.request.contextPath}/images/${product.thumbnailImage}" 
+                                             alt="${product.name}" class="order-item-image">
+                                        <div class="order-item-info">
+                                            <div class="order-item-name">${product.name}</div>
+                                            <div class="order-item-variant">
+                                                ${variant.color} - ${variant.rom}GB x ${item.quantity}
+                                            </div>
+                                        </div>
+                                        <div class="order-item-price">
+                                            <c:set var="hasDiscount" value="${not empty variant.discountPrice and not empty variant.discountExpiry and variant.discountExpiry > currentTime}" />
+                                            <c:choose>
+                                                <c:when test="${hasDiscount}">
+                                                    <fmt:formatNumber value="${variant.discountPrice * item.quantity}" type="currency" currencySymbol="₫" />
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <fmt:formatNumber value="${variant.price * item.quantity}" type="currency" currencySymbol="₫" />
+                                                </c:otherwise>
+                                            </c:choose>
                                         </div>
                                     </div>
-                                    <div class="order-item-price">
-                                        <c:set var="hasDiscount" value="${not empty variant.discountPrice and not empty variant.discountExpiry and variant.discountExpiry > currentTime}" />
-                                        <c:choose>
-                                            <c:when test="${hasDiscount}">
-                                                <fmt:formatNumber value="${variant.discountPrice * item.quantity}" type="currency" currencySymbol="₫" />
-                                            </c:when>
-                                            <c:otherwise>
-                                                <fmt:formatNumber value="${variant.price * item.quantity}" type="currency" currencySymbol="₫" />
-                                            </c:otherwise>
-                                        </c:choose>
-                                    </div>
-                                </div>
+                                </c:if>
                             </c:forEach>
                             
                             <hr>
                             
                             <div class="summary-item">
                                 <span>Tạm tính:</span>
-                                <span><fmt:formatNumber value="${cart.totalPrice}" type="currency" currencySymbol="₫" /></span>
+                                <span><fmt:formatNumber value="${selectedTotal}" type="currency" currencySymbol="₫" /></span>
                             </div>
                             <div class="summary-item">
                                 <span>Phí vận chuyển:</span>
@@ -403,7 +425,7 @@
                             </div>
                             <div class="summary-item summary-total">
                                 <span>Tổng cộng:</span>
-                                <span><fmt:formatNumber value="${cart.totalPrice}" type="currency" currencySymbol="₫" /></span>
+                                <span><fmt:formatNumber value="${selectedTotal}" type="currency" currencySymbol="₫" /></span>
                             </div>
                             
                             <button class="place-order-btn" id="placeOrderBtn">

@@ -28,15 +28,22 @@
     </head>
     <body>
         <jsp:include page="../templates/header.jsp" />
-        
+
         <div class="cart-container">
             <div class="cart-header">
                 <h1><i class="fas fa-shopping-cart"></i> Giỏ hàng của bạn</h1>
                 <p class="mb-0">Quản lý sản phẩm trong giỏ hàng</p>
             </div>
-            
+
             <div class="row">
                 <div class="col-lg-8">
+                    <!--test-->
+                    <form action="${pageContext.request.contextPath}/carts" method="post" class="mb-3">
+                        <input type="hidden" name="action" value="demoAddToCart" />
+                        <button type="submit" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-magic"></i> Thêm sản phẩm demo để test
+                        </button>
+                    </form>
                     <c:choose>
                         <c:when test="${empty cart.cartItems}">
                             <div class="empty-cart">
@@ -50,20 +57,36 @@
                         </c:when>
                         <c:otherwise>
                             <div class="d-flex justify-content-between align-items-center mb-3">
-                                <h4>Sản phẩm (${cart.cartItems.size()} sản phẩm)</h4>
+                                <div class="d-flex align-items-center">
+                                    <div class="form-check me-3">
+                                        <input class="form-check-input" type="checkbox" id="selectAll" checked>
+                                        <label class="form-check-label" for="selectAll">
+                                            <strong>Chọn tất cả</strong>
+                                        </label>
+                                    </div>
+                                    <h4 class="mb-0">Sản phẩm (${cart.cartItems.size()} sản phẩm)</h4>
+                                </div>
                                 <button class="clear-cart-btn">
                                     <i class="fas fa-trash"></i> Xóa tất cả
                                 </button>
                             </div>
-                            
+
                             <c:forEach var="entry" items="${cart.cartItems}">
                                 <c:set var="variantId" value="${entry.key}" />
                                 <c:set var="item" value="${entry.value}" />
                                 <c:set var="product" value="${item.productVariant.product}" />
                                 <c:set var="variant" value="${item.productVariant}" />
-                                
+
                                 <div class="cart-item" id="cart-item-${variantId}">
                                     <div class="row align-items-center">
+                                        <div class="col-md-1 col-2">
+                                            <div class="form-check">
+                                                <input class="form-check-input item-checkbox" type="checkbox" 
+                                                       id="item-${variantId}" 
+                                                       data-variant-id="${variantId}"
+                                                       ${item.selected ? 'checked' : ''}>
+                                            </div>
+                                        </div>
                                         <div class="col-md-2 col-3">
                                             <img src="${pageContext.request.contextPath}/images/${product.thumbnailImage}" 
                                                  alt="${product.name}" class="product-image">
@@ -77,12 +100,12 @@
                                                 <div class="product-variant">
                                                     <i class="fas fa-hdd"></i> ROM: ${variant.rom}GB
                                                 </div>
-                                <c:set var="hasDiscount" value="${not empty variant.discountPrice and not empty variant.discountExpiry and variant.discountExpiry > currentTime}" />
-                                <c:if test="${hasDiscount}">
-                                    <span class="discount-badge">
-                                        <i class="fas fa-tag"></i> Giảm giá
-                                    </span>
-                                </c:if>
+                                                <c:set var="hasDiscount" value="${not empty variant.discountPrice and not empty variant.discountExpiry and variant.discountExpiry > currentTime}" />
+                                                <c:if test="${hasDiscount}">
+                                                    <span class="discount-badge">
+                                                        <i class="fas fa-tag"></i> Giảm giá
+                                                    </span>
+                                                </c:if>
                                             </div>
                                         </div>
                                         <div class="col-md-2 col-3">
@@ -127,15 +150,15 @@
                         </c:otherwise>
                     </c:choose>
                 </div>
-                
+
                 <div class="col-lg-4">
                     <div class="cart-summary">
                         <h4><i class="fas fa-calculator"></i> Tổng đơn hàng</h4>
-                        
+
                         <c:if test="${not empty cart.cartItems}">
                             <div class="summary-item">
                                 <span>Tạm tính:</span>
-                                <span><fmt:formatNumber value="${cart.totalPrice}" type="currency" currencySymbol="₫" /></span>
+                                <span id="subtotal"><fmt:formatNumber value="${selectedTotal}" type="currency" currencySymbol="₫" /></span>
                             </div>
                             <div class="summary-item">
                                 <span>Phí vận chuyển:</span>
@@ -143,13 +166,13 @@
                             </div>
                             <div class="summary-item summary-total">
                                 <span>Tổng cộng:</span>
-                                <span><fmt:formatNumber value="${cart.totalPrice}" type="currency" currencySymbol="₫" /></span>
+                                <span id="total"><fmt:formatNumber value="${selectedTotal}" type="currency" currencySymbol="₫" /></span>
                             </div>
-                            
+
                             <a href="${pageContext.request.contextPath}/cart/confirm.jsp" class="checkout-btn">
                                 <i class="fas fa-credit-card"></i> Tiến hành thanh toán
                             </a>
-                            
+
                             <div class="text-center mt-3">
                                 <small class="text-muted">
                                     <i class="fas fa-shield-alt"></i> Bảo mật thanh toán
@@ -160,8 +183,41 @@
                 </div>
             </div>
         </div>
-        
+
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
         <script src="${pageContext.request.contextPath}/js/cart.js"></script>
+        <script>
+            // Initialize select all checkbox state and visual feedback
+            document.addEventListener('DOMContentLoaded', function() {
+                const selectAllCheckbox = document.getElementById('selectAll');
+                const itemCheckboxes = document.querySelectorAll('.item-checkbox');
+                
+                if (selectAllCheckbox && itemCheckboxes.length > 0) {
+                    const checkedCount = Array.from(itemCheckboxes).filter(cb => cb.checked).length;
+                    const totalCount = itemCheckboxes.length;
+                    
+                    if (checkedCount === 0) {
+                        selectAllCheckbox.indeterminate = false;
+                        selectAllCheckbox.checked = false;
+                    } else if (checkedCount === totalCount) {
+                        selectAllCheckbox.indeterminate = false;
+                        selectAllCheckbox.checked = true;
+                    } else {
+                        selectAllCheckbox.indeterminate = true;
+                        selectAllCheckbox.checked = false;
+                    }
+                }
+                
+                // Set initial visual state for cart items
+                document.querySelectorAll('.cart-item').forEach(item => {
+                    const checkbox = item.querySelector('.item-checkbox');
+                    if (checkbox && checkbox.checked) {
+                        item.classList.add('selected');
+                    } else {
+                        item.classList.remove('selected');
+                    }
+                });
+            });
+        </script>
     </body>
 </html>
