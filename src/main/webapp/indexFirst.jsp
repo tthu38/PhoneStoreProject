@@ -272,19 +272,16 @@
                 height: 25px;
                 vertical-align: middle;
             }
-            /* Thanh lọc cố định */
-            .filter-container {
-                position: sticky;
-                top: 102px; /* Cao bằng chiều cao của header */
-                z-index: 1000;
-                background-color: #fff;
+            .text-primary {
+                color: #ff0000 !important;
             }
-            .filter-container2 {
-                position: sticky;
-                top: 147px; /* Cao bằng chiều cao của header */
-                z-index: 1000;
-                background-color: #fff;
+
+            .card a {
+                text-decoration: none !important;
+                color: inherit;
             }
+
+
             /* Style cho footer trải dài toàn màn hình */
             .footer {
                 background-color: #111;
@@ -405,7 +402,7 @@
 
             <section id="products-section" class="products-section">
                 <div class="container">
-                    <h2 class="text-primary text-center mb-4">Danh Sách Sản Phẩm Bán Chạy</h2>
+                    <h2 class="text-primary text-center mb-4">Sản Phẩm Khuyến Mãi</h2>
                     <div class="row">
                         <c:forEach var="product" items="${discountedProducts}">
                             <div class="col-custom-5 mb-4 d-flex">
@@ -426,8 +423,8 @@
                                         </div>
                                     </a>
                                     <div class="card-footer">
-                                        <form action="AddToCartServlet" method="post">
-                                            <input type="hidden" name="productId" value="${product.id}">
+                                        <form action="<%= request.getContextPath()%>/carts?action=add" method="get">
+                                            <input type="hidden" name="variantId" value="${variantId.id}">
                                             <button type="submit" class="btn btn-primary">Thêm vào giỏ hàng</button>
                                         </form>
                                     </div>
@@ -438,7 +435,7 @@
 
                     <!-- Nút "Xem thêm" -->
                     <div class="view-more-container">
-                        <a href="${pageContext.request.contextPath}/products?action=productBestSeller" class="btn btn-view-more">
+                        <a href="${pageContext.request.contextPath}/products?action=showDiscountedProducts" class="btn btn-view-more">
                             Xem Thêm Sản Phẩm <i class="bi bi-arrow-right"></i>
                         </a>
                     </div>

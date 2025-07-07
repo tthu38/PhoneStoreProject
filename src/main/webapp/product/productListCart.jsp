@@ -90,6 +90,7 @@
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
+             min-height: 40px;
         }
 
         .card-text {
@@ -97,6 +98,7 @@
             font-weight: 400;
             margin-bottom: 1rem;
             font-size: 0.95rem; /* Adjusted for narrower cards */
+             min-height: 40px;
         }
 
         .card-text .text-decoration-line-through {
@@ -119,6 +121,9 @@
             border-top: 1px solid rgba(255, 46, 99, 0.1);
             padding: 0.8rem;
             text-align: center;
+        }
+        .card-footer {
+            margin-top: auto;
         }
 
         .btn-primary {
@@ -337,11 +342,19 @@
                                     <div class="card-body">
                                         <h5 class="card-title">${product.name}</h5>
                                         <p class="card-text">
-                                            <span class="discount-price">${product.discountPrice}₫</span><br>
-                                            <span class="text-decoration-line-through text-muted">${product.originalPrice}₫</span>
-                                    </p>
-                                </div>
-                            </a>
+                                            <c:choose>
+                                                <c:when test="${product.discountPercent > 0}">
+                                                    <span class="discount-price">${product.discountPrice}₫</span><br>
+                                                    <span class="text-decoration-line-through text-muted">${product.originalPrice}₫</span>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <span class="discount-price">${product.originalPrice}₫</span>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </p>
+
+                                    </div>
+                                </a>
                             <div class="card-footer">
                                 <form action="AddToCartServlet" method="post">
                                     <input type="hidden" name="productId" value="${product.id}">

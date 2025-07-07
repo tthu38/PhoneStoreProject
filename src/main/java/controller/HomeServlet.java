@@ -26,7 +26,7 @@ public class HomeServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        List<Map<String, Object>> discountedProducts = productService.getMostDiscountedProducts(10);
+        List<Map<String, Object>> discountedProducts = productService.getMostDiscountedProducts(15);
         request.setAttribute("discountedProducts", discountedProducts);
         request.getRequestDispatcher("indexFirst.jsp").forward(request, response);
     }

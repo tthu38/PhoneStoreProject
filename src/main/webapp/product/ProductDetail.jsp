@@ -454,15 +454,16 @@
                         <button type="button" id="increaseQty" class="quantity-btn">+</button>
                     </div>
 
-                    <div class="action-buttons">
-                        <button type="button" id="addToCartBtn" class="btn-add-to-cart">
-                            <i class="fas fa-shopping-cart"></i> Thêm vào giỏ
-                        </button>
-                        <button type="submit" name="action" value="buyNow" class="btn-buy-now">
-                            <i class="fas fa-bolt"></i> Mua ngay
-                        </button>
-                    </div>
-                </form>
+                        <div class="action-buttons">
+                            <form action="/carts?action=add" method="get">
+                                <input type="hidden" name="variantId" value="${variantId.id}">
+                                <button type="button" id="addToCartBtn" class="btn-add-to-cart">
+                                    <i class="fas fa-shopping-cart"></i> Thêm vào giỏ
+                                </button>
+                            </form>
+                           
+                        </div>
+<!--                </form>-->
             </div>
         </div>
 
