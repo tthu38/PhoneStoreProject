@@ -455,7 +455,7 @@
                     </div>
 
                         <div class="action-buttons">
-                            <form action="/carts?action=add" method="get">
+                            <form action="<%= request.getContextPath()%>/carts?action=add" method="get">
                                 <input type="hidden" name="variantId" value="${variantId.id}">
                                 <button type="button" id="addToCartBtn" class="btn-add-to-cart">
                                     <i class="fas fa-shopping-cart"></i> Thêm vào giỏ

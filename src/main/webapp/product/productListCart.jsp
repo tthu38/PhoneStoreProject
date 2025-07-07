@@ -356,7 +356,7 @@
                                     </div>
                                 </a>
                             <div class="card-footer">
-                                <form action="/carts?action=add" method="get">
+                                <form action="<%= request.getContextPath()%>/carts?action=add" method="get">
                                     <input type="hidden" name="variantId" value="${variantId.id}">
                                     <button type="submit" class="btn btn-primary w-100">Thêm vào giỏ hàng</button>
                                 </form>
