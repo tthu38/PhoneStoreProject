@@ -57,6 +57,22 @@ class CartManager {
                 this.proceedToCheckout();
             });
         }
+
+        // Select all checkbox
+        const selectAllCheckbox = document.getElementById('selectAll');
+        if (selectAllCheckbox) {
+            selectAllCheckbox.addEventListener('change', (e) => {
+                this.toggleSelectAll(e.target.checked);
+            });
+        }
+
+        // Individual item checkboxes
+        document.querySelectorAll('.item-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', (e) => {
+                const variantId = parseInt(e.target.dataset.variantId);
+                this.toggleItemSelection(variantId, e.target.checked);
+            });
+        });
     }
 
     getVariantIdFromElement(element) {
@@ -185,6 +201,124 @@ class CartManager {
 
         // Chuyển đến trang thanh toán
         window.location.href = `${this.getContextPath()}/cart/confirm.jsp`;
+    }
+
+    async toggleSelectAll(selectAll) {
+        try {
+            this.setLoading(true);
+            
+            const response = await fetch(`${this.getContextPath()}/carts`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `action=selectAll&selectAll=${selectAll}`
+            });
+
+            const data = await response.json();
+            
+            if (data.success) {
+                // Update all checkboxes
+                document.querySelectorAll('.item-checkbox').forEach(checkbox => {
+                    checkbox.checked = selectAll;
+                });
+                
+                // Update visual feedback for all items
+                document.querySelectorAll('.cart-item').forEach(item => {
+                    if (selectAll) {
+                        item.classList.add('selected');
+                    } else {
+                        item.classList.remove('selected');
+                    }
+                });
+                
+                // Update total price
+                this.updateSelectedTotal(data.selectedTotal);
+                this.showToast(data.message || 'Đã cập nhật lựa chọn tất cả', 'success');
+            } else {
+                this.showToast(data.message || 'Có lỗi xảy ra', 'error');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            this.showToast('Có lỗi xảy ra khi cập nhật lựa chọn', 'error');
+        } finally {
+            this.setLoading(false);
+        }
+    }
+
+    async toggleItemSelection(variantId, selected) {
+        try {
+            this.setLoading(true);
+            
+            const response = await fetch(`${this.getContextPath()}/carts`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `action=toggleSelection&variantId=${variantId}&selected=${selected}`
+            });
+
+            const data = await response.json();
+            
+            if (data.success) {
+                // Update visual feedback
+                const cartItem = document.getElementById(`cart-item-${variantId}`);
+                if (cartItem) {
+                    if (selected) {
+                        cartItem.classList.add('selected');
+                    } else {
+                        cartItem.classList.remove('selected');
+                    }
+                }
+                
+                // Update total price
+                this.updateSelectedTotal(data.selectedTotal);
+                
+                // Update select all checkbox
+                this.updateSelectAllCheckbox();
+                
+                this.showToast(data.message || 'Đã cập nhật lựa chọn', 'success');
+            } else {
+                this.showToast(data.message || 'Có lỗi xảy ra', 'error');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            this.showToast('Có lỗi xảy ra khi cập nhật lựa chọn', 'error');
+        } finally {
+            this.setLoading(false);
+        }
+    }
+
+    updateSelectedTotal(selectedTotal) {
+        const subtotalElement = document.getElementById('subtotal');
+        const totalElement = document.getElementById('total');
+        
+        if (subtotalElement && totalElement) {
+            const formattedTotal = this.formatCurrency(selectedTotal);
+            subtotalElement.textContent = formattedTotal;
+            totalElement.textContent = formattedTotal;
+        }
+    }
+
+    updateSelectAllCheckbox() {
+        const selectAllCheckbox = document.getElementById('selectAll');
+        const itemCheckboxes = document.querySelectorAll('.item-checkbox');
+        
+        if (selectAllCheckbox && itemCheckboxes.length > 0) {
+            const checkedCount = Array.from(itemCheckboxes).filter(cb => cb.checked).length;
+            const totalCount = itemCheckboxes.length;
+            
+            if (checkedCount === 0) {
+                selectAllCheckbox.indeterminate = false;
+                selectAllCheckbox.checked = false;
+            } else if (checkedCount === totalCount) {
+                selectAllCheckbox.indeterminate = false;
+                selectAllCheckbox.checked = true;
+            } else {
+                selectAllCheckbox.indeterminate = true;
+                selectAllCheckbox.checked = false;
+            }
+        }
     }
 
     updateCartBadge() {

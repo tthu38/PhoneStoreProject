@@ -17,6 +17,8 @@ import model.CartItem;
 import model.ProductVariant;
 import service.ProductVariantService;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import model.Product;
 
 /**
  *
@@ -52,6 +54,10 @@ public class CartServlet extends HttpServlet {
 
         // Tính tổng giá trị giỏ hàng với discount
         calculateCartTotal(cart);
+        
+        // Tính tổng giá trị các sản phẩm được chọn
+        double selectedTotal = calculateSelectedCartTotal(cart);
+        request.setAttribute("selectedTotal", selectedTotal);
 
         request.getRequestDispatcher("/cart/cart.jsp").forward(request, response);
     }
@@ -190,6 +196,61 @@ public class CartServlet extends HttpServlet {
         response.setContentType("application/json");
         response.getWriter().write("{\"success\": true, \"message\": \"Đã xóa toàn bộ giỏ hàng\"}");
     }
+    
+    private void toggleItemSelection(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        Cart cart = (Cart) session.getAttribute("cart");
+
+        if (cart == null) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Giỏ hàng trống");
+            return;
+        }
+
+        try {
+            int variantId = Integer.parseInt(request.getParameter("variantId"));
+            boolean selected = Boolean.parseBoolean(request.getParameter("selected"));
+
+            CartItem item = cart.getCartItems().get(variantId);
+            if (item == null) {
+                response.sendError(HttpServletResponse.SC_NOT_FOUND, "Sản phẩm không có trong giỏ hàng");
+                return;
+            }
+
+            item.setSelected(selected);
+            
+            // Calculate selected total
+            double selectedTotal = calculateSelectedCartTotal(cart);
+
+            response.setContentType("application/json");
+            response.getWriter().write("{\"success\": true, \"selectedTotal\": " + selectedTotal + ", \"message\": \"Đã cập nhật lựa chọn\"}");
+
+        } catch (NumberFormatException e) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Dữ liệu không hợp lệ");
+        }
+    }
+    
+    private void selectAllItems(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        Cart cart = (Cart) session.getAttribute("cart");
+
+        if (cart == null) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Giỏ hàng trống");
+            return;
+        }
+
+        boolean selectAll = Boolean.parseBoolean(request.getParameter("selectAll"));
+        
+        for (CartItem item : cart.getCartItems().values()) {
+            item.setSelected(selectAll);
+        }
+        
+        double selectedTotal = calculateSelectedCartTotal(cart);
+
+        response.setContentType("application/json");
+        response.getWriter().write("{\"success\": true, \"selectedTotal\": " + selectedTotal + ", \"message\": \"Đã cập nhật lựa chọn tất cả\"}");
+    }
 
     private void updateCartBadge(HttpSession session) {
         Cart cart = (Cart) session.getAttribute("cart");
@@ -216,6 +277,110 @@ public class CartServlet extends HttpServlet {
         cart.setTotalPrice(totalPrice);
     }
     
+    private double calculateSelectedCartTotal(Cart cart) {
+        double totalPrice = 0;
+        java.time.LocalDateTime now = java.time.LocalDateTime.now();
+        for (CartItem item : cart.getCartItems().values()) {
+            if (item.isSelected()) {
+                BigDecimal price = item.getProductVariant().getDiscountPrice() != null
+                        && item.getProductVariant().getDiscountExpiry() != null
+                        && item.getProductVariant().getDiscountExpiry().isAfter(now)
+                        ? item.getProductVariant().getDiscountPrice()
+                        : item.getProductVariant().getPrice();
+                totalPrice += price.doubleValue() * item.getQuantity();
+            }
+        }
+        return totalPrice;
+    }
+    private void addDemoProductToCart(HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException {
+    HttpSession session = request.getSession();
+    Cart cart = (Cart) session.getAttribute("cart");
+
+    if (cart == null) {
+        cart = new Cart(new HashMap<>());
+        session.setAttribute("cart", cart);
+    }
+
+    // Tạo 3 sản phẩm demo khác nhau
+    Product product1 = new Product();
+    product1.setId(1001);
+    product1.setName("Demo Phone A1");
+    product1.setDescription("Sản phẩm demo A1");
+    product1.setThumbnailImage("demo-a1.jpg");
+    product1.setIsActive(true);
+
+    Product product2 = new Product();
+    product2.setId(1002);
+    product2.setName("Demo Phone B2");
+    product2.setDescription("Sản phẩm demo B2");
+    product2.setThumbnailImage("demo-b2.jpg");
+    product2.setIsActive(true);
+
+    Product product3 = new Product();
+    product3.setId(1003);
+    product3.setName("Demo Phone C3");
+    product3.setDescription("Sản phẩm demo C3");
+    product3.setThumbnailImage("demo-c3.jpg");
+    product3.setIsActive(true);
+
+    // Biến thời gian khuyến mãi
+    LocalDateTime discountExpiry = LocalDateTime.now().plusDays(3);
+
+    // Tạo các biến thể (variant)
+    ProductVariant variant1 = new ProductVariant();
+    variant1.setId(2001);
+    variant1.setProduct(product1);
+    variant1.setColor("Đỏ");
+    variant1.setRom(64);
+    variant1.setPrice(new BigDecimal("4900000"));
+    variant1.setDiscountPrice(new BigDecimal("4500000"));
+    variant1.setDiscountExpiry(discountExpiry);
+    variant1.setImageURLs("demo-a1.jpg");
+    variant1.setIsActive(true);
+
+    ProductVariant variant2 = new ProductVariant();
+    variant2.setId(2002);
+    variant2.setProduct(product2);
+    variant2.setColor("Xanh");
+    variant2.setRom(128);
+    variant2.setPrice(new BigDecimal("6500000"));
+    variant2.setDiscountPrice(new BigDecimal("5900000"));
+    variant2.setDiscountExpiry(discountExpiry);
+    variant2.setImageURLs("demo-b2.jpg");
+    variant2.setIsActive(true);
+
+    ProductVariant variant3 = new ProductVariant();
+    variant3.setId(2003);
+    variant3.setProduct(product3);
+    variant3.setColor("Đen");
+    variant3.setRom(256);
+    variant3.setPrice(new BigDecimal("8900000"));
+    variant3.setDiscountPrice(new BigDecimal("8500000"));
+    variant3.setDiscountExpiry(discountExpiry);
+    variant3.setImageURLs("demo-c3.jpg");
+    variant3.setIsActive(true);
+
+    // Thêm vào giỏ hàng (1 cái mỗi loại)
+    addItemToCart(cart, variant1, 1);
+    addItemToCart(cart, variant2, 1);
+    addItemToCart(cart, variant3, 1);
+
+    updateCartBadge(session);
+    calculateCartTotal(cart);
+
+    // Chuyển về trang giỏ hàng
+    response.sendRedirect(request.getContextPath() + "/carts");
+}
+    private void addItemToCart(Cart cart, ProductVariant variant, int quantity) {
+    CartItem existingItem = cart.getCartItems().get(variant.getId());
+    if (existingItem != null) {
+        existingItem.setQuantity(existingItem.getQuantity() + quantity);
+    } else {
+        CartItem newItem = new CartItem(quantity, variant);
+        cart.getCartItems().put(variant.getId(), newItem);
+    }
+}
     private void processCheckout(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         HttpSession session = request.getSession();
@@ -269,6 +434,7 @@ public class CartServlet extends HttpServlet {
                     // TODO: Chuyển đến PayPal payment gateway
                     response.sendRedirect(request.getContextPath() + "/payment/paypal");
                     break;
+
                 default:
                     response.sendRedirect(request.getContextPath() + "/cart/success.jsp");
                     break;
@@ -296,7 +462,7 @@ public class CartServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        viewCart(request, response);
+        processRequest(request, response);
     }
 
     /**
@@ -331,6 +497,15 @@ public class CartServlet extends HttpServlet {
             case "checkout":
                 processCheckout(request, response);
                 break;
+            case "toggleSelection":
+                toggleItemSelection(request, response);
+                break;
+            case "selectAll":
+                selectAllItems(request, response);
+                break;
+            case "demoAddToCart":
+                addDemoProductToCart(request, response);
+                break;   
             default:
                 viewCart(request, response);
                 break;

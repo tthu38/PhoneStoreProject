@@ -11,10 +11,12 @@ package model;
 public class CartItem {
     private int quantity;
     private ProductVariant productVariant;
+    private boolean selected = true; // Default to selected
 
     public CartItem(int quantity, ProductVariant productVariant) {
         this.quantity = quantity;
         this.productVariant = productVariant;
+        this.selected = true;
     }
 
     public CartItem() {
@@ -34,6 +36,14 @@ public class CartItem {
 
     public void setProductVariant(ProductVariant productVariant) {
         this.productVariant = productVariant;
+    }
+
+    public boolean isSelected() {
+        return selected;
+    }
+
+    public void setSelected(boolean selected) {
+        this.selected = selected;
     }
     
     
