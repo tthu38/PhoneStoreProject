@@ -44,7 +44,18 @@ public class OrderDetailService {
 
     // Lấy danh sách theo OrderID
     public List<OrderDetails> getOrderDetailsByOrderId(int orderId) {
-        return orderDetailDAO.findByNamedQuery("OrderDetails.findByOrderDetailID", "orderDetailID", orderId);
+        EntityManager em = emf.createEntityManager();
+        try {
+            return em.createQuery(
+                "SELECT od FROM OrderDetails od " +
+                "LEFT JOIN FETCH od.productVariant pv " +
+                "LEFT JOIN FETCH pv.product " +
+                "WHERE od.order.id = :orderID", OrderDetails.class)
+                .setParameter("orderID", orderId)
+                .getResultList();
+        } finally {
+            em.close();
+        }
     }
 
     // Lấy theo VariantID (sản phẩm cụ thể)

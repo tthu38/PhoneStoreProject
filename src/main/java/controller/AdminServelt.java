@@ -16,8 +16,8 @@ import jakarta.servlet.http.HttpServletResponse;
  *
  * @author Admin
  */
-@WebServlet(name = "VnPayServlet", urlPatterns = {"/VnPayServlet"})
-public class VnPayServlet extends HttpServlet {
+@WebServlet(name = "AdminServlet", urlPatterns = {"/AdminServelt"})
+public class AdminServelt extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -36,10 +36,10 @@ public class VnPayServlet extends HttpServlet {
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Servlet VnPayServlet</title>");
+            out.println("<title>Servlet AdminServelt</title>");
             out.println("</head>");
             out.println("<body>");
-            out.println("<h1>Servlet VnPayServlet at " + request.getContextPath() + "</h1>");
+            out.println("<h1>Servlet AdminServelt at " + request.getContextPath() + "</h1>");
             out.println("</body>");
             out.println("</html>");
         }
@@ -57,7 +57,7 @@ public class VnPayServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        PaymentSuccess(request, response);
+        processRequest(request, response);
     }
 
     /**
@@ -69,17 +69,12 @@ public class VnPayServlet extends HttpServlet {
      * @throws IOException if an I/O error occurs
      */
     
-    public void PaymentSuccess(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{
-    request.setAttribute("success", true);
-    request.setAttribute("orderId", "1");
-    request.setAttribute("amount", "200000");
-    request.getRequestDispatcher("PaymentResult.jsp").forward(request, response);
-}
+    
     
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        PaymentSuccess(request, response);
+        processRequest(request, response);
     }
 
     /**
