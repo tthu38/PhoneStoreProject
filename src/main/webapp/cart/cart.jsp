@@ -77,7 +77,7 @@
                                                 <div class="product-variant">
                                                     <i class="fas fa-hdd"></i> ROM: ${variant.rom}GB
                                                 </div>
-                                <c:set var="hasDiscount" value="${not empty variant.discountPrice}" />
+                                <c:set var="hasDiscount" value="${not empty variant.discountPrice and not empty variant.discountExpiry and variant.discountExpiry > currentTime}" />
                                 <c:if test="${hasDiscount}">
                                     <span class="discount-badge">
                                         <i class="fas fa-tag"></i> Giảm giá
@@ -146,9 +146,9 @@
                                 <span><fmt:formatNumber value="${cart.totalPrice}" type="currency" currencySymbol="₫" /></span>
                             </div>
                             
-                            <button class="checkout-btn">
+                            <a href="${pageContext.request.contextPath}/cart/confirm.jsp" class="checkout-btn">
                                 <i class="fas fa-credit-card"></i> Tiến hành thanh toán
-                            </button>
+                            </a>
                             
                             <div class="text-center mt-3">
                                 <small class="text-muted">

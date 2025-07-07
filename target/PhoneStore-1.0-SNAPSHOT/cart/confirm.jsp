@@ -234,6 +234,12 @@
                 <p class="mb-0">Hoàn tất thông tin để đặt hàng</p>
             </div>
             
+            <c:if test="${not empty error}">
+                <div class="alert alert-danger" role="alert">
+                    <i class="fas fa-exclamation-triangle"></i> ${error}
+                </div>
+            </c:if>
+            
             <div class="row">
                 <div class="col-lg-8">
                     <!-- Thông tin giao hàng -->
@@ -242,7 +248,8 @@
                             <i class="fas fa-shipping-fast"></i> Thông tin giao hàng
                         </h4>
                         
-                        <form id="checkoutForm">
+                        <form id="checkoutForm" action="${pageContext.request.contextPath}/carts" method="POST">
+                            <input type="hidden" name="action" value="checkout">
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
@@ -286,7 +293,7 @@
                                         <select class="form-control" name="district" required>
                                             <option value="">Chọn quận/huyện</option>
                                         </select>
-                                    </div>
+                                    </div>  
                                 </div>
                                 <div class="col-md-4">
                                     <div class="form-group">
@@ -312,14 +319,14 @@
                             <i class="fas fa-credit-card"></i> Phương thức thanh toán
                         </h4>
                         
-                        <div class="payment-methods">
+                                                <div class="payment-methods">
                             <div class="payment-method" data-method="cod">
                                 <i class="fas fa-money-bill-wave"></i>
                                 <div>
                                     <strong>Thanh toán khi nhận hàng</strong>
                                     <small class="d-block text-muted">COD - Cash on Delivery</small>
                                 </div>
-                            </div>                           
+                            </div>
                             
                             <div class="payment-method" data-method="vnpay">
                                 <i class="fas fa-credit-card"></i>
@@ -329,19 +336,20 @@
                                 </div>
                             </div>
                             
-                            <div class="payment-method" data-method="momo">
-                                <i class="fas fab fa-paypal"></i>
+                            <div class="payment-method" data-method="paypal">
+                                <i class="fas fa-paypal"></i>
                                 <div>
                                     <strong>PAYPAL</strong>
                                     <small class="d-block text-muted">Ví điện tử PayPal</small>
                                 </div>
                             </div>
                         </div>
+                        <input type="hidden" name="paymentMethod" id="paymentMethod" value="">
                     </div>
                     
                     <!-- Nút điều hướng -->
                     <div class="d-flex justify-content-between">
-                        <a href="${pageContext.request.contextPath}/cart" class="back-to-cart">
+                        <a href="${pageContext.request.contextPath}/cart/cart.jsp" class="back-to-cart">
                             <i class="fas fa-arrow-left"></i> Quay lại giỏ hàng
                         </a>
                     </div>
@@ -370,7 +378,7 @@
                                         </div>
                                     </div>
                                     <div class="order-item-price">
-                                        <c:set var="hasDiscount" value="${not empty variant.discountPrice}" />
+                                        <c:set var="hasDiscount" value="${not empty variant.discountPrice and not empty variant.discountExpiry and variant.discountExpiry > currentTime}" />
                                         <c:choose>
                                             <c:when test="${hasDiscount}">
                                                 <fmt:formatNumber value="${variant.discountPrice * item.quantity}" type="currency" currencySymbol="₫" />
@@ -422,6 +430,10 @@
                     document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('selected'));
                     // Add selected class to clicked method
                     this.classList.add('selected');
+                    
+                    // Set payment method value
+                    const paymentMethod = this.getAttribute('data-method');
+                    document.getElementById('paymentMethod').value = paymentMethod;
                 });
             });
             
@@ -444,17 +456,18 @@
                 this.disabled = true;
                 this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
                 
-                // Simulate order processing
-                setTimeout(() => {
-                    alert('Đặt hàng thành công! Chúng tôi sẽ liên hệ với bạn sớm nhất.');
-                    window.location.href = '${pageContext.request.contextPath}/cart/success.jsp';
-                }, 2000);
+                // Submit form to servlet
+                form.submit();
             });
             
             // Form validation
             document.getElementById('checkoutForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                document.getElementById('placeOrderBtn').click();
+                const selectedPayment = document.querySelector('.payment-method.selected');
+                if (!selectedPayment) {
+                    e.preventDefault();
+                    alert('Vui lòng chọn phương thức thanh toán');
+                    return;
+                }
             });
         </script>
     </body>
