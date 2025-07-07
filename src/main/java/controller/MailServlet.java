@@ -5,12 +5,19 @@
 package controller;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import service.MailService;
+import model.User;
+import model.Order;
+import model.OrderDetails;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -19,6 +26,8 @@ import jakarta.servlet.http.HttpServletResponse;
 @WebServlet(name = "MailServlet", urlPatterns = {"/mails"})
 public class MailServlet extends HttpServlet {
 
+    private final MailService mailService = new MailService();
+
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -26,25 +35,14 @@ public class MailServlet extends HttpServlet {
      * @param request servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if a I/O error occurs
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet MailServlet</title>");
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet MailServlet at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
-        }
+        System.out.println("MailServlet processRequest called");
     }
-
+    
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
      * Handles the HTTP <code>GET</code> method.
@@ -52,12 +50,12 @@ public class MailServlet extends HttpServlet {
      * @param request servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if a I/O error occurs
      */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        System.out.println("MailServlet is running!");
     }
 
     /**
@@ -66,12 +64,46 @@ public class MailServlet extends HttpServlet {
      * @param request servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if a I/O error occurs
      */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        String action = request.getParameter("action");
+        String email = request.getParameter("email");
+
+        if (action == null) {
+            System.out.println("Error: No action specified");
+            return;
+        }
+
+        switch (action) {
+            case "register_otp" -> {
+                String otp = mailService.generateOTP(email);
+                boolean sent = mailService.sendOtpForRegister(email, otp);
+                System.out.println("Register OTP sent: " + (sent ? "success" : "fail") + " for email: " + email);
+            }
+            case "reset_otp" -> {
+                String otp = mailService.generateOTP(email);
+                boolean sent = mailService.sendOtpForResetPassword(email, otp);
+                System.out.println("Reset OTP sent: " + (sent ? "success" : "fail") + " for email: " + email);
+            }
+            case "order_confirm" -> {
+                User user = (User) request.getSession().getAttribute("user");
+                if (user == null) {
+                    System.out.println("Error: User not logged in");
+                    return;
+                }
+                Order order = new Order();
+                int orderID = Integer.parseInt(request.getParameter("orderID"));
+                BigDecimal totalAmount = new BigDecimal(request.getParameter("totalAmount"));
+                List<OrderDetails> orderDetails = new ArrayList<>(); 
+
+                boolean sent = mailService.sendOrderConfirmation(user, order, orderID, orderDetails, totalAmount);
+                System.out.println("Order confirmation sent: " + (sent ? "success" : "fail") + " for order: " + orderID);
+            }
+            default -> System.out.println("Error: Unknown action - " + action);
+        }
     }
 
     /**

@@ -47,7 +47,7 @@
                     
                     <!-- Content Area -->
                     <main class="content">
-                        <jsp:include page="${content}" />
+                        <jsp:include page="../../product/ProductList.jsp" />
                     </main>
                 </div>
             </div>

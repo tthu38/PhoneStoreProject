@@ -1,52 +1,55 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package model;
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.Instant;
-import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Nationalized;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-/**
- *
- * @author ThienThu
- */
-
 @Entity
 @Table(name = "Orders")
 public class Order {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "OrderID", nullable = false)
     private Integer id;
-    
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "UserID", nullable = false, referencedColumnName = "UserID")
-    private User userID;
-    
-    @ColumnDefault("getdate()")
-    @Column(name = "OrderDate")
-    private Instant orderDate;
-    
-    @Column(nullable = false, precision = 18, scale = 2)
-    private BigDecimal totalAmount;
-    
-    @Column(precision = 18, scale = 2)
-    private BigDecimal discountAmount = BigDecimal.ZERO;
 
-    @Column(nullable = false, precision = 18, scale = 2)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "UserID", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private User user;
+
+    @Column(name = "OrderDate", nullable = false)
+    private Instant orderDate;
+
+    @Column(name = "TotalAmount", nullable = false, precision = 18, scale = 2)
+    private BigDecimal totalAmount;
+
+    @Column(name = "DiscountAmount", nullable = false, precision = 18, scale = 2)
+    private BigDecimal discountAmount;
+
+    @Column(name = "FinalAmount", nullable = false, precision = 18, scale = 2)
     private BigDecimal finalAmount;
-    
+
     @Nationalized
-    @ColumnDefault("'Pending'")
-    @Column(name = "OrderStatus", length = 50)
+    @Column(name = "OrderStatus", nullable = false, length = 50)
     private String orderStatus;
+
+    // === Constructor mặc định ===
+    public Order() {
+        this.discountAmount = BigDecimal.ZERO;
+        this.orderStatus = "Pending";
+    }
+
+    // === Set mặc định ngày khi lưu ===
+    @PrePersist
+    protected void onCreate() {
+        this.orderDate = Instant.now();
+    }
+
+    // === Getter & Setter ===
 
     public Integer getId() {
         return id;
@@ -56,12 +59,12 @@ public class Order {
         this.id = id;
     }
 
-    public User getUserID() {
-        return userID;
+    public User getUser() {
+        return user;
     }
 
-    public void setUserID(User userID) {
-        this.userID = userID;
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public Instant getOrderDate() {
@@ -103,6 +106,4 @@ public class Order {
     public void setOrderStatus(String orderStatus) {
         this.orderStatus = orderStatus;
     }
-    
-    
 }

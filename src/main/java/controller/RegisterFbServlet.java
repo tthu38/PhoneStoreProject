@@ -5,21 +5,25 @@
 package controller;
 
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.time.LocalDate;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import model.User;
+import model.UserAddress;
+import service.UserAddressService;
+import service.UserService;
 
 /**
  *
- * @author ThienThu
+ * @author dangt
  */
-@WebServlet(name = "LogoutServlet", urlPatterns = {"/logout"})
-public class LogoutServlet extends HttpServlet {
+@WebServlet(name = "RegisterFbServlet", urlPatterns = {"/registerfb"})
+public class RegisterFbServlet extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -32,19 +36,6 @@ public class LogoutServlet extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet LogoutServlet</title>");
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet LogoutServlet at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
-        }
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
@@ -59,16 +50,7 @@ public class LogoutServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        HttpSession session = request.getSession(false);
-        if (session != null) {
-            session.invalidate();
-        }
-        Cookie cookie = new Cookie("remember_token", "");
-        cookie.setMaxAge(0);
-        cookie.setPath("/");
-        response.addCookie(cookie);
-
-        response.sendRedirect(request.getContextPath() + "/user/login.jsp");
+        processRequest(request, response);
     }
 
     /**
@@ -82,7 +64,36 @@ public class LogoutServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        doGet(request, response);
+        String phone = request.getParameter("phone");
+        String dobStr = request.getParameter("dob");
+        String address = request.getParameter("address");
+
+        HttpSession session = request.getSession();
+        User fbUser = (User) session.getAttribute("fbUser");
+        if (fbUser == null) {
+            response.sendRedirect("user/register.jsp?error=fb_session");
+            return;
+        }
+
+        fbUser.setPhoneNumber(phone);
+        if (dobStr != null && !dobStr.isEmpty()) {
+            fbUser.setDob(LocalDate.parse(dobStr));
+        }
+        
+        if (address != null && !address.isEmpty()) {
+            UserAddress userAddress = new UserAddress();
+            userAddress.setUser(fbUser);
+            userAddress.setAddress(address);
+            UserAddressService userAddressService = new UserAddressService();
+            userAddressService.addAddress(userAddress);
+        }
+
+        UserService userService = new UserService();
+        userService.updateUserInfoFromFacebook(fbUser);
+        User updatedUser = userService.getUserByEmail(fbUser.getEmail()).orElse(fbUser);
+        session.setAttribute("user", updatedUser);
+        session.removeAttribute("fbUser");
+        response.sendRedirect(request.getContextPath() + "/indexFirst.jsp");
     }
 
     /**

@@ -16,6 +16,7 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.Optional;
 import model.UserAddress;
 
 /**
@@ -112,12 +113,14 @@ public class LoginServlet extends HttpServlet {
             try {
                 String accessToken = utils.GoogleUtils.getToken(code);
                 User googleUserInfo = utils.GoogleUtils.getUserInfo(accessToken);
+                Optional<User> existedUser = userService.getUserByEmail(googleUserInfo.getEmail());
                 User googleUser = userService.findOrCreateGoogleUser(
                         googleUserInfo.getEmail(),
                         googleUserInfo.getFullName(),
                         googleUserInfo.getPicture(),
                         "GOOGLE",
-                        true);
+                        true
+                );
 
                 List<UserAddress> addresses = userService.getUserAddressesByUserId(googleUser.getUserID());
                 googleUser.setAddresses(addresses);
@@ -130,8 +133,7 @@ public class LoginServlet extends HttpServlet {
                     if (Boolean.TRUE.equals(rememberMe)) {
                         String token = java.util.UUID.randomUUID().toString();
                         userService.saveRememberToken(googleUser.getUserID(), token);
-                        jakarta.servlet.http.Cookie rememberCookie = new jakarta.servlet.http.Cookie("remember_token",
-                                token);
+                        jakarta.servlet.http.Cookie rememberCookie = new jakarta.servlet.http.Cookie("remember_token", token);
                         rememberCookie.setMaxAge(60 * 60 * 24 * 30);
                         rememberCookie.setPath("/");
                         rememberCookie.setHttpOnly(true);
@@ -139,16 +141,14 @@ public class LoginServlet extends HttpServlet {
                     }
                     request.getSession().removeAttribute("rememberMe");
 
-                    if (googleUser.getPhoneNumber() == null || googleUser.getPhoneNumber().isEmpty()
-                            || !userService.hasAddress(googleUser.getUserID())) {
-                        response.sendRedirect(request.getContextPath() + "/user/userupdate.jsp");
-                    } else {
+                    if (existedUser.isPresent()) {
                         response.sendRedirect(request.getContextPath() + "/indexFirst.jsp");
+                    } else {
+                        response.sendRedirect(request.getContextPath() + "/user/userupdate.jsp");
                     }
                     return;
                 } else {
-                    request.setAttribute("error",
-                            "Không thể đăng nhập bằng Google. Email này chưa được đăng ký hoặc tài khoản đã bị khóa.");
+                    request.setAttribute("error", "Không thể đăng nhập bằng Google. Email này chưa được đăng ký hoặc tài khoản đã bị khóa.");
                     request.getRequestDispatcher("/user/login.jsp").forward(request, response);
                 }
             } catch (Exception e) {
@@ -203,24 +203,15 @@ public class LoginServlet extends HttpServlet {
             return;
         }
 
-        String email = request.getParameter("email");
+        String phone = request.getParameter("phone");
         String password = request.getParameter("password");
 
-        User user = userService.login(email, password);
+        User user = userService.login(phone, password); 
         if (user != null) {
-            User latestUser = userService.getUserById(user.getUserID()).orElse(user);
-            request.getSession().setAttribute("user", latestUser);
-
-            boolean missingPhone = latestUser.getPhoneNumber() == null || latestUser.getPhoneNumber().isEmpty();
-            boolean missingAddress = !userService.hasAddress(latestUser.getUserID());
-
-            if (missingPhone || missingAddress) {
-                response.sendRedirect(request.getContextPath() + "/user/userupdate.jsp");
-            } else {
-                response.sendRedirect(request.getContextPath() + "/indexFirst.jsp");
-            }
+            request.getSession().setAttribute("user", user);
+            response.sendRedirect(request.getContextPath() + "/indexFirst.jsp");
         } else {
-            request.setAttribute("error", "Invalid email or password");
+            request.setAttribute("error", "Số điện thoại hoặc mật khẩu không đúng!");
             request.getRequestDispatcher("/user/login.jsp").forward(request, response);
         }
     }

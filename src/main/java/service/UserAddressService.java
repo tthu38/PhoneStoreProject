@@ -11,7 +11,7 @@ import jakarta.persistence.TypedQuery;
 import model.UserAddress;
 
 import java.util.List;
-
+                
 public class UserAddressService {
     private static final EntityManagerFactory emf = Persistence.createEntityManagerFactory("PhoneStorePU");
 
@@ -21,15 +21,6 @@ public class UserAddressService {
             TypedQuery<UserAddress> query = em.createNamedQuery("UserAddress.findByUserId", UserAddress.class);
             query.setParameter("userId", userId);
             return query.getResultList();
-        } finally {
-            em.close();
-        }
-    }
-
-    public UserAddress getAddressById(Integer addressId) {
-        EntityManager em = emf.createEntityManager();
-        try {
-            return em.find(UserAddress.class, addressId);
         } finally {
             em.close();
         }
@@ -80,6 +71,15 @@ public class UserAddressService {
         } catch (Exception e) {
             if (em.getTransaction().isActive()) em.getTransaction().rollback();
             return false;
+        } finally {
+            em.close();
+        }
+    }
+
+    public UserAddress getAddressById(Integer addressId) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            return em.find(UserAddress.class, addressId);
         } finally {
             em.close();
         }
