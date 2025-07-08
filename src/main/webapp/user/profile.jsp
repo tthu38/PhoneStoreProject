@@ -27,7 +27,7 @@
         <div class="profile-header position-relative">
             <div class="profile-actions position-absolute end-0 top-0 d-flex gap-2">
                 <a href="${pageContext.request.contextPath}/user/editprofile.jsp" class="btn btn-outline-primary btn-sm"><i class="fas fa-edit"></i> Chỉnh sửa</a>
-                <a href="${pageContext.request.contextPath}/indexFirst.jsp" class="btn btn-outline-danger btn-sm"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
+                <a href="${pageContext.request.contextPath}/logout" class="btn btn-outline-danger btn-sm"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
             </div>
             <% if (user.getPicture() != null && !user.getPicture().isEmpty()) { %>
                 <img src="<%= user.getPicture() %>" alt="Avatar" class="profile-avatar">

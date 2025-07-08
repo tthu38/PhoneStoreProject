@@ -137,7 +137,36 @@ body {
     font-size: 0.97rem;
 }
 
-/* Responsive */
+#province, #district, #ward,
+.register-form .form-select, .form-select {
+    border-radius: 8px;
+    min-height: 44px;
+    font-size: 1rem;
+    border: 1px solid #e0e0e0;
+    margin-bottom: 0.5rem;
+    transition: border-color 0.2s;
+}
+
+#province:focus, #district:focus, #ward:focus,
+.register-form .form-select:focus, .form-select:focus {
+    border-color: #ea1d25;
+    box-shadow: 0 0 0 2px rgba(234,29,37,0.1);
+}
+
+
+.address-row .form-select {
+    min-width: 100%;
+    box-sizing: border-box;
+    height: 44px;
+    font-size: 1rem;
+    border-radius: 8px;
+    margin-bottom: 0;
+}
+.address-row .col-md-4 {
+    padding-right: 8px;
+    padding-left: 8px;
+    margin-bottom: 0;
+}
 @media (max-width: 600px) {
     .register-center-inner,
     .bg-white.rounded-4.shadow.p-4 {
@@ -146,4 +175,24 @@ body {
         border-radius: 0;
         box-shadow: none;
     }
+
+    .address-row .col-md-4 {
+        padding-right: 0;
+        padding-left: 0;
+        margin-bottom: 0.5rem;
+    }
+}
+
+#province, #district, #ward, .form-select {
+    max-height: 44px;
+    overflow-y: auto;
+}
+
+
+select.form-select {
+    overflow-y: auto;
+}
+
+select.form-select:focus {
+    outline: 2px solid #ea1d25;
 }
