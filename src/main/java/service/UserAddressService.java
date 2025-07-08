@@ -35,7 +35,6 @@ public class UserAddressService {
             return true;
         } catch (Exception e) {
             if (em.getTransaction().isActive()) em.getTransaction().rollback();
-            e.printStackTrace();
             return false;
         } finally {
             em.close();

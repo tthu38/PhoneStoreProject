@@ -30,32 +30,20 @@ public class RegisterServlet extends HttpServlet {
             throws ServletException, IOException {
         String email = request.getParameter("email");
         String password = request.getParameter("password");
-        String fullName = request.getParameter("fullname");
-        String phoneNumber = request.getParameter("phone");
-        String address = request.getParameter("address");
-
+        String fullName = request.getParameter("fullName");
+        String phoneNumber = request.getParameter("phoneNumber");
+        
         User user = new User();
         user.setEmail(email);
         user.setPassword(password);
         user.setFullName(fullName);
         user.setPhoneNumber(phoneNumber);
-
+        
         if (userService.register(user)) {
-            service.UserAddressService addressService = new service.UserAddressService();
-            model.UserAddress userAddress = new model.UserAddress();
-            User createdUser = userService.getUserByEmail(email).orElse(user);
-            userAddress.setUser(createdUser);
-            userAddress.setFullName(fullName);
-            userAddress.setPhoneNumber(phoneNumber);
-            userAddress.setAddress(address);
-            userAddress.setIsDefault(true);
-            userAddress.setIsActive(true);
-            addressService.addAddress(userAddress);
-
             response.sendRedirect(request.getContextPath() + "/login");
         } else {
             request.setAttribute("error", "Email already exists");
             request.getRequestDispatcher("/user/register.jsp").forward(request, response);
         }
     }
-}
+} 
