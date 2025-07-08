@@ -63,12 +63,8 @@ public class LogoutServlet extends HttpServlet {
         if (session != null) {
             session.invalidate();
         }
-        Cookie cookie = new Cookie("remember_token", "");
-        cookie.setMaxAge(0);
-        cookie.setPath("/");
-        response.addCookie(cookie);
 
-        response.sendRedirect(request.getContextPath() + "/user/login.jsp");
+        response.sendRedirect(request.getContextPath() + "/indexFirst.jsp");
     }
 
     /**
