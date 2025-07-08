@@ -12,7 +12,8 @@ import org.hibernate.annotations.OnDeleteAction;
     @NamedQuery(name = "OrderDetails.findByQuantity", query = "SELECT o FROM OrderDetails o WHERE o.quantity = :quantity"),
     @NamedQuery(name = "OrderDetails.findByUnitPrice", query = "SELECT o FROM OrderDetails o WHERE o.unitPrice = :unitPrice"),
     @NamedQuery(name = "OrderDetails.findByProductVariantID", query = "SELECT o FROM OrderDetails o WHERE o.productVariant.id = :productVariantID"),
-    @NamedQuery(name = "OrderDetails.listWithOffset", query = "SELECT o FROM OrderDetails o ORDER BY o.id")
+    @NamedQuery(name = "OrderDetails.listWithOffset", query = "SELECT o FROM OrderDetails o ORDER BY o.id"),
+    @NamedQuery(name = "OrderDetails.findByOrderID", query = "SELECT o FROM OrderDetails o WHERE o.order.id = :orderID")
 })
 @Table(name = "OrderDetails")
 public class OrderDetails {
@@ -28,7 +29,7 @@ public class OrderDetails {
     private Order order;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "ProductVariantID", nullable = false)
+    @JoinColumn(name = "VariantID", nullable = false)
     private ProductVariant productVariant;
 
     @Column(name = "Quantity", nullable = false)

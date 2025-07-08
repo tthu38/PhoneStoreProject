@@ -16,10 +16,22 @@ import model.ProductBrand;
  * @author ThienThu
  */
 public class BrandService {
+
     private final GenericDAO<ProductBrand> productBrandDAO = new GenericDAO<>(ProductBrand.class);
     static final EntityManagerFactory emf = Persistence.createEntityManagerFactory("PhoneStorePU");
-    
+
     public List<ProductBrand> getAllBrands() {
-        return productBrandDAO.getAll();
+    List<ProductBrand> result = productBrandDAO.getAll();
+    System.out.println("⚠️ DEBUG - Số thương hiệu load được: " + result.size());
+    for (ProductBrand b : result) {
+        System.out.println("Brand: " + b.getId() + " - " + b.getName());
     }
+    return result;
+}
+
+
+    public ProductBrand getProductById(int id) {
+        return productBrandDAO.findById(id);
+    }
+
 }

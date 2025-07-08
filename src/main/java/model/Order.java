@@ -9,6 +9,11 @@ import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Table(name = "Orders")
+@NamedQueries({
+    @NamedQuery(name = "Order.findAll", query = "SELECT o FROM Order o"),
+    @NamedQuery(name = "Order.findByOrderStatus", query = "SELECT o FROM Order o WHERE o.status = :orderStatus"),
+    @NamedQuery(name = "Order.findByUserID", query = "SELECT o FROM Order o WHERE o.user.id = :userID")
+})
 public class Order {
 
     @Id
@@ -27,20 +32,25 @@ public class Order {
     @Column(name = "TotalAmount", nullable = false, precision = 18, scale = 2)
     private BigDecimal totalAmount;
 
-    @Column(name = "DiscountAmount", nullable = false, precision = 18, scale = 2)
-    private BigDecimal discountAmount;
-
-    @Column(name = "FinalAmount", nullable = false, precision = 18, scale = 2)
-    private BigDecimal finalAmount;
+    @Nationalized
+    @Column(name = "Status", nullable = false, length = 50)
+    private String status;
 
     @Nationalized
-    @Column(name = "OrderStatus", nullable = false, length = 50)
-    private String orderStatus;
+    @Column(name = "ShippingAddress", nullable = false, length = 255)
+    private String shippingAddress;
+
+    @Nationalized
+    @Column(name = "PhoneNumber", length = 20)
+    private String phoneNumber;
+
+    @Nationalized
+    @Column(name = "Note", length = 500)
+    private String note;
 
     // === Constructor mặc định ===
     public Order() {
-        this.discountAmount = BigDecimal.ZERO;
-        this.orderStatus = "Pending";
+        this.status = "Pending";
     }
 
     // === Set mặc định ngày khi lưu ===
@@ -83,27 +93,50 @@ public class Order {
         this.totalAmount = totalAmount;
     }
 
-    public BigDecimal getDiscountAmount() {
-        return discountAmount;
+    public String getStatus() {
+        return status;
     }
 
-    public void setDiscountAmount(BigDecimal discountAmount) {
-        this.discountAmount = discountAmount;
+    public void setStatus(String status) {
+        this.status = status;
     }
 
-    public BigDecimal getFinalAmount() {
-        return finalAmount;
+    public String getShippingAddress() {
+        return shippingAddress;
     }
 
-    public void setFinalAmount(BigDecimal finalAmount) {
-        this.finalAmount = finalAmount;
+    public void setShippingAddress(String shippingAddress) {
+        this.shippingAddress = shippingAddress;
     }
 
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public String getNote() {
+        return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
+    }
+
+    // Backward compatibility method
     public String getOrderStatus() {
-        return orderStatus;
+        return status;
     }
 
     public void setOrderStatus(String orderStatus) {
-        this.orderStatus = orderStatus;
+        this.status = orderStatus;
+    }
+
+    public String getOrderDateFormatted() {
+        if (orderDate == null) return "";
+        java.time.LocalDateTime ldt = java.time.LocalDateTime.ofInstant(orderDate, java.time.ZoneId.systemDefault());
+        return ldt.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
     }
 }
