@@ -623,37 +623,60 @@ public class ProductService {
     }
 
     public List<Map<String, Object>> getMostOrderedProducts(Integer limit) {
-        EntityManager em = productDAO.emf.createEntityManager();
-        try {
-            String jpql = "SELECT p.id, p.name, p.description, p.thumbnailImage, "
-                    + "COALESCE(SUM(od.quantity), 0) AS totalOrdered, "
-                    + "COALESCE(MIN(pv.price), 0) AS productPrice "
-                    + // Lấy giá nhỏ nhất
-                    "FROM Product p "
-                    + "LEFT JOIN ProductVariant pv ON p = pv.product "
-                    + "LEFT JOIN OrderDetail od ON pv = od.productVariantID "
-                    + "GROUP BY p.id, p.name, p.description, p.thumbnailImage "
-                    + "ORDER BY totalOrdered DESC";
+    EntityManager em = productDAO.emf.createEntityManager();
+    try {
+        String jpql = "SELECT p.id, p.name, p.description, p.thumbnailImage, "
+                + "MIN(v.price), "
+                + "MIN(CASE WHEN v.discountPrice IS NOT NULL AND v.discountExpiry >= CURRENT_TIMESTAMP "
+                + "THEN v.discountPrice ELSE NULL END), "
+                + "SUM(od.quantity) "
+                + "FROM Product p "
+                + "JOIN p.variants v "
+                + "JOIN OrderDetails od ON v = od.productVariant "
+                + "WHERE p.isActive = true AND v.isActive = true "
+                + "GROUP BY p.id, p.name, p.description, p.thumbnailImage "
+                + "ORDER BY SUM(od.quantity) DESC";
 
-            TypedQuery<Object[]> query = em.createQuery(jpql, Object[].class);
+        TypedQuery<Object[]> query = em.createQuery(jpql, Object[].class);
 
-            // Nếu limit > 0 thì giới hạn số lượng, nếu không thì lấy tất cả
-            if (limit != null && limit > 0) {
-                query.setMaxResults(limit);
-            }
-
-            return query.getResultStream().map(row -> Map.of(
-                    "productId", row[0],
-                    "productName", row[1],
-                    "description", row[2],
-                    "thumbnailImage", row[3],
-                    "totalOrdered", row[4],
-                    "productPrice", row[5] // Thêm giá nhỏ nhất vào Map
-            )).collect(Collectors.toList());
-        } finally {
-            em.close();
+        if (limit != null && limit > 0) {
+            query.setMaxResults(limit);
         }
+
+        return query.getResultStream().map(row -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", row[0]);
+            map.put("name", row[1]);
+            map.put("description", row[2]);
+            map.put("thumbnailImage", row[3]);
+
+            BigDecimal originalPrice = (BigDecimal) row[4];
+            BigDecimal discountPrice = (BigDecimal) row[5];
+            Long totalOrdered = (Long) row[6];
+
+            map.put("originalPrice", originalPrice);
+            map.put("discountPrice", discountPrice);
+            map.put("totalOrdered", totalOrdered);
+
+            BigDecimal discountPercent = BigDecimal.ZERO;
+            if (originalPrice != null && discountPrice != null && originalPrice.compareTo(BigDecimal.ZERO) > 0) {
+                discountPercent = originalPrice.subtract(discountPrice)
+                        .divide(originalPrice, 2, RoundingMode.HALF_UP)
+                        .multiply(BigDecimal.valueOf(100))
+                        .setScale(0, RoundingMode.HALF_UP); // Làm tròn 0 chữ số sau dấu phẩy
+            }
+            map.put("discountPercent", discountPercent);
+
+            return map;
+        }).collect(Collectors.toList());
+
+    } finally {
+        em.close();
     }
+}
+
+
+
 
     // Count total discounted products for pagination
     public int getNumberOfDiscountedProducts() {
@@ -879,16 +902,17 @@ public class ProductService {
     public List<Map<String, Object>> getMostDiscountedProducts(Integer limit) {
         EntityManager em = productDAO.emf.createEntityManager();
         try {
-            String jpql = "SELECT p.id, p.name, p.description, p.thumbnailImage, "
-                    + "MIN(v.price), MIN(v.discountPrice), "
-                    + "ROUND((1.0 * (MIN(v.price) - MIN(v.discountPrice)) / MIN(v.price)) * 100) "
-                    + "FROM Product p "
-                    + "JOIN ProductVariant v ON v.product = p "
-                    + "WHERE p.isActive = true AND v.isActive = true "
-                    + "AND v.discountPrice IS NOT NULL "
-                    + "AND v.discountExpiry >= CURRENT_TIMESTAMP "
-                    + "GROUP BY p.id, p.name, p.description, p.thumbnailImage "
-                    + "ORDER BY p.id";
+           String jpql = "SELECT p.id, p.name, p.description, p.thumbnailImage, "
+        + "MIN(v.price), MIN(v.discountPrice), "
+        + "ROUND((1.0 * (MIN(v.price) - MIN(v.discountPrice)) / MIN(v.price)) * 100) "
+        + "FROM Product p "
+        + "JOIN p.variants v "  
+        + "WHERE p.isActive = true AND v.isActive = true "
+        + "AND v.discountPrice IS NOT NULL "
+        + "AND v.discountExpiry >= CURRENT_TIMESTAMP "
+        + "GROUP BY p.id, p.name, p.description, p.thumbnailImage "
+        + "ORDER BY p.id";
+
 
             TypedQuery<Object[]> query = em.createQuery(jpql, Object[].class);
 
@@ -896,15 +920,18 @@ public class ProductService {
                 query.setMaxResults(limit);
             }
 
-            return query.getResultStream().map(row -> Map.of(
-                    "id", row[0],
-                    "name", row[1],
-                    "description", row[2],
-                    "thumbnailImage", row[3],
-                    "originalPrice", row[4],
-                    "discountPrice", row[5],
-                    "discountPercent", row[6]
-            )).collect(Collectors.toList());
+            return query.getResultStream().map(row -> {
+    Map<String, Object> map = new HashMap<>();
+    map.put("id", row[0]);
+    map.put("name", row[1]);
+    map.put("description", row[2]);
+    map.put("thumbnailImage", row[3]);
+    map.put("originalPrice", row[4]);
+    map.put("discountPrice", row[5]);
+    map.put("discountPercent", row[6]);
+    return map;
+}).collect(Collectors.toList());
+
         } finally {
             em.close();
         }

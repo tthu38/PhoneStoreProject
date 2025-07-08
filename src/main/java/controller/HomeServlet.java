@@ -26,8 +26,18 @@ public class HomeServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        List<Map<String, Object>> discountedProducts = productService.getMostDiscountedProducts(15);
+
+        // Lấy sản phẩm giảm giá
+        List<Map<String, Object>> discountedProducts = productService.getMostDiscountedProducts(10);
         request.setAttribute("discountedProducts", discountedProducts);
+
+        // Gợi ý sản phẩm nếu người dùng đã đăng nhập
+        Integer userId = (Integer) request.getSession().getAttribute("userId");
+        if (userId != null) {
+            List<Map<String, Object>> recommendedProducts = utils.ProductRecommendationClient.getRecommendations(userId);
+            request.setAttribute("recommendedProducts", recommendedProducts);
+        }
+
         request.getRequestDispatcher("indexFirst.jsp").forward(request, response);
     }
 }

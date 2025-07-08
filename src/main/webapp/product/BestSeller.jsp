@@ -152,6 +152,137 @@
             color: #b71c1c;
             background-color: #ffebee;
         }
+        
+        .col-custom-5 {
+            flex: 0 0 20%; 
+            max-width: 20%;
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+                    /* Card styling */
+        .card {
+            border: none;
+            border-radius: 15px;
+            background-color: #ffffff;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 35px rgba(255, 46, 99, 0.25);
+        }
+
+        .card-img-top {
+            border-radius: 15px 15px 0 0;
+            width: 100%;
+            height: 200px; 
+            object-fit: contain;
+            background-color: #f9f9f9;
+            padding: 1rem;
+            transition: transform 0.5s ease;
+        }
+
+        .card:hover .card-img-top {
+            transform: scale(1.05);
+        }
+
+        .card-body {
+            padding: 1.25rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .card-title {
+            font-family: 'Poppins', sans-serif;
+            color: #ff2e63;
+            font-weight: 600;
+            font-size: 1.2rem; 
+            margin-bottom: 0.8rem;
+            height: 2.8em;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .card-text {
+            color: #555;
+            font-weight: 400;
+            margin-bottom: 1rem;
+            font-size: 0.95rem; 
+        }
+
+        .card-text .text-decoration-line-through {
+            color: #aaa;
+            font-size: 0.8rem;
+            margin-bottom: 0.3rem;
+            display: block;
+            text-decoration: none; 
+        }
+
+
+        .card-text .discount-price {
+            color: #ff2e63;
+            font-weight: 700;
+            font-size: 1.3rem; 
+        }
+
+        .card-footer {
+            
+            background-color: #f8f9fa;
+            border-top: 1px solid rgba(255, 46, 99, 0.1);
+            padding: 0.8rem;
+            text-align: center;
+        }
+        .btn-primary {
+            background-color: red !important;
+            border-color: red !important;
+        }
+
+        .btn-primary:hover {
+            background-color: darkred;
+            border-color: darkred;
+        }
+
+        /* Discount badge */
+        .discount-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: linear-gradient(45deg, #ff2e63, #ff6b6b);
+            color: white;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: 700;
+            font-size: 1rem; 
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            z-index: 10;
+            animation: pulse 1.5s infinite;
+        }
+         @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
 
         /* Animation for page load */
         @keyframes fadeInUp {
@@ -222,31 +353,55 @@
                 <c:set var="totalProducts" value="${products.size()}"/>
                 <c:set var="totalPages" value="${Math.ceil(totalProducts / pageSize)}"/>
 
-                <c:forEach var="product" items="${products}" varStatus="status">
-                    <c:if test="${status.index >= start && status.index < end}">
-                        <div class="col-md-3 mb-5">
-                            <div class="card" style="--animation-order: ${status.index + 1}">
-                                <a href="products?action=productDetail&productId=${product['productId']}" class="text-decoration-none text-dark">
-                                    <img src="${product['imageURL']}" class="card-img-top" alt="${product['productName']}">
-                                    <div class="card-body">
-                                        <h5 class="card-title">${product['productName']}</h5>
-                                        <p class="card-text">
-                                            <fmt:formatNumber value="${product['productPrice']}" pattern="#,###"/> VND
-                                        </p>
-                                    </div>
-                                </a>
-                                <div class="card-footer text-center">
-                                    <form action="AddToCartServlet" method="post">
-                                        <input type="hidden" name="productId" value="${product['productId']}">
-                                        <button type="submit" class="btn btn-primary">Thêm vào giỏ hàng</button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </c:if>
-                </c:forEach>
-            </div>
+  <div class="row">
+    <c:forEach var="product" items="${products}">
+        <div class="col-custom-5 mb-4 d-flex">
+            <div class="card w-100">
+                <c:if test="${product.discountPercent > 0}">
+                    <div class="discount-badge">
+                        -${product.discountPercent}%
+                    </div>
+                </c:if>
+                
+                <a href="products?action=productDetail&productId=${product.id}">
+                    <img src="${product.thumbnailImage}" class="card-img-top" alt="${product.name}">
+                </a>
+                
+                <div class="card-body">
+                    <h5 class="card-title">${product.name}</h5>
+                    <p class="card-text">
+    <c:choose>
+        <c:when test="${product.discountPercent > 0}">
+            <span class="discount-price">
+                <fmt:formatNumber value="${product.discountPrice}" type="currency" currencySymbol="₫" groupingUsed="true"/>
+            </span><br>
+            <span class="text-decoration-line-through text-muted">
+                <fmt:formatNumber value="${product.originalPrice}" type="currency" currencySymbol="₫" groupingUsed="true"/>
+            </span>
+        </c:when>
+        <c:otherwise>
+            <span class="discount-price">
+                <fmt:formatNumber value="${product.originalPrice}" type="currency" currencySymbol="₫" groupingUsed="true"/>
+            </span>
+        </c:otherwise>
+    </c:choose>
+</p>
 
+                </div>
+
+                <div class="card-footer">
+                    <form action="<%= request.getContextPath()%>/carts?action=add" method="get">
+                        <input type="hidden" name="variantId" value="${product.variantId}">
+                        <button type="submit" class="btn btn-primary w-100">Thêm vào giỏ hàng</button>
+                    </form>
+                </div>
+            </div> <!-- end .card -->
+        </div> <!-- end .col-custom-5 -->
+    </c:forEach>
+</div> <!-- end .row -->
+
+
+<div>
             <!-- Pagination -->
             <nav aria-label="Page navigation">
                 <ul class="pagination">
@@ -276,6 +431,7 @@
         </c:otherwise>
     </c:choose>
 </div>
+
 
 <jsp:include page="/templates/footer.jsp"/>
 

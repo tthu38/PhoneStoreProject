@@ -466,6 +466,24 @@
 <!--                </form>-->
             </div>
         </div>
+        <div class="container mt-4">
+    <h3 class="mb-3">Sản phẩm gợi ý</h3>
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
+        <c:forEach var="item" items="${suggestedProducts}">
+    <div class="card border-0 p-2" style="width: 13rem;">
+        <img src="${item['image']}" class="card-img-top" alt="${item['name']}" style="height: 190px; object-fit: contain;">
+        <div class="card-body text-center p-1">
+            <h6 class="card-title m-0">${item['name']}</h6>
+            <div class="d-flex justify-content-center">
+                <p class="card-text text-danger mb-0">${item['price']}đ</p>
+            </div>
+        </div>
+    </div>
+</c:forEach>
+
+    </div>
+</div>
+
 
         <script>
             $(document).ready(function () {

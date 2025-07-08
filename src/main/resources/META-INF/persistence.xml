@@ -6,8 +6,8 @@
     <class>model.ProductBrand</class>
     <class>model.User</class>
     <class>model.Inventory</class>
-    <class>model.Order</class>
-    <class>model.OrderDetail</class>
+    <class>model.Orders</class>
+    <class>model.OrderDetails</class>
     <class>model.ProductStock</class>
     <class>model.ProductVariant</class>
     <class>model.InventoryLog</class>

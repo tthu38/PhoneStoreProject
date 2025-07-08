@@ -6,6 +6,8 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 import java.io.*;
 import java.math.BigDecimal;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -17,6 +19,8 @@ import model.Product;
 import model.ProductBrand;
 import model.ProductStock;
 import model.ProductVariant;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import service.BrandService;
 import service.InventoryService;
 import service.ProductService;
@@ -409,10 +413,45 @@ public class ProductServlet extends HttpServlet {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND, "Product không được tìm thấy");
                 return;
             }
+
             List<ProductVariant> productVariants = productVariantService.getVariantsByProductId(id);
 
+            // --- Gọi Flask API ---
+            List<Map<String, String>> suggestedProducts = new ArrayList<>();
+            try {
+                String apiURL = "http://localhost:5555/api?id=" + id;
+                URL url = new URL(apiURL);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("GET");
+
+                BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                StringBuilder jsonBuilder = new StringBuilder();
+                String line;
+                while ((line = in.readLine()) != null) {
+                    jsonBuilder.append(line);
+                }
+                in.close();
+                conn.disconnect();
+
+                JSONObject json = new JSONObject(jsonBuilder.toString());
+                JSONArray arr = json.getJSONArray("san pham goi y");
+
+                for (int i = 0; i < arr.length(); i++) {
+                    JSONObject obj = arr.getJSONObject(i);
+                    Map<String, String> item = new HashMap<>();
+                    item.put("name", obj.getString("name"));
+                    item.put("price", obj.getString("price"));
+                    item.put("image", obj.optString("image", "default.jpg"));
+                    suggestedProducts.add(item);
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+
+            // Gửi dữ liệu sang JSP
             request.setAttribute("productDetails", productDetails);
             request.setAttribute("productVariants", productVariants);
+            request.setAttribute("suggestedProducts", suggestedProducts);
 
             request.getRequestDispatcher("/product/ProductDetail.jsp").forward(request, response);
 
@@ -427,7 +466,7 @@ public class ProductServlet extends HttpServlet {
     private void getProductBestSeller(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         List<Map<String, Object>> products = productService.getMostOrderedProducts(20);
         request.setAttribute("products", products);
-        request.getRequestDispatcher("product/ProductBestSeller.jsp").forward(request, response);
+        request.getRequestDispatcher("product/BestSeller.jsp").forward(request, response);
     }
 
     private void showDiscountManagement(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

@@ -2,13 +2,10 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="service.ProductService" %>
-<%@ page import="java.util.*" %>
 
 <jsp:useBean id="productService" class="service.ProductService" scope="page"/>
-<%
-    List<Map<String, Object>> discounted = productService.getMostDiscountedProducts(10);
-    request.setAttribute("discountedProducts", discounted);
-%>
+<c:set var="discountedProducts" value="${productService.getMostDiscountedProducts(10)}"/>
+<c:set var="bestsellerProducts" value="${productService.getMostOrderedProducts(10)}"/>
 
 <!DOCTYPE html>
 
@@ -400,48 +397,119 @@
                 <button class="btn btn-link text-primary">Giá</button>
             </div>
 
-            <section id="products-section" class="products-section">
-                <div class="container">
-                    <h2 class="text-primary text-center mb-4">Sản Phẩm Khuyến Mãi</h2>
-                    <div class="row">
-                        <c:forEach var="product" items="${discountedProducts}">
-                            <div class="col-custom-5 mb-4 d-flex">
-                                <div class="card w-100">
-                                    <div class="discount-badge">
-                                        -${product.discountPercent}%
-                                    </div>
-                                    <a href="products?action=productDetail&productId=${product.id}">
-
-
-                                        <img src="${product.thumbnailImage}" class="card-img-top" alt="${product.name}">
-                                        <div class="card-body">
-                                            <h5 class="card-title">${product.name}</h5>
-                                            <p class="card-text">
-                                                <span class="discount-price">${product.discountPrice}₫</span><br>
-                                                <span class="text-decoration-line-through">${product.originalPrice}₫</span>
-                                            </p>
-                                        </div>
-                                    </a>
-                                    <div class="card-footer">
-                                        <form action="<%= request.getContextPath()%>/carts?action=add" method="get">
-                                            <input type="hidden" name="variantId" value="${variantId.id}">
-                                            <button type="submit" class="btn btn-primary">Thêm vào giỏ hàng</button>
-                                        </form>
-                                    </div>
+            <c:if test="${not empty recommendedProducts}">
+    <section class="products-section bg-light py-5">
+        <div class="container">
+            <h2 class="text-success text-center mb-4">Gợi Ý Dành Riêng Cho Bạn</h2>
+            <div class="row">
+                <c:forEach var="product" items="${recommendedProducts}">
+                    <div class="col-custom-5 mb-4 d-flex">
+                        <div class="card w-100">
+                            <a href="products?action=productDetail&productId=${product.id}">
+                                <img src="${product.thumbnailImage}" class="card-img-top" alt="${product.productName}">
+                                <div class="card-body">
+                                    <h5 class="card-title">${product.productName}</h5>
+                                    <p class="card-text">
+                                        <span class="text-danger fw-bold">${product.price}₫</span>
+                                    </p>
                                 </div>
+                            </a>
+                            <div class="card-footer">
+                                <form action="${pageContext.request.contextPath}/carts?action=add" method="get">
+                                    <input type="hidden" name="variantId" value="${product.variantId}">
+                                    <button type="submit" class="btn btn-success">Thêm vào giỏ hàng</button>
+                                </form>
                             </div>
-                        </c:forEach>
+                        </div>
                     </div>
-
-                    <!-- Nút "Xem thêm" -->
-                    <div class="view-more-container">
-                        <a href="${pageContext.request.contextPath}/products?action=showDiscountedProducts" class="btn btn-view-more">
-                            Xem Thêm Sản Phẩm <i class="bi bi-arrow-right"></i>
+                </c:forEach>
+            </div>
+        </div>
+    </section>
+</c:if>
+              <section id="products-section" class="products-section">
+    <div class="container">
+        <h2 class="text-primary text-center mb-4">Best Seller</h2>
+        <div class="row">
+            <c:forEach var="product" items="${bestsellerProducts}">
+                <div class="col-custom-5 mb-4 d-flex">
+                    <div class="card w-100">
+                        <div class="discount-badge">
+                            -${product.discountPercent}%
+                        </div>
+                        <a href="products?action=productDetail&productId=${product.id}">
+                            <img src="${product.thumbnailImage}" class="card-img-top" alt="${product.name}">
+                            <div class="card-body">
+                                <h5 class="card-title">${product.name}</h5>
+                                <p class="card-text">
+                                    <span class="discount-price">${product.discountPrice}₫</span><br>
+                                    <span class="text-decoration-line-through">${product.originalPrice}₫</span>
+                                </p>
+                            </div>
                         </a>
+                        <div class="card-footer">
+                            <form action="${pageContext.request.contextPath}/carts?action=add" method="get">
+                                <input type="hidden" name="variantId" value="${product.variantId}">
+                                <button type="submit" class="btn btn-primary">Thêm vào giỏ hàng</button>
+                            </form>
+                        </div>
                     </div>
                 </div>
-            </section>
+            </c:forEach>
         </div>
+
+        <!-- Nút "Xem thêm" -->
+        <div class="view-more-container text-center mt-3">
+            <a href="${pageContext.request.contextPath}/products?action=productBestSeller" class="btn btn-view-more">
+                Xem Thêm Sản Phẩm <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</section>
+        </div>
+<div class="content-frame">
+           <section id="products-section" class="products-section">
+    <div class="container">
+        <h2 class="text-primary text-center mb-4">Sản Phẩm Khuyến Mãi</h2>
+        <div class="row">
+            <c:forEach var="product" items="${discountedProducts}">
+                <div class="col-custom-5 mb-4 d-flex">
+                    <div class="card w-100">
+                        <div class="discount-badge">
+                            -${product.discountPercent}%
+                        </div>
+                        <a href="products?action=productDetail&productId=${product.id}">
+                            <img src="${product.thumbnailImage}" class="card-img-top" alt="${product.name}">
+                            <div class="card-body">
+                                <h5 class="card-title">${product.name}</h5>
+                                <p class="card-text">
+                                    <span class="discount-price">${product.discountPrice}₫</span><br>
+                                    <span class="text-decoration-line-through">${product.originalPrice}₫</span>
+                                </p>
+                            </div>
+                        </a>
+                        <div class="card-footer">
+                            <form action="${pageContext.request.contextPath}/carts?action=add" method="get">
+                                <input type="hidden" name="variantId" value="${product.variantId}">
+                                <button type="submit" class="btn btn-primary">Thêm vào giỏ hàng</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </c:forEach>
+        </div>
+
+        <!-- Nút "Xem thêm" -->
+        <div class="view-more-container text-center mt-3">
+            <a href="${pageContext.request.contextPath}/products?action=showDiscountedProducts" class="btn btn-view-more">
+                Xem Thêm Sản Phẩm <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</section>
+</div>
+
+      
 
         <jsp:include page="/templates/footer.jsp"/>
         <!-- Bootstrap JS -->
