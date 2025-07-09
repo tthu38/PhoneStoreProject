@@ -408,7 +408,8 @@
                 </h2>
                 <div class="stock-info">Còn lại: ${productDetails[0].stock} sản phẩm</div>
 
-                <form action="carts" method="get">
+                <form action="${pageContext.request.contextPath}/carts" method="post">
+                    <input type="hidden" name="action" value="add">
                     <input type="hidden" id="productId" name="productId" value="${productDetails[0].productId}">
                     <input type="hidden" id="rom" name="rom" value="">
                     <input type="hidden" id="color" name="color" value="">
@@ -454,16 +455,12 @@
                         <button type="button" id="increaseQty" class="quantity-btn">+</button>
                     </div>
 
-                        <div class="action-buttons">
-                            <form action="<%= request.getContextPath()%>/carts?action=add" method="get">
-                                <input type="hidden" name="variantId" value="${variantId.id}">
-                                <button type="button" id="addToCartBtn" class="btn-add-to-cart">
-                                    <i class="fas fa-shopping-cart"></i> Thêm vào giỏ
-                                </button>
-                            </form>
-                           
-                        </div>
-<!--                </form>-->
+                    <div class="action-buttons">
+                        <button type="submit" id="addToCartBtn" class="btn-add-to-cart">
+                            <i class="fas fa-shopping-cart"></i> Thêm vào giỏ
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
         <div class="container mt-4">
@@ -592,7 +589,7 @@
                         type: "POST",
                         url: "carts",
                         data: {
-                            action: "addToCart",
+                            action: "add",
                             productId: productId,
                             rom: rom,
                             color: color,
