@@ -67,7 +67,7 @@
                 </div>
 
                 <!-- Cart -->
-                <a href="${pageContext.request.contextPath}/cart" class="cart-link">
+                <a href="${pageContext.request.contextPath}/carts" class="cart-link">
                     <i class="fa fa-shopping-cart"></i>
                     <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger cart-badge" 
                           id="cartBadge">2</span>

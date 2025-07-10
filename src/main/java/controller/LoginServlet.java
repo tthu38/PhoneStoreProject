@@ -6,7 +6,6 @@ package controller;
 
 import model.User;
 import service.UserService;
-
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -72,16 +71,18 @@ public class LoginServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String servletPath = request.getServletPath();
-        switch (servletPath) {
-            case "/login-google":
+        String action = request.getParameter("action");
+        if (action == null) action = "";
+        switch (action) {
+            case "login-google":
                 handleLoginGoogle(request, response);
                 break;
-            case "/oauth2/google":
+            case "oauth2-google":
                 handleOauth2Google(request, response);
                 break;
             default:
                 handleLoginGet(request, response);
+                break;
         }
     }
 
@@ -96,13 +97,27 @@ public class LoginServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String servletPath = request.getServletPath();
-        switch (servletPath) {
-            case "/update-profile":
+        String action = request.getParameter("action");
+        if (action == null) action = "";
+        switch (action) {
+            case "verify-google-otp":
+                handleVerifyGoogleOtp(request, response);
+                break;
+            case "update-profile":
                 handleUpdateProfile(request, response);
+                break;
+            case "forgot-password-send-otp":
+                handleForgotPasswordSendOtp(request, response);
+                break;
+            case "forgot-password-verify-otp":
+                handleForgotPasswordVerifyOtp(request, response);
+                break;
+            case "forgot-password-reset":
+                handleForgotPasswordReset(request, response);
                 break;
             default:
                 handleLoginPost(request, response);
+                break;
         }
     }
 
@@ -133,14 +148,33 @@ public class LoginServlet extends HttpServlet {
             if ("on".equals(rememberMe)) {
                 String token = java.util.UUID.randomUUID().toString();
                 userService.saveRememberToken(user.getUserID(), token);
-                jakarta.servlet.http.Cookie rememberCookie = new jakarta.servlet.http.Cookie("remember_token", token);
-                rememberCookie.setMaxAge(60 * 60 * 24 * 30);
-                rememberCookie.setPath(request.getContextPath().isEmpty() ? "/" : request.getContextPath());
-                rememberCookie.setHttpOnly(true);
-                response.addCookie(rememberCookie);
+
+                jakarta.servlet.http.Cookie tokenCookie = new jakarta.servlet.http.Cookie("remember_token", token);
+                tokenCookie.setMaxAge(60 * 60 * 24 * 30);
+                tokenCookie.setPath(request.getContextPath().isEmpty() ? "/" : request.getContextPath());
+                tokenCookie.setHttpOnly(true);
+                response.addCookie(tokenCookie);
+
+                jakarta.servlet.http.Cookie userCookie = new jakarta.servlet.http.Cookie("remember_username", username);
+                jakarta.servlet.http.Cookie passCookie = new jakarta.servlet.http.Cookie("remember_password", password);
+                userCookie.setMaxAge(7 * 24 * 60 * 60); // 7 ngày
+                passCookie.setMaxAge(7 * 24 * 60 * 60);
+                userCookie.setPath("/");
+                passCookie.setPath("/");
+                response.addCookie(userCookie);
+                response.addCookie(passCookie);
+            } else {
+                jakarta.servlet.http.Cookie userCookie = new jakarta.servlet.http.Cookie("remember_username", "");
+                jakarta.servlet.http.Cookie passCookie = new jakarta.servlet.http.Cookie("remember_password", "");
+                userCookie.setMaxAge(0);
+                passCookie.setMaxAge(0);
+                userCookie.setPath("/");
+                passCookie.setPath("/");
+                response.addCookie(userCookie);
+                response.addCookie(passCookie);
             }
 
-            response.sendRedirect(request.getContextPath() + "/user/profile.jsp");
+            response.sendRedirect(request.getContextPath() + "/indexFirst.jsp");
         } else {
             request.setAttribute("error", "Sai tài khoản hoặc mật khẩu");
             request.getRequestDispatcher("/user/login.jsp").forward(request, response);
@@ -166,12 +200,45 @@ public class LoginServlet extends HttpServlet {
         User user = userOpt.get();
         String fullName = request.getParameter("fullname");
         String phoneNumber = request.getParameter("phone");
+        String address = request.getParameter("address");
+        String dobStr = request.getParameter("dob");
 
         user.setFullName(fullName);
         user.setPhoneNumber(phoneNumber);
 
+        if (dobStr != null && !dobStr.trim().isEmpty()) {
+            try {
+                user.setDob(java.time.LocalDate.parse(dobStr));
+            } catch (Exception e) {
+                e.printStackTrace();
+                request.setAttribute("error", "Định dạng ngày sinh không hợp lệ. Vui lòng sử dụng định dạng yyyy-MM-dd.");
+                request.getRequestDispatcher("/user/profile.jsp").forward(request, response);
+                return;
+            }
+        }
+
         userService.updateUser(user);
         session.setAttribute("user", user);
+
+        if (address != null && !address.trim().isEmpty()) {
+            service.UserAddressService addressService = new service.UserAddressService();
+            List<UserAddress> addresses = addressService.getAllAddressesByUserId(user.getUserID());
+            UserAddress userAddress;
+            if (addresses != null && !addresses.isEmpty()) {
+                userAddress = addresses.get(0);
+                userAddress.setAddress(address);
+                addressService.updateAddress(userAddress);
+            } else {
+                userAddress = new UserAddress();
+                userAddress.setUser(user);
+                userAddress.setAddress(address);
+                userAddress.setIsDefault(true);
+                userAddress.setIsActive(true);
+                userAddress.setFullName(user.getFullName());
+                userAddress.setPhoneNumber(user.getPhoneNumber());
+                addressService.addAddress(userAddress);
+            }
+        }
 
         response.sendRedirect(request.getContextPath() + "/indexFirst.jsp");
     }
@@ -238,10 +305,21 @@ public class LoginServlet extends HttpServlet {
                 }
                 request.getSession().removeAttribute("rememberMe");
 
-                if (existedUser.isPresent()) {
-                    response.sendRedirect(request.getContextPath() + "/indexFirst.jsp");
+                if (existedUser.isEmpty()) {
+                    service.MailService mailService = new service.MailService();
+                    String otp = mailService.generateOTP(googleUser.getEmail());
+                    boolean sent = mailService.sendOtpForRegister(googleUser.getEmail(), otp);
+                    if (sent) {
+                        request.getSession().setAttribute("google_otp", otp);
+                        response.sendRedirect(request.getContextPath() + "/templates/googleotp.jsp");
+                    } else {
+                        request.setAttribute("error", "Không thể gửi email xác nhận. Vui lòng thử lại.");
+                        request.getRequestDispatcher("/user/login.jsp").forward(request, response);
+                    }
+                    return;
                 } else {
-                    response.sendRedirect(request.getContextPath() + "/user/userupdate.jsp");
+                    response.sendRedirect(request.getContextPath() + "/indexFirst.jsp");
+                    return;
                 }
             } else {
                 request.setAttribute("error", "Không thể đăng nhập bằng Google. Email này chưa được đăng ký hoặc tài khoản đã bị khóa.");
@@ -253,6 +331,82 @@ public class LoginServlet extends HttpServlet {
             request.getRequestDispatcher("/user/login.jsp").forward(request, response);
         }
     }
+
+    private void handleVerifyGoogleOtp(HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException {
+    String otpInput = request.getParameter("otp");
+    User user = (User) request.getSession().getAttribute("user");
+    String otpSession = (String) request.getSession().getAttribute("google_otp");
+
+    if (user != null && otpSession != null && otpSession.equals(otpInput)) {
+        request.getSession().removeAttribute("google_otp");
+        response.sendRedirect(request.getContextPath() + "/user/userupdate.jsp");
+    } else {
+        request.setAttribute("error", "Mã xác nhận không đúng hoặc đã hết hạn.");
+        request.getRequestDispatcher("/templates/googleotp.jsp").forward(request, response);
+    }
+}
+
+    private void handleForgotPasswordSendOtp(HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException {
+    String email = request.getParameter("email");
+    Optional<User> userOpt = userService.getUserByEmail(email);
+    if (userOpt.isPresent()) {
+        service.MailService mailService = new service.MailService();
+        String otp = mailService.generateOTP(email);
+        boolean sent = mailService.sendOtpForResetPassword(email, otp);
+        if (sent) {
+            request.getSession().setAttribute("reset_otp", otp);
+            request.getSession().setAttribute("reset_email", email);
+            request.setAttribute("message", "Mã xác nhận đã được gửi về email của bạn.");
+            request.getRequestDispatcher("/user/forgotpassword.jsp?step=otp&email=" + email).forward(request, response);
+            return;
+        } else {
+            request.setAttribute("error", "Không thể gửi mã xác nhận. Vui lòng thử lại.");
+        }
+    } else {
+        request.setAttribute("error", "Email không tồn tại trong hệ thống.");
+    }
+    request.getRequestDispatcher("/user/forgotpassword.jsp").forward(request, response);
+}
+
+    private void handleForgotPasswordVerifyOtp(HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException {
+    String otpInput = request.getParameter("otp");
+    String otpSession = (String) request.getSession().getAttribute("reset_otp");
+    if (otpSession != null && otpSession.equals(otpInput)) {
+        request.getRequestDispatcher("/user/reset-password.jsp").forward(request, response);
+    } else {
+        request.setAttribute("error", "Mã xác nhận không đúng hoặc đã hết hạn.");
+        request.getRequestDispatcher("/user/forgotpassword.jsp").forward(request, response);
+    }
+}
+
+    private void handleForgotPasswordReset(HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException {
+    String email = request.getParameter("email");
+    String otpInput = request.getParameter("otp");
+    String newPassword = request.getParameter("newPassword");
+    String otpSession = (String) request.getSession().getAttribute("reset_otp");
+    String emailSession = (String) request.getSession().getAttribute("reset_email");
+
+    if (emailSession != null && emailSession.equals(email)
+            && otpSession != null && otpSession.equals(otpInput)) {
+        boolean updated = userService.updatePasswordByEmail(email, newPassword);
+        if (updated) {
+            request.getSession().removeAttribute("reset_otp");
+            request.getSession().removeAttribute("reset_email");
+            request.setAttribute("message", "Đổi mật khẩu thành công. Bạn có thể đăng nhập lại.");
+            request.getRequestDispatcher("/user/login.jsp").forward(request, response);
+            return;
+        } else {
+            request.setAttribute("error", "Không thể đổi mật khẩu. Vui lòng thử lại.");
+        }
+    } else {
+        request.setAttribute("error", "Mã xác nhận không đúng hoặc đã hết hạn.");
+    }
+    request.getRequestDispatcher("/user/forgotpassword.jsp?step=otp&email=" + email).forward(request, response);
+}
 
     /**
      * Returns a short description of the servlet.

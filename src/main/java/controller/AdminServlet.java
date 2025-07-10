@@ -5,19 +5,22 @@
 package controller;
 
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.util.List;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.PrintWriter;
+import model.Product;
+import service.ProductService;
 
 /**
  *
  * @author Admin
  */
-@WebServlet(name = "AdminServlet", urlPatterns = {"/AdminServelt"})
-public class AdminServelt extends HttpServlet {
+@WebServlet(name = "AdminServlet", urlPatterns = {"/admin"})
+public class AdminServlet extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -57,7 +60,36 @@ public class AdminServelt extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        String menu = request.getParameter("menu");
+        String contentPage = null;
+
+        if (menu == null || menu.equals("dashboard")) {
+            contentPage = "../dashboard/dashboard.jsp";
+        } else if (menu.equals("products")) {
+            // Lấy danh sách sản phẩm
+            ProductService productService = new ProductService();
+            List<Product> products = productService.getAllProducts();
+            request.setAttribute("products", products);
+            contentPage = "../../product/ProductList.jsp";
+        } else if (menu.equals("categories")) {
+            // TODO: Lấy danh sách category, set vào request
+            contentPage = "../../product/CategoryList.jsp";
+        } else if (menu.equals("orders")) {
+            // TODO: Lấy danh sách orders, set vào request
+            contentPage = "../orders/orders.jsp";
+        } else if (menu.equals("customers")) {
+            // TODO: Lấy danh sách customers, set vào request
+            contentPage = "../users/customers.jsp";
+        } else if (menu.equals("reports")) {
+            contentPage = "../reports/reports.jsp";
+        } else if (menu.equals("settings")) {
+            contentPage = "../settings/settings.jsp";
+        } else {
+            contentPage = "../dashboard/dashboard.jsp";
+        }
+
+        request.setAttribute("contentPage", contentPage);
+        request.getRequestDispatcher("/admin/layout/admin-header.jsp").forward(request, response);
     }
 
     /**

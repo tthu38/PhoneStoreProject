@@ -41,8 +41,13 @@ public class OrderDetails {
     @Column(name = "DiscountPrice", precision = 18, scale = 2)
     private BigDecimal discountPrice;
 
-    @Column(name = "TotalPrice", nullable = false, precision = 18, scale = 2)
-    private BigDecimal totalPrice;
+    // KHÔNG mapping totalPrice với @Column vì là computed column trong SQL Server
+    // Nếu cần hiển thị tổng tiền trong Java, dùng @Transient
+    @Transient
+    public BigDecimal getTotalPrice() {
+        BigDecimal price = (discountPrice != null) ? discountPrice : unitPrice;
+        return (price != null && quantity != null) ? price.multiply(BigDecimal.valueOf(quantity)) : null;
+    }
 
     // === GETTER & SETTER ===
 
@@ -76,7 +81,6 @@ public class OrderDetails {
 
     public void setQuantity(Integer quantity) {
         this.quantity = quantity;
-        updateTotalPrice(); // cập nhật lại tổng tiền
     }
 
     public BigDecimal getUnitPrice() {
@@ -85,7 +89,6 @@ public class OrderDetails {
 
     public void setUnitPrice(BigDecimal unitPrice) {
         this.unitPrice = unitPrice;
-        updateTotalPrice(); // cập nhật lại tổng tiền
     }
 
     public BigDecimal getDiscountPrice() {
@@ -94,22 +97,8 @@ public class OrderDetails {
 
     public void setDiscountPrice(BigDecimal discountPrice) {
         this.discountPrice = discountPrice;
-        updateTotalPrice(); // cập nhật lại tổng tiền
     }
 
-    public BigDecimal getTotalPrice() {
-        return totalPrice;
-    }
-
-    public void setTotalPrice(BigDecimal totalPrice) {
-        this.totalPrice = totalPrice;
-    }
-
-    // === TÍNH TOTAL TỰ ĐỘNG ===
-    private void updateTotalPrice() {
-        BigDecimal price = (discountPrice != null) ? discountPrice : unitPrice;
-        if (price != null && quantity != null) {
-            this.totalPrice = price.multiply(BigDecimal.valueOf(quantity));
-        }
-    }
+    // XÓA hoặc COMMENT các phần liên quan đến totalPrice cũ
+    // private void updateTotalPrice() { ... }
 }

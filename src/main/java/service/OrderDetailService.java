@@ -24,7 +24,19 @@ public class OrderDetailService {
 
     // Thêm chi tiết đơn hàng
     public boolean addOrderDetail(OrderDetails orderDetail) {
-        return orderDetailDAO.insert(orderDetail);
+        // Log dữ liệu đầu vào
+        System.out.println("Insert OrderDetail: "
+            + "OrderID=" + (orderDetail.getOrder() != null ? orderDetail.getOrder().getId() : "null")
+            + ", VariantID=" + (orderDetail.getProductVariant() != null ? orderDetail.getProductVariant().getId() : "null")
+            + ", Quantity=" + orderDetail.getQuantity()
+            + ", UnitPrice=" + orderDetail.getUnitPrice()
+            + ", DiscountPrice=" + orderDetail.getDiscountPrice()
+        );
+        boolean result = orderDetailDAO.insert(orderDetail);
+        if (!result) {
+            System.out.println("Insert OrderDetail FAILED: " + orderDetail);
+        }
+        return result;
     }
 
     // Cập nhật
