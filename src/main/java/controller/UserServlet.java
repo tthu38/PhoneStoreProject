@@ -75,55 +75,76 @@ public class UserServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String action = request.getParameter("action");
+        if (action == null) action = "";
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("user") == null) {
             response.sendRedirect(request.getContextPath() + "/user/login.jsp");
             return;
         }
 
-        if ("update-profile".equals(action)) {
-            User user = (User) session.getAttribute("user");
-            String fullName = request.getParameter("fullname");
-            String phoneNumber = request.getParameter("phone");
-            String dobStr = request.getParameter("dob");
-            String address = request.getParameter("address");
+        switch (action) {
+            case "update-profile":
+                handleUpdateProfile(request, response, session);
+                break;
+            // case "other-action":
+            //     handleOtherAction(request, response, session);
+            //     break;
+            default:
+                // Xử lý action khác nếu cần
+                break;
+        }
+    }
 
-            if (fullName == null || fullName.trim().isEmpty() ||
-                phoneNumber == null || phoneNumber.trim().isEmpty()) {
-                request.setAttribute("error", "Vui lòng nhập đầy đủ họ tên và số điện thoại.");
-                request.getRequestDispatcher("/user/editprofile.jsp").forward(request, response);
-                return;
-            }
+    private void handleUpdateProfile(HttpServletRequest request, HttpServletResponse response, HttpSession session)
+            throws ServletException, IOException {
+        User user = (User) session.getAttribute("user");
+        String fullName = request.getParameter("fullname");
+        String phoneNumber = request.getParameter("phone");
+        String dobStr = request.getParameter("dob");
+        String address = request.getParameter("address");
 
-            user.setFullName(fullName);
-            user.setPhoneNumber(phoneNumber);
-            if (dobStr != null && !dobStr.isEmpty()) {
-                user.setDob(java.time.LocalDate.parse(dobStr));
-            }
-
-            userService.updateUser(user);
-            session.setAttribute("user", user);
-
-            // Cập nhật địa chỉ
-            service.UserAddressService addressService = new service.UserAddressService();
-            List<model.UserAddress> addresses = addressService.getAllAddressesByUserId(user.getUserID());
-            model.UserAddress userAddress;
-            if (addresses != null && !addresses.isEmpty()) {
-                userAddress = addresses.get(0);
-                userAddress.setAddress(address);
-                addressService.updateAddress(userAddress);
-            } else {
-                userAddress = new model.UserAddress();
-                userAddress.setUser(user);
-                userAddress.setAddress(address);
-                userAddress.setIsDefault(true);
-                userAddress.setIsActive(true);
-                addressService.addAddress(userAddress);
-            }
-
-            response.sendRedirect(request.getContextPath() + "/user/profile.jsp");
+        if (fullName == null || fullName.trim().isEmpty() ||
+            phoneNumber == null || phoneNumber.trim().isEmpty()) {
+            request.setAttribute("error", "Vui lòng nhập đầy đủ họ tên và số điện thoại.");
+            request.getRequestDispatcher("/user/editprofile.jsp").forward(request, response);
             return;
         }
+
+        user.setFullName(fullName);
+        user.setPhoneNumber(phoneNumber);
+
+        if (dobStr != null && !dobStr.isEmpty()) {
+            try {
+                user.setDob(java.time.LocalDate.parse(dobStr));
+            } catch (Exception e) {
+                user.setDob(null);
+            }
+        } else {
+            user.setDob(null);
+        }
+
+        userService.updateUser(user);
+        User updatedUser = userService.getUserById(user.getUserID()).orElse(user);
+        session.setAttribute("user", updatedUser);
+
+        // Cập nhật địa chỉ
+        service.UserAddressService addressService = new service.UserAddressService();
+        List<model.UserAddress> addresses = addressService.getAllAddressesByUserId(user.getUserID());
+        model.UserAddress userAddress;
+        if (addresses != null && !addresses.isEmpty()) {
+            userAddress = addresses.get(0);
+            userAddress.setAddress(address);
+            addressService.updateAddress(userAddress);
+        } else {
+            userAddress = new model.UserAddress();
+            userAddress.setUser(user);
+            userAddress.setAddress(address);
+            userAddress.setIsDefault(true);
+            userAddress.setIsActive(true);
+            addressService.addAddress(userAddress);
+        }
+
+        response.sendRedirect(request.getContextPath() + "/user/profile.jsp");
     }
 
     /**

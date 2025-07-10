@@ -115,6 +115,7 @@ public class User implements Serializable {
     public Instant getCreatedAt() { return createdAt; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
 
+
     public String getOauthId() { return oauthId; }
     public void setOauthId(String oauthId) { this.oauthId = oauthId; }
 

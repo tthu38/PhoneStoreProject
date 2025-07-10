@@ -110,6 +110,7 @@
                     </div>
                 </div>
                 <script src="${pageContext.request.contextPath}/js/register.js"></script>
+                <script src="${pageContext.request.contextPath}/js/address.js"></script>
             </body>
 
             </html>

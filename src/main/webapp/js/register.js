@@ -1,6 +1,3 @@
-// JS cho trang đăng ký
-// Validate mật khẩu và xác nhận mật khẩu
-
 document.addEventListener('DOMContentLoaded', function() {
     var form = document.querySelector('.register-form');
     if (!form) return;

@@ -58,7 +58,19 @@ public class UserService {
     }
 
     public boolean updateUser(User user) {
-        return userDao.update(user);
+        EntityManager em = emf.createEntityManager();
+        try {
+            em.getTransaction().begin();
+            em.merge(user);
+            em.getTransaction().commit();
+            return true;
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) em.getTransaction().rollback();
+            e.printStackTrace();
+            return false;
+        } finally {
+            em.close();
+        }
     }
 
     public boolean deactivateUser(int id) {
@@ -409,4 +421,13 @@ public class UserService {
         }
     }
 
+    public boolean updatePasswordByEmail(String email, String newPassword) {
+        Optional<User> userOpt = getUserByEmail(email);
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            user.setPassword(newPassword); // Nên hash mật khẩu ở đây nếu có
+            return updateUser(user);
+        }
+        return false;
+    }
 }
