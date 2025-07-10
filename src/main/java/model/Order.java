@@ -2,7 +2,7 @@ package model;
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;
-import java.time.Instant;
+import java.time.LocalDateTime;
 import org.hibernate.annotations.Nationalized;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -27,7 +27,7 @@ public class Order {
     private User user;
 
     @Column(name = "OrderDate", nullable = false)
-    private Instant orderDate;
+    private LocalDateTime orderDate;
 
     @Column(name = "TotalAmount", nullable = false, precision = 18, scale = 2)
     private BigDecimal totalAmount;
@@ -41,7 +41,11 @@ public class Order {
     private String shippingAddress;
 
     @Nationalized
-    @Column(name = "PhoneNumber", length = 20)
+    @Column(name = "PaymentMethod", nullable = false, length = 60)
+    private String paymentMethod;
+
+    @Nationalized
+    @Column(name = "PhoneNumber", nullable = false, length = 20)
     private String phoneNumber;
 
     @Nationalized
@@ -56,7 +60,7 @@ public class Order {
     // === Set mặc định ngày khi lưu ===
     @PrePersist
     protected void onCreate() {
-        this.orderDate = Instant.now();
+        this.orderDate = LocalDateTime.now();
     }
 
     // === Getter & Setter ===
@@ -77,11 +81,11 @@ public class Order {
         this.user = user;
     }
 
-    public Instant getOrderDate() {
+    public LocalDateTime getOrderDate() {
         return orderDate;
     }
 
-    public void setOrderDate(Instant orderDate) {
+    public void setOrderDate(LocalDateTime orderDate) {
         this.orderDate = orderDate;
     }
 
@@ -107,6 +111,14 @@ public class Order {
 
     public void setShippingAddress(String shippingAddress) {
         this.shippingAddress = shippingAddress;
+    }
+
+    public String getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public void setPaymentMethod(String paymentMethod) {
+        this.paymentMethod = paymentMethod;
     }
 
     public String getPhoneNumber() {
@@ -136,7 +148,6 @@ public class Order {
 
     public String getOrderDateFormatted() {
         if (orderDate == null) return "";
-        java.time.LocalDateTime ldt = java.time.LocalDateTime.ofInstant(orderDate, java.time.ZoneId.systemDefault());
-        return ldt.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+        return orderDate.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
     }
 }

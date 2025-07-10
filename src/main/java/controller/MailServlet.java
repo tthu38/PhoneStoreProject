@@ -86,7 +86,13 @@ public class MailServlet extends HttpServlet {
             case "reset_otp" -> {
                 String otp = mailService.generateOTP(email);
                 boolean sent = mailService.sendOtpForResetPassword(email, otp);
-                System.out.println("Reset OTP sent: " + (sent ? "success" : "fail") + " for email: " + email);
+                if (sent) {
+                    request.setAttribute("message", "Mã xác nhận mới đã được gửi về email của bạn.");
+                } else {
+                    request.setAttribute("error", "Không thể gửi lại mã xác nhận. Vui lòng thử lại.");
+                }
+                request.getRequestDispatcher("/templates/googleotp.jsp").forward(request, response);
+                return;
             }
             case "order_confirm" -> {
                 User user = (User) request.getSession().getAttribute("user");
@@ -97,7 +103,7 @@ public class MailServlet extends HttpServlet {
                 Order order = new Order();
                 int orderID = Integer.parseInt(request.getParameter("orderID"));
                 BigDecimal totalAmount = new BigDecimal(request.getParameter("totalAmount"));
-                List<OrderDetails> orderDetails = new ArrayList<>(); 
+                List<OrderDetails> orderDetails = new ArrayList<>();
 
                 boolean sent = mailService.sendOrderConfirmation(user, order, orderID, orderDetails, totalAmount);
                 System.out.println("Order confirmation sent: " + (sent ? "success" : "fail") + " for order: " + orderID);
