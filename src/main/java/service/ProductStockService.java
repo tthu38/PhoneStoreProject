@@ -77,6 +77,18 @@ public class ProductStockService {
             em.close();
         }
     }
+    public List<ProductStock> getStockByProductId(int productId) {
+    EntityManager em = emf.createEntityManager();
+    try {
+        return em.createQuery(
+            "SELECT ps FROM ProductStock ps WHERE ps.variant.product.id = :productId", ProductStock.class)
+            .setParameter("productId", productId)
+            .getResultList();
+    } finally {
+        em.close();
+    }
+}
+
     public ProductStock getStockByVariantId(Integer variantId) {
     EntityManager em = emf.createEntityManager();
     try {
