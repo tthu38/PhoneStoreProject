@@ -64,6 +64,12 @@
                         <% } %>
                     </div>
                 </div>
+                <div>
+                    <div class="info-label">Ngày sinh</div>
+                    <div class="info-value">
+                        <%= user.getDob() != null ? user.getDob().toString() : "Chưa cập nhật" %>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="profile-section">
