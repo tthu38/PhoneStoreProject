@@ -236,6 +236,7 @@
                                             <th>Khách hàng</th>
                                             <th>Ngày đặt</th>
                                             <th>Tổng tiền</th>
+                                            <th>Phương thức thanh toán</th>
                                             <th>Trạng thái</th>
                                             <th>Thao tác</th>
                                         </tr>
@@ -269,6 +270,33 @@
                                                     <strong>
                                                         <fmt:formatNumber value="${order.totalAmount}" type="currency" currencySymbol="₫"/>
                                                     </strong>
+                                                </td>
+                                                <td>
+                                                    <c:choose>
+                                                        <c:when test="${order.paymentMethod == 'VNPay'}">
+                                                            <span class="badge bg-primary">
+                                                                <i class="fas fa-credit-card me-1"></i>
+                                                                VNPay
+                                                            </span>
+                                                        </c:when>
+                                                        <c:when test="${order.paymentMethod == 'PayPal'}">
+                                                            <span class="badge bg-info">
+                                                                <i class="fab fa-paypal me-1"></i>
+                                                                PayPal
+                                                            </span>
+                                                        </c:when>
+                                                        <c:when test="${order.paymentMethod == 'COD'}">
+                                                            <span class="badge bg-warning">
+                                                                <i class="fas fa-money-bill-wave me-1"></i>
+                                                                Thanh toán khi nhận hàng
+                                                            </span>
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            <span class="badge bg-secondary">
+                                                                ${order.paymentMethod}
+                                                            </span>
+                                                        </c:otherwise>
+                                                    </c:choose>
                                                 </td>
                                                 <td>
                                                     <c:choose>
@@ -322,6 +350,22 @@
                                                     <div class="col-md-6">
                                                         <p><strong>Địa chỉ giao hàng:</strong> ${order.shippingAddress}</p>
                                                         <p><strong>Số điện thoại:</strong> ${order.phoneNumber}</p>
+                                                        <p><strong>Phương thức thanh toán:</strong> 
+                                                            <c:choose>
+                                                                <c:when test="${order.paymentMethod == 'VNPay'}">
+                                                                    <span class="badge bg-primary">VNPay</span>
+                                                                </c:when>
+                                                                <c:when test="${order.paymentMethod == 'PayPal'}">
+                                                                    <span class="badge bg-info">PayPal</span>
+                                                                </c:when>
+                                                                <c:when test="${order.paymentMethod == 'COD'}">
+                                                                    <span class="badge bg-warning">Thanh toán khi nhận hàng</span>
+                                                                </c:when>
+                                                                <c:otherwise>
+                                                                    <span class="badge bg-secondary">${order.paymentMethod}</span>
+                                                                </c:otherwise>
+                                                            </c:choose>
+                                                        </p>
                                                     </div>
                                                     <div class="col-md-6">
                                                         <p><strong>Ghi chú:</strong> ${order.note}</p>

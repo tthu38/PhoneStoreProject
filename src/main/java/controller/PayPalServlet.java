@@ -17,7 +17,7 @@ import model.OrderDetails;
 import model.User;
 import service.OrderService;
 import service.OrderDetailService;
-import java.time.Instant;
+import Payment.PaypalConfig;
 
 /**
  *
@@ -34,6 +34,8 @@ public class PayPalServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        // Thêm log để kiểm tra pathInfo khi PayPal redirect về
+        System.out.println("[PayPalServlet] doGet pathInfo: " + request.getPathInfo());
         String pathInfo = request.getPathInfo();
         
         if (pathInfo == null) {
@@ -132,7 +134,7 @@ public class PayPalServlet extends HttpServlet {
         order.setNote(note);
         order.setTotalAmount(totalAmountVND);
         order.setStatus("pending");
-        order.setOrderDate(Instant.now());
+        order.setPaymentMethod("PayPal"); // Set payment method
         
         // Lưu đơn hàng
         OrderService orderService = new OrderService();
@@ -151,8 +153,15 @@ public class PayPalServlet extends HttpServlet {
             orderDetail.setOrder(order);
             orderDetail.setProductVariant(cartItem.getProductVariant());
             orderDetail.setQuantity(cartItem.getQuantity());
-            orderDetail.setUnitPrice(cartItem.getProductVariant().getPrice());
-            orderDetail.setDiscountPrice(cartItem.getProductVariant().getDiscountPrice());
+
+            // Lấy giá gốc và giá khuyến mãi (nếu có)
+            BigDecimal unitPrice = cartItem.getProductVariant().getPrice();
+            BigDecimal discountPrice = cartItem.getProductVariant().getDiscountPrice();
+
+            orderDetail.setUnitPrice(unitPrice);
+            orderDetail.setDiscountPrice(discountPrice);
+
+            // Không set totalPrice
             orderDetailService.addOrderDetail(orderDetail);
         }
         
@@ -171,21 +180,25 @@ public class PayPalServlet extends HttpServlet {
             : itemNames.toString();
         
         // Tài khoản business sandbox PayPal (bạn phải thay đúng tài khoản của bạn)
-        String businessEmail = "nhatnam@business.example.com"; // THAY email sandbox
+        String businessEmail = PaypalConfig.BUSINESS_EMAIL;
 
-        String returnURL = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath() + "/paypal/success";
-        String cancelURL = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath() + "/paypal/cancel";
+        String returnURL = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath() + PaypalConfig.RETURN_PATH;
+        String cancelURL = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath() + PaypalConfig.CANCEL_PATH;
 
         // Tạo URL chuyển hướng sang PayPal
-        String paypalURL = "https://www.sandbox.paypal.com/cgi-bin/webscr"
+        String paypalURL = PaypalConfig.PAYPAL_URL
                 + "?cmd=_xclick"
                 + "&business=" + URLEncoder.encode(businessEmail, "UTF-8")
                 + "&item_name=" + URLEncoder.encode(itemDescription, "UTF-8")
                 + "&amount=" + formattedAmount
-                + "&currency_code=USD"
+                + "&currency_code=" + PaypalConfig.CURRENCY_CODE
                 + "&return=" + URLEncoder.encode(returnURL, "UTF-8")
                 + "&cancel_return=" + URLEncoder.encode(cancelURL, "UTF-8");
 
+        // Log các URL trả về để kiểm tra
+        System.out.println("[PayPalServlet] returnURL: " + returnURL);
+        System.out.println("[PayPalServlet] cancelURL: " + cancelURL);
+        System.out.println("[PayPalServlet] paypalURL: " + paypalURL);
         // Lưu thông tin giao dịch vào session để sử dụng ở trang success
         session.setAttribute("paypalAmountVND", totalAmountVND);
         session.setAttribute("paypalAmountUSD", formattedAmount);

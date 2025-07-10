@@ -5,6 +5,25 @@
 <h5>Thông tin đơn hàng #${order.id}</h5>
 <p>Khách hàng: <strong>${order.user.fullName}</strong></p>
 <p>Ngày đặt: ${order.orderDateFormatted}</p>
+<p>Địa chỉ giao hàng: ${order.shippingAddress}</p>
+<p>Số điện thoại: ${order.phoneNumber}</p>
+<p>Phương thức thanh toán: 
+    <c:choose>
+        <c:when test="${order.paymentMethod == 'VNPay'}">
+            <span class="badge bg-primary">VNPay</span>
+        </c:when>
+        <c:when test="${order.paymentMethod == 'PayPal'}">
+            <span class="badge bg-info">PayPal</span>
+        </c:when>
+        <c:when test="${order.paymentMethod == 'COD'}">
+            <span class="badge bg-warning">Thanh toán khi nhận hàng</span>
+        </c:when>
+        <c:otherwise>
+            <span class="badge bg-secondary">${order.paymentMethod}</span>
+        </c:otherwise>
+    </c:choose>
+</p>
+<p>Ghi chú: ${order.note}</p>
 <table class="table table-bordered">
     <thead>
         <tr>

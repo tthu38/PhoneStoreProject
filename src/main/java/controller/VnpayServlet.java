@@ -178,6 +178,7 @@ public class VnpayServlet extends HttpServlet {
             order.setShippingAddress(shippingAddress);
             order.setPhoneNumber(phoneNumber);
             order.setNote(note);
+            order.setPaymentMethod("VNPay"); // Set payment method
             
             // Lưu đơn hàng vào database
             boolean orderSaved = orderService.addOrder(order);
@@ -202,18 +203,15 @@ public class VnpayServlet extends HttpServlet {
                 orderDetail.setOrder(order);
                 orderDetail.setProductVariant(item.getProductVariant());
                 orderDetail.setQuantity(item.getQuantity());
-                
-                // Tính giá đơn vị
-                BigDecimal unitPrice = item.getProductVariant().getDiscountPrice() != null
-                        ? item.getProductVariant().getDiscountPrice()
-                        : item.getProductVariant().getPrice();
+
+                // Lấy giá gốc và giá khuyến mãi (nếu có)
+                BigDecimal unitPrice = item.getProductVariant().getPrice();
+                BigDecimal discountPrice = item.getProductVariant().getDiscountPrice();
+
                 orderDetail.setUnitPrice(unitPrice);
-                
-                // Tính tổng tiền cho item này
-                BigDecimal itemTotal = unitPrice.multiply(BigDecimal.valueOf(item.getQuantity()));
-                orderDetail.setTotalPrice(itemTotal);
-                
-                // Lưu order detail
+                orderDetail.setDiscountPrice(discountPrice);
+
+                // Không cần setTotalPrice, entity sẽ tự tính hoặc SQL Server tự tính
                 orderDetailService.addOrderDetail(orderDetail);
             }
             
