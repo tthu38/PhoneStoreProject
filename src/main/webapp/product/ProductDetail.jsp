@@ -354,6 +354,65 @@
                 background-color: #ccc;
                 border-radius: 3px;
             }
+            .suggested-products-container {
+                position: relative;
+                width: 100%;
+                overflow: hidden;
+            }
+
+            .suggested-products-wrapper {
+                display: flex;
+                overflow-x: auto;
+                scroll-behavior: smooth;
+                scrollbar-width: none; /* Ẩn thanh cuộn mặc định trên Firefox */
+                -ms-overflow-style: none; /* Ẩn thanh cuộn trên IE và Edge */
+            }
+
+            .suggested-products-wrapper::-webkit-scrollbar {
+                display: none; /* Ẩn thanh cuộn trên Chrome, Safari */
+            }
+
+            .suggestion-card {
+                transition: transform 0.2s ease;
+            }
+
+            .suggestion-card:hover {
+                transform: translateY(-5px);
+            }
+
+            .suggestion-nav-btn {
+                position: absolute;
+                top: 50%;
+                transform: translateY(-50%);
+                background-color: rgba(255, 255, 255, 0.8);
+                border: 1px solid #ddd;
+                color: #000000;
+                padding: 10px;
+                border-radius: 50%;
+                cursor: pointer;
+                z-index: 1;
+                transition: all 0.2s ease;
+            }
+
+            .suggestion-nav-btn:hover {
+                background-color: #fff;
+                border-color: var(--primary-light);
+                color: var(--primary-color);
+            }
+
+            #prevSuggestion {
+                left: 0;
+            }
+
+            #nextSuggestion {
+                right: 0;
+            }
+
+            .suggested-products {
+                display: flex;
+                gap: 15px;
+                padding: 10px 0;
+            }
 
             @media (max-width: 768px) {
                 .product-container {
@@ -367,6 +426,18 @@
                 }
 
                 .nav-btn {
+                    padding: 5px;
+                    font-size: 0.9rem;
+                }
+                .suggested-products {
+                    gap: 10px;
+                }
+
+                .suggestion-card {
+                    width: 10rem;
+                }
+
+                .suggestion-nav-btn {
                     padding: 5px;
                     font-size: 0.9rem;
                 }
@@ -480,24 +551,71 @@
         </div>
         <div class="container mt-4">
             <h3 class="mb-3">Sản phẩm gợi ý</h3>
-            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
-                <c:forEach var="item" items="${suggestedProducts}">
-                    <div class="card border-0 p-2" style="width: 13rem;">
-                        <img src="${item['image']}" class="card-img-top" alt="${item['name']}" style="height: 190px; object-fit: contain;">
-                        <div class="card-body text-center p-1">
-                            <h6 class="card-title m-0">${item['name']}</h6>
-                            <div class="d-flex justify-content-center">
-                                <p class="card-text text-danger mb-0">${item['price']}đ</p>
+            <div class="suggested-products-container">
+                <button id="prevSuggestion" class="nav-btn suggestion-nav-btn"><i class="fas fa-chevron-left"></i></button>
+                <div class="suggested-products-wrapper">
+                    <div class="suggested-products" id="suggestedProducts">
+                        <c:forEach var="item" items="${suggestedProducts}" varStatus="loop">
+                            <div class="card suggestion-card border-0 p-2" style="width: 13rem; flex: 0 0 auto;">
+<!--                                href="products?action=productDetail&productId=${product.id}"-->
+                                <a href="products?action=productDetail&productId=${item['productId']}" class="text-decoration-none">
+                                    <img src="${item['image']}" class="card-img-top" alt="${item['name']}" style="height: 190px; object-fit: contain;">
+                                    <div class="card-body text-center p-1">
+                                        <h6 class="card-title m-0 text-dark">${item['name']}</h6>
+                                        <p class="card-text text-danger mb-0">${item['price']}đ</p>
+                                    </div>
+                                </a>
                             </div>
-                        </div>
+                        </c:forEach>
                     </div>
-                </c:forEach>
-
+                </div>
+                <button id="nextSuggestion" class="nav-btn suggestion-nav-btn"><i class="fas fa-chevron-right"></i></button>
             </div>
         </div>
 
 
         <script>
+            $(document).ready(function () {
+                const $suggestionContainer = $("#suggestedProducts");
+                const $prevBtn = $("#prevSuggestion");
+                const $nextBtn = $("#nextSuggestion");
+                let scrollPosition = 0;
+                const cardWidth = $(".suggestion-card").outerWidth(true); // Chiều rộng thẻ + margin
+                const visibleCards = 5; // Số thẻ hiển thị trên một hàng
+                const maxScroll = $suggestionContainer[0].scrollWidth - $suggestionContainer.outerWidth();
+
+                // Cập nhật trạng thái nút
+                function updateButtonState() {
+                    $prevBtn.prop("disabled", scrollPosition <= 0);
+                    $nextBtn.prop("disabled", scrollPosition >= maxScroll);
+                }
+
+                // Nút Previous
+                $prevBtn.click(function () {
+                    if (scrollPosition > 0) {
+                        scrollPosition -= cardWidth * visibleCards;
+                        scrollPosition = Math.max(0, scrollPosition);
+                        $suggestionContainer.animate({scrollLeft: scrollPosition}, 300);
+                        updateButtonState();
+                    }
+                });
+
+                // Nút Next
+                $nextBtn.click(function () {
+                    if (scrollPosition < maxScroll) {
+                        scrollPosition += cardWidth * visibleCards;
+                        scrollPosition = Math.min(maxScroll, scrollPosition);
+                        $suggestionContainer.animate({scrollLeft: scrollPosition}, 300);
+                        updateButtonState();
+                    }
+                });
+
+                // Cập nhật trạng thái ban đầu
+                $(window).on("resize", function () {
+                    maxScroll = $suggestionContainer[0].scrollWidth - $suggestionContainer.outerWidth();
+                    updateButtonState();
+                }).trigger("resize");
+            });
             $(document).ready(function () {
                 // Các biến khởi tạo
                 let selectedRom = "", selectedColor = "", quantity = 1;

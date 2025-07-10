@@ -410,13 +410,6 @@
                                                 </c:choose>
                                             </p>
                                         </div>
-
-                                        <div class="card-footer">
-                                            <form action="<%= request.getContextPath()%>/carts?action=add" method="get">
-                                                <input type="hidden" name="variantId" value="${product['variantId']}">
-                                                <button type="submit" class="text-cart btn btn-primary w-100">Thêm vào giỏ hàng</button>
-                                            </form>
-                                        </div>
                                     </div> <!-- end .card -->
                                 </div> <!-- end .col-custom-5 -->
                             </c:forEach>

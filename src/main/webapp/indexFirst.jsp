@@ -450,12 +450,6 @@
                                             </p>
                                         </div>
                                     </a>
-                                    <div class="card-footer">
-                                        <form action="${pageContext.request.contextPath}/carts?action=add" method="get">
-                                            <input type="hidden" name="variantId" value="${product.variantId}">
-                                            <button type="submit" class="btn btn-primary">Thêm vào giỏ hàng</button>
-                                        </form>
-                                    </div>
                                 </div>
                             </div>
                         </c:forEach>
@@ -491,12 +485,6 @@
                                             </p>
                                         </div>
                                     </a>
-                                    <div class="card-footer">
-                                        <form action="${pageContext.request.contextPath}/carts?action=add" method="get">
-                                            <input type="hidden" name="variantId" value="${product.variantId}">
-                                            <button type="submit" class="btn btn-primary">Thêm vào giỏ hàng</button>
-                                        </form>
-                                    </div>
                                 </div>
                             </div>
                         </c:forEach>

@@ -437,12 +437,7 @@
                                             </p>
                                         </div>
                                     </a>
-                                    <div class="card-footer">
-                                        <form action="<%= request.getContextPath()%>/carts?action=add" method="get">
-                                            <input type="hidden" name="variantId" value="${variantId.id}">
-                                            <button type="submit" class="btn btn-primary">Thêm vào giỏ hàng</button>
-                                        </form>
-                                    </div>
+                                    
                                 </div>
                             </div>
                         </c:forEach>
