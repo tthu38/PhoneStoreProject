@@ -18,9 +18,6 @@ import service.ProductVariantService;
 import java.util.ArrayList;
 import java.util.List;
 import java.math.BigDecimal;
-import model.User;
-import model.Order;
-import service.OrderService;
 
 /**
  *
@@ -106,9 +103,6 @@ public class CartServlet extends HttpServlet {
                 break;
             case "selectAll":
                 selectAllItems(request, response);
-                break;
-            case "checkout":
-                processCheckout(request, response);
                 break;
             case "list":
             default:
@@ -258,7 +252,6 @@ public class CartServlet extends HttpServlet {
         if (cart == null) {
             cart = new ArrayList<>();
         }
-        
         // Tính tổng tiền các sản phẩm đã chọn
         BigDecimal selectedTotal = BigDecimal.ZERO;
         for (CartItem item : cart) {
@@ -269,107 +262,9 @@ public class CartServlet extends HttpServlet {
                 selectedTotal = selectedTotal.add(price.multiply(BigDecimal.valueOf(item.getQuantity())));
             }
         }
-        
-        // Lấy thông tin đơn hàng đã thanh toán gần đây nhất của user
-        User user = (User) session.getAttribute("user");
-        Order recentPaidOrder = null;
-        if (user != null) {
-            OrderService orderService = new OrderService();
-            List<Order> paidOrders = orderService.getPaidOrders();
-            // Tìm đơn hàng đã thanh toán gần đây nhất của user hiện tại
-            for (Order order : paidOrders) {
-                if (order.getUser().getUserID() == user.getUserID()) {
-                    recentPaidOrder = order;
-                    break;
-                }
-            }
-        }
-        
         request.setAttribute("cart", cart);
         request.setAttribute("selectedTotal", selectedTotal);
-        request.setAttribute("recentPaidOrder", recentPaidOrder);
         request.getRequestDispatcher("/cart/cart.jsp").forward(request, response);
-    }
-
-    private void processCheckout(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        HttpSession session = request.getSession();
-        
-        // Kiểm tra user đăng nhập
-        Object user = session.getAttribute("user");
-        if (user == null) {
-            request.setAttribute("error", "Vui lòng đăng nhập để tiếp tục thanh toán");
-            request.getRequestDispatcher("/user/login.jsp").forward(request, response);
-            return;
-        }
-        
-        // Lấy thông tin từ form
-        String fullName = request.getParameter("fullName");
-        String phone = request.getParameter("phone");
-        String address = request.getParameter("address");
-        String city = request.getParameter("city");
-        String district = request.getParameter("district");
-        String ward = request.getParameter("ward");
-        String note = request.getParameter("note");
-        String paymentMethod = request.getParameter("paymentMethod");
-        
-        // Validate dữ liệu
-        if (fullName == null || fullName.trim().isEmpty() ||
-            phone == null || phone.trim().isEmpty() ||
-            address == null || address.trim().isEmpty() ||
-            city == null || city.trim().isEmpty() ||
-            district == null || district.trim().isEmpty() ||
-            ward == null || ward.trim().isEmpty() ||
-            paymentMethod == null || paymentMethod.trim().isEmpty()) {
-            
-            request.setAttribute("error", "Vui lòng điền đầy đủ thông tin bắt buộc");
-            request.getRequestDispatcher("/cart/confirm.jsp").forward(request, response);
-            return;
-        }
-        
-        // Lấy giỏ hàng
-        List<CartItem> cart = (List<CartItem>) session.getAttribute("cart");
-        if (cart == null || cart.isEmpty()) {
-            request.setAttribute("error", "Giỏ hàng trống");
-            response.sendRedirect(request.getContextPath() + "/carts");
-            return;
-        }
-        
-        // Tính tổng tiền
-        BigDecimal totalAmount = BigDecimal.ZERO;
-        for (CartItem item : cart) {
-            if (item.isSelected()) {
-                BigDecimal price = item.getProductVariant().getDiscountPrice() != null
-                        ? item.getProductVariant().getDiscountPrice()
-                        : item.getProductVariant().getPrice();
-                totalAmount = totalAmount.add(price.multiply(BigDecimal.valueOf(item.getQuantity())));
-            }
-        }
-        
-        if (totalAmount.compareTo(BigDecimal.ZERO) == 0) {
-            request.setAttribute("error", "Vui lòng chọn ít nhất một sản phẩm để thanh toán");
-            request.getRequestDispatcher("/cart/confirm.jsp").forward(request, response);
-            return;
-        }
-        
-        // Lưu thông tin giao hàng vào session
-        session.setAttribute("shippingInfo", new String[]{
-            fullName, phone, address + ", " + ward + ", " + district + ", " + city, note
-        });
-        
-        // Xử lý theo phương thức thanh toán
-        switch (paymentMethod) {
-            case "vnpay":
-                // TODO: Implement VNPAY payment
-                request.setAttribute("error", "Tính năng VNPAY đang được phát triển");
-                request.getRequestDispatcher("/cart/confirm.jsp").forward(request, response);
-                break;
-            case "cod":
-            default:
-                // TODO: Implement COD order creation
-                request.setAttribute("error", "Tính năng COD đang được phát triển");
-                request.getRequestDispatcher("/cart/confirm.jsp").forward(request, response);
-                break;
-        }
     }
 
     /**

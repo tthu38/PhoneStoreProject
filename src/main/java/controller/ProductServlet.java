@@ -28,7 +28,7 @@ import service.ProductStockService;
 import service.ProductVariantService;
 import utils.ProductUtils;
 
-@WebServlet(name = "ProductServlet", urlPatterns = {"/products"})
+@WebServlet(name = "ProductServlet", urlPatterns = { "/products" })
 @MultipartConfig
 public class ProductServlet extends HttpServlet {
 
@@ -341,11 +341,13 @@ public class ProductServlet extends HttpServlet {
             }
 
             if (colors == null || roms == null || prices == null || quantities == null
-                    || colors.length != roms.length || colors.length != prices.length || colors.length != quantities.length) {
+                    || colors.length != roms.length || colors.length != prices.length
+                    || colors.length != quantities.length) {
                 throw new IllegalArgumentException("Dữ liệu variant không hợp lệ hoặc không đồng bộ");
             }
 
-            productService.updateProductDetails(productId, name, description, thumbnailPath, brandId, colors, roms, prices, quantities);
+            productService.updateProductDetails(productId, name, description, thumbnailPath, brandId, colors, roms,
+                    prices, quantities);
 
             response.sendRedirect(request.getContextPath() + "/products");
 
@@ -382,7 +384,8 @@ public class ProductServlet extends HttpServlet {
         String sort = request.getParameter("sort");
         String searchName = request.getParameter("searchName");
 
-        List<Product> products = productService.searchAndFilterProducts(searchName, categoryID, brandID, sort, page, pageSize);
+        List<Product> products = productService.searchAndFilterProducts(searchName, categoryID, brandID, sort, page,
+                pageSize);
 
         int totalProducts = productService.countFilteredProducts(searchName, categoryID, brandID);
         int totalPages = (int) Math.ceil((double) totalProducts / pageSize);
@@ -408,6 +411,12 @@ public class ProductServlet extends HttpServlet {
         try {
             int id = Integer.parseInt(request.getParameter("productId"));
             List<Map<String, Object>> productDetails = productService.detailProduct(id);
+            List<ProductStock> productStocks = productStockService.getStockByProductId(id);
+            Map<Integer, Integer> stockMap = new HashMap<>();
+
+            for (ProductStock ps : productStocks) {
+                stockMap.put(ps.getVariant().getId(), ps.getAmount());
+            }
 
             if (productDetails.isEmpty()) {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND, "Product không được tìm thấy");
@@ -452,7 +461,7 @@ public class ProductServlet extends HttpServlet {
             request.setAttribute("productDetails", productDetails);
             request.setAttribute("productVariants", productVariants);
             request.setAttribute("suggestedProducts", suggestedProducts);
-
+            request.setAttribute("stockMap", stockMap);
             request.getRequestDispatcher("/product/ProductDetail.jsp").forward(request, response);
 
         } catch (NumberFormatException e) {
@@ -463,20 +472,23 @@ public class ProductServlet extends HttpServlet {
         }
     }
 
-    private void getProductBestSeller(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    private void getProductBestSeller(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
         List<Map<String, Object>> products = productService.getMostOrderedProducts(20);
         request.setAttribute("products", products);
         request.getRequestDispatcher("product/BestSeller.jsp").forward(request, response);
     }
 
-    private void showDiscountManagement(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    private void showDiscountManagement(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
 
         List<Category> categories = productService.getAllCategories();
         request.setAttribute("categories", categories);
         request.getRequestDispatcher("/product/DiscountManagement.jsp").forward(request, response);
     }
 
-    private void showDiscountedProducts(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    private void showDiscountedProducts(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
         int page = 1;
         int recordsPerPage = 10;
 
@@ -484,7 +496,8 @@ public class ProductServlet extends HttpServlet {
             page = Integer.parseInt(request.getParameter("page"));
         }
 
-        List<Product> discountedProducts = productService.getDiscountedProducts((page - 1) * recordsPerPage, recordsPerPage);
+        List<Product> discountedProducts = productService.getDiscountedProducts((page - 1) * recordsPerPage,
+                recordsPerPage);
         int noOfRecords = productService.getNumberOfDiscountedProducts();
         int noOfPages = (int) Math.ceil(noOfRecords * 1.0 / recordsPerPage);
 
@@ -495,7 +508,8 @@ public class ProductServlet extends HttpServlet {
         request.getRequestDispatcher("/product/DiscountProduct.jsp").forward(request, response);
     }
 
-    private void removeDiscount(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    private void removeDiscount(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
         try {
             String name = request.getParameter("searchName");
             String categoryId = request.getParameter("categoryId");
@@ -512,7 +526,8 @@ public class ProductServlet extends HttpServlet {
         }
     }
 
-    private void applyDiscount(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    private void applyDiscount(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
         try {
             String name = request.getParameter("searchName");
             String categoryId = request.getParameter("categoryId");

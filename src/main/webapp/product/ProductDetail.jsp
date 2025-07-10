@@ -1,5 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+
 
 <!DOCTYPE html>
 <html lang="vi">
@@ -389,8 +391,12 @@
                                  class="thumbnail-img ${loop.index == 0 ? 'selected' : ''}"
                                  data-image="${variant.imageURLs}"
                                  data-index="${loop.index}"
-                                 data-variant-id="${variant.id}">
+                                 data-variant-id="${variant.id}"
+                                 data-rom="${variant.rom}"
+                                 data-color="${variant.color}"
+                                 data-stock="${stockMap[variant.id] != null ? stockMap[variant.id] : 0}">
                         </c:forEach>
+
                     </div>
                 </div>
             </div>
@@ -407,7 +413,7 @@
                         </c:otherwise>
                     </c:choose>
                 </h2>
-                <div class="stock-info">Còn lại: ${productDetails[0].stock} sản phẩm</div>
+                <div class="stock-info">Còn lại: <span id="stockCount">${productDetails[0].stock}</span> sản phẩm</div>
 
                 <form action="${pageContext.request.contextPath}/carts" method="post">
                     <input type="hidden" name="action" value="add">
@@ -418,35 +424,43 @@
 
                     <div class="mb-3">
                         <label class="option-label">Phiên bản:</label>
+                        <c:set var="displayedROMs" value="" />
+
                         <div class="option-container" id="romOptions">
                             <c:forEach var="variant" items="${productVariants}" varStatus="loop">
-                                <button type="button" class="option-btn"
-                                        data-rom="${variant.rom}"
-                                        data-price="${variant.price}"
-                                        data-discount="${variant.discountPrice}"
-                                        <c:if test="${loop.index == 0}">data-active="true"</c:if>>
-                                    ${variant.rom} GB
-                                </button>
+                                <c:if test="${not fn:contains(displayedROMs, variant.rom)}">
+                                    <button type="button" class="option-btn"
+                                            data-rom="${variant.rom}"
+                                            data-price="${variant.price}"
+                                            data-discount="${variant.discountPrice}"
+                                            <c:if test="${loop.index == 0}">data-active="true"</c:if>>
+                                        ${variant.rom} GB
+                                    </button>
+                                    <c:set var="displayedROMs" value="${displayedROMs},${variant.rom}" />
+                                </c:if>
                             </c:forEach>
-
                         </div>
                     </div>
 
+
                     <div class="mb-3">
                         <label class="option-label">Màu sắc:</label>
+                        <c:set var="displayedColors" value="" />
+
                         <div class="option-container" id="colorOptions">
                             <c:forEach var="variant" items="${productVariants}" varStatus="loop">
-                                <button type="button" class="option-btn"
-                                        data-color="${variant.color}"
-                                        data-price="${variant.price}"
-                                        data-discount="${variant.discountPrice}"
-                                        data-image="${variant.imageURLs}"
-                                        <c:if test="${loop.index == 0}">data-active="true"</c:if>>
-                                    ${variant.color}
-                                </button>
-
+                                <c:if test="${not fn:contains(displayedColors, variant.color)}">
+                                    <button type="button" class="option-btn"
+                                            data-color="${variant.color}"
+                                            data-price="${variant.price}"
+                                            data-discount="${variant.discountPrice}"
+                                            data-image="${variant.imageURLs}"
+                                            <c:if test="${loop.index == 0}">data-active="true"</c:if>>
+                                        ${variant.color}
+                                    </button>
+                                    <c:set var="displayedColors" value="${displayedColors},${variant.color}" />
+                                </c:if>
                             </c:forEach>
-
                         </div>
                     </div>
 
@@ -465,34 +479,47 @@
             </div>
         </div>
         <div class="container mt-4">
-    <h3 class="mb-3">Sản phẩm gợi ý</h3>
-    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
-        <c:forEach var="item" items="${suggestedProducts}">
-    <div class="card border-0 p-2" style="width: 13rem;">
-        <img src="${item['image']}" class="card-img-top" alt="${item['name']}" style="height: 190px; object-fit: contain;">
-        <div class="card-body text-center p-1">
-            <h6 class="card-title m-0">${item['name']}</h6>
-            <div class="d-flex justify-content-center">
-                <p class="card-text text-danger mb-0">${item['price']}đ</p>
+            <h3 class="mb-3">Sản phẩm gợi ý</h3>
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
+                <c:forEach var="item" items="${suggestedProducts}">
+                    <div class="card border-0 p-2" style="width: 13rem;">
+                        <img src="${item['image']}" class="card-img-top" alt="${item['name']}" style="height: 190px; object-fit: contain;">
+                        <div class="card-body text-center p-1">
+                            <h6 class="card-title m-0">${item['name']}</h6>
+                            <div class="d-flex justify-content-center">
+                                <p class="card-text text-danger mb-0">${item['price']}đ</p>
+                            </div>
+                        </div>
+                    </div>
+                </c:forEach>
+
             </div>
         </div>
-    </div>
-</c:forEach>
-
-    </div>
-</div>
 
 
         <script>
             $(document).ready(function () {
-                let selectedRom = "";
-                let selectedColor = "";
-
-                let quantity = 1;
+                // Các biến khởi tạo
+                let selectedRom = "", selectedColor = "", quantity = 1;
                 let $thumbnailItems = $(".thumbnail-img");
                 let currentIndex = 0;
 
-                // Select ROM and update price
+                // Hàm cập nhật ảnh chính
+                function updateMainImage() {
+                    let $currentThumbnail = $thumbnailItems.eq(currentIndex);
+                    $("#mainImage").attr("src", $currentThumbnail.data("image"));
+                    $thumbnailItems.removeClass("selected");
+                    $currentThumbnail.addClass("selected");
+                }
+
+                function scrollToThumbnail() {
+                    let $currentThumbnail = $thumbnailItems.eq(currentIndex);
+                    let container = $(".thumbnail-wrapper");
+                    let scrollPosition = $currentThumbnail.position().left + container.scrollLeft() - (container.width() / 2) + ($currentThumbnail.outerWidth() / 2);
+                    container.animate({scrollLeft: scrollPosition}, 300);
+                }
+
+                // ROM chọn
                 $("#romOptions .option-btn").click(function () {
                     $("#romOptions .option-btn").removeClass("active");
                     $(this).addClass("active");
@@ -500,21 +527,20 @@
                     $("#rom").val(selectedRom);
                     updatePrice();
                     updateMainImage();
+                    updateStock();
                 });
 
-                // Select Color and update price
+                // Màu chọn
                 $("#colorOptions .option-btn").click(function () {
                     $("#colorOptions .option-btn").removeClass("active");
                     $(this).addClass("active");
                     selectedColor = $(this).data("color");
                     $("#color").val(selectedColor);
                     updatePrice();
-
-                    // Cập nhật ảnh chính khi chọn màu
+                    updateStock();
                     let newImage = $(this).data("image");
                     if (newImage) {
                         $("#mainImage").attr("src", newImage);
-                        // Đồng thời cập nhật ảnh đang chọn trong thumbnail
                         $(".thumbnail-img").removeClass("selected");
                         $(".thumbnail-img").each(function () {
                             if ($(this).data("image") === newImage) {
@@ -525,12 +551,26 @@
                     }
                 });
 
+                // Nút chuyển ảnh
+                $("#prevBtn").click(function () {
+                    currentIndex = Math.max(0, currentIndex - 1);
+                    updateMainImage();
+                    scrollToThumbnail();
+                });
 
-                // Initialize active buttons
-                $("#romOptions .option-btn[data-active]").addClass("active").click();
-                $("#colorOptions .option-btn[data-active]").addClass("active").click();
+                $("#nextBtn").click(function () {
+                    currentIndex = Math.min($thumbnailItems.length - 1, currentIndex + 1);
+                    updateMainImage();
+                    scrollToThumbnail();
+                });
 
-                // Quantity controls
+                $thumbnailItems.click(function () {
+                    currentIndex = $(this).data("index");
+                    updateMainImage();
+                    scrollToThumbnail();
+                });
+
+                // Số lượng
                 $("#increaseQty").click(function () {
                     let maxQty = parseInt($(".quantity-input").attr("max"));
                     let currentQty = parseInt($(".quantity-input").val());
@@ -565,6 +605,7 @@
                     $("#quantity").val(quantity);
                 });
 
+                // Cập nhật giá
                 function updatePrice() {
                     let romBtn = $("#romOptions .option-btn.active");
                     let colorBtn = $("#colorOptions .option-btn.active");
@@ -574,30 +615,34 @@
                     $(".discount-price").text(discountPrice + "đ");
                 }
 
-                // Add to cart functionality
+                // Init
+                $("#romOptions .option-btn[data-active]").addClass("active").click();
+                $("#colorOptions .option-btn[data-active]").addClass("active").click();
+                updateMainImage();
+
+                // ✅ Add to cart
                 $("#addToCartBtn").click(function (event) {
                     event.preventDefault();
-                    if (!$("#rom").val() || !$("#color").val()) {
+                    const productId = $("#productId").val();
+                    const rom = $("#rom").val();
+                    const color = $("#color").val();
+                    const quantity = $("#quantity").val();
+                    let variantId = null;
+
+                    if (!rom || !color) {
                         alert("Vui lòng chọn phiên bản và màu sắc!");
                         return;
                     }
 
-                    let productId = $("#productId").val();
-                    let rom = $("#rom").val();
-                    let color = $("#color").val();
-                    let quantity = $("#quantity").val();
-                    let variantId = ""; // Khởi tạo biến để lưu variantId
-
-                    // Tìm variantId dựa trên rom và color
-                    $thumbnailItems.each(function() {
-                        if ($(this).data("image") === $("#mainImage").attr("src")) {
-                            variantId = $(this).data("variant-id"); // Sử dụng variantId làm variantId
-                            return false; // Dừng vòng lặp
+                    $thumbnailItems.each(function () {
+                        if ($(this).data("rom") == rom && $(this).data("color") == color) {
+                            variantId = $(this).data("variant-id");
+                            return false;
                         }
                     });
 
                     if (!variantId) {
-                        alert("Không thể xác định variantId. Vui lòng chọn lại.");
+                        alert(`❌ Phiên bản ${rom}GB không có màu ${color}. Vui lòng chọn màu khác hoặc phiên bản khác.`);
                         return;
                     }
 
@@ -613,69 +658,69 @@
                             let newCartCount = response.cartCount || 0;
                             $("#cartCount").text(newCartCount);
                             const successToast = `
-                                <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
-                                    <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
-                                        <div class="toast-header bg-danger text-white">
-                                            <strong class="me-auto"><i class="fas fa-check-circle"></i> Thành công</strong>
-                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
-                                        </div>
-                                        <div class="toast-body">
-                                            Đã thêm sản phẩm vào giỏ hàng thành công!
-                                        </div>
-                                    </div>
-                                </div>
-                            `;
+                <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+                    <div id="toastSuccess" class="toast align-items-center show" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="true">
+                        <div class="toast-header bg-danger text-white">
+                            <strong class="me-auto"><i class="fas fa-check-circle"></i> Thành công</strong>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+                        </div>
+                        <div class="toast-body">
+                            Đã thêm sản phẩm vào giỏ hàng thành công!
+                        </div>
+                    </div>
+                </div>`;
                             $('body').append(successToast);
-                            setTimeout(() => {
-                                $('.toast').toast('hide');
-                                setTimeout(() => {
-                                    $('.toast').parent().remove();
-                                }, 500);
-                            }, 3000);
+                            let toastEl = document.getElementById('toastSuccess');
+                            let bsToast = new bootstrap.Toast(toastEl, {delay: 3000});
+                            bsToast.show();
+                            toastEl.addEventListener('hidden.bs.toast', function () {
+                                toastEl.parentElement.remove();
+                            });
                         },
                         error: function () {
-                            alert("Có lỗi xảy ra, vui lòng thử lại");
+                            alert("❌ Có lỗi xảy ra, vui lòng thử lại.");
                         }
                     });
                 });
-
-                // Thumbnail and navigation logic
-                $("#prevBtn").click(function () {
-                    currentIndex = Math.max(0, currentIndex - 1);
-                    updateMainImage();
-                    scrollToThumbnail();
-                });
-
-                $("#nextBtn").click(function () {
-                    currentIndex = Math.min($thumbnailItems.length - 1, currentIndex + 1);
-                    updateMainImage();
-                    scrollToThumbnail();
-                });
-
-                // Click thumbnail to update main image
-                $thumbnailItems.click(function () {
-                    currentIndex = $(this).data("index");
-                    updateMainImage();
-                    scrollToThumbnail();
-                });
-
-                function updateMainImage() {
-                    let $currentThumbnail = $thumbnailItems.eq(currentIndex);
-                    $("#mainImage").attr("src", $currentThumbnail.data("image"));
-                    $thumbnailItems.removeClass("selected");
-                    $currentThumbnail.addClass("selected");
-                }
-
-                function scrollToThumbnail() {
-                    let $currentThumbnail = $thumbnailItems.eq(currentIndex);
-                    let container = $(".thumbnail-wrapper");
-                    let scrollPosition = $currentThumbnail.position().left + container.scrollLeft() - (container.width() / 2) + ($currentThumbnail.outerWidth() / 2);
-                    container.animate({scrollLeft: scrollPosition}, 300);
-                }
-
-                // Initialize with first image
-                updateMainImage();
             });
+            function updateStock() {
+                const rom = $("#rom").val();
+                const color = $("#color").val();
+                let stock = 0;
+
+                $(".thumbnail-img").each(function () {
+                    if ($(this).data("rom") == rom && $(this).data("color") == color) {
+                        stock = $(this).data("stock") || 0;
+                        return false; // dừng vòng lặp
+                    }
+                });
+
+                // Cập nhật text số lượng tồn kho
+                $("#stockCount").text(stock);
+
+                // Cập nhật giới hạn số lượng có thể mua
+                $("#quantityInput").attr("max", stock);
+
+                // Nếu số lượng hiện tại > stock thì giảm xuống = stock
+                const currentQty = parseInt($("#quantityInput").val());
+                if (currentQty > stock) {
+                    $("#quantityInput").val(stock > 0 ? stock : 1);
+                    $("#quantity").val(stock > 0 ? stock : 1);
+                }
+
+                // Nếu stock = 0 thì disable nút add
+                if (stock <= 0) {
+                    $("#addToCartBtn").prop("disabled", true).text("Hết hàng");
+                } else {
+                    $("#addToCartBtn").prop("disabled", false).text("Thêm vào giỏ");
+                }
+            }
+
+
+
+
         </script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
     </body>
 </html>
