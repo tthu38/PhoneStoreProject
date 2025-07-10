@@ -196,6 +196,46 @@
                             </div>
                         </c:if>
                     </div>
+                    
+                    <!-- Hiển thị thông tin đơn hàng đã thanh toán -->
+                    <c:if test="${not empty recentPaidOrder}">
+                        <div class="recent-order-info mt-4">
+                            <div class="card border-success">
+                                <div class="card-header bg-success text-white">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-check-circle"></i> Đơn hàng đã thanh toán gần đây
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="order-info-item">
+                                        <strong>Mã đơn hàng:</strong> #${recentPaidOrder.id}
+                                    </div>
+                                    <div class="order-info-item">
+                                        <strong>Ngày đặt:</strong> ${recentPaidOrder.orderDateFormatted}
+                                    </div>
+                                    <div class="order-info-item">
+                                        <strong>Tổng tiền:</strong> 
+                                        <span class="text-success">
+                                            <fmt:formatNumber value="${recentPaidOrder.totalAmount}" type="currency" currencySymbol="₫" />
+                                        </span>
+                                    </div>
+                                    <div class="order-info-item">
+                                        <strong>Trạng thái:</strong> 
+                                        <span class="badge bg-success">Đã thanh toán</span>
+                                    </div>
+                                    <div class="order-info-item">
+                                        <strong>Địa chỉ giao hàng:</strong> 
+                                        <small class="text-muted">${recentPaidOrder.shippingAddress}</small>
+                                    </div>
+                                    <div class="text-center mt-3">
+                                        <a href="${pageContext.request.contextPath}/user/profile.jsp" class="btn btn-outline-success btn-sm">
+                                            <i class="fas fa-eye"></i> Xem chi tiết đơn hàng
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </c:if>
                 </div>
             </div>
         </div>
