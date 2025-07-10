@@ -9,17 +9,20 @@ package model;
  * @author ThienThu
  */
 public class CartItem {
-    private int quantity;
     private ProductVariant productVariant;
+    private int quantity;
     private boolean selected = true; // Default to selected
 
-    public CartItem(int quantity, ProductVariant productVariant) {
-        this.quantity = quantity;
+    public CartItem(ProductVariant productVariant, int quantity) {
         this.productVariant = productVariant;
-        this.selected = true;
+        this.quantity = quantity;
     }
 
     public CartItem() {
+    }
+
+    public ProductVariant getProductVariant() {
+        return productVariant;
     }
 
     public int getQuantity() {
@@ -28,14 +31,6 @@ public class CartItem {
 
     public void setQuantity(int quantity) {
         this.quantity = quantity;
-    }
-
-    public ProductVariant getProductVariant() {
-        return productVariant;
-    }
-
-    public void setProductVariant(ProductVariant productVariant) {
-        this.productVariant = productVariant;
     }
 
     public boolean isSelected() {

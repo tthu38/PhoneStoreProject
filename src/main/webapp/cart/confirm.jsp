@@ -8,7 +8,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ page import="java.time.LocalDateTime" %>
-<%@ page import="model.Cart" %>
+<%@ page import="java.util.List" %>
 <%@ page import="model.CartItem" %>
 <%
     // Set current time for discount checking
@@ -19,11 +19,11 @@
     }
     
     // Calculate selected total for confirm page
-    Cart cart = (Cart) session.getAttribute("cart");
+    List<CartItem> cart = (List<CartItem>) session.getAttribute("cart");
     double selectedTotal = 0;
-    if (cart != null && cart.getCartItems() != null) {
+    if (cart != null && !cart.isEmpty()) {
         java.time.LocalDateTime now = java.time.LocalDateTime.now();
-        for (CartItem item : cart.getCartItems().values()) {
+        for (CartItem item : cart) {
             if (item.isSelected()) {
                 java.math.BigDecimal price = item.getProductVariant().getDiscountPrice() != null
                         && item.getProductVariant().getDiscountExpiry() != null
@@ -275,14 +275,14 @@
                                     <div class="form-group">
                                         <label class="form-label">Họ và tên *</label>
                                         <input type="text" class="form-control" name="fullName" required 
-                                               value="${currentUser != null ? currentUser.fullName : ''}" placeholder="Nhập họ và tên">
+                                               value="${sessionScope.user != null ? sessionScope.user.fullName : ''}" placeholder="Nhập họ và tên">
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label class="form-label">Số điện thoại *</label>
                                         <input type="tel" class="form-control" name="phone" required 
-                                               value="${currentUser != null ? currentUser.phone : ''}" placeholder="Nhập số điện thoại">
+                                               value="${sessionScope.user != null ? sessionScope.user.phone : ''}" placeholder="Nhập số điện thoại">
                                     </div>
                                 </div>
                             </div>
@@ -381,17 +381,27 @@
                             <i class="fas fa-shopping-bag"></i> Tóm tắt đơn hàng
                         </h4>
                         
-                        <c:if test="${not empty cart.cartItems}">
-                            <c:forEach var="entry" items="${cart.cartItems}">
-                                <c:set var="variantId" value="${entry.key}" />
-                                <c:set var="item" value="${entry.value}" />
+                        <c:if test="${not empty cart}">
+                            <c:forEach var="item" items="${cart}">
                                 <c:set var="product" value="${item.productVariant.product}" />
                                 <c:set var="variant" value="${item.productVariant}" />
                                 
                                 <c:if test="${item.selected}">
                                     <div class="order-item">
-                                        <img src="${pageContext.request.contextPath}/images/${product.thumbnailImage}" 
-                                             alt="${product.name}" class="order-item-image">
+                                        <c:choose>
+                                            <c:when test="${not empty variant.imageURLs}">
+                                                <img src="${variant.imageURLs}" 
+                                                     alt="${product.name}" class="order-item-image">
+                                            </c:when>
+                                            <c:when test="${not empty product.thumbnailImage}">
+                                                <img src="${pageContext.request.contextPath}/images/${product.thumbnailImage}" 
+                                                     alt="${product.name}" class="order-item-image">
+                                            </c:when>
+                                            <c:otherwise>
+                                                <img src="${pageContext.request.contextPath}/images/default-product.jpg" 
+                                                     alt="${product.name}" class="order-item-image">
+                                            </c:otherwise>
+                                        </c:choose>
                                         <div class="order-item-info">
                                             <div class="order-item-name">${product.name}</div>
                                             <div class="order-item-variant">
@@ -463,6 +473,14 @@
             document.getElementById('placeOrderBtn').addEventListener('click', function() {
                 const form = document.getElementById('checkoutForm');
                 const selectedPayment = document.querySelector('.payment-method.selected');
+                
+                // Kiểm tra user đăng nhập
+                const currentUser = '${sessionScope.user}';
+                if (!currentUser || currentUser === 'null' || currentUser === '') {
+                    alert('Vui lòng đăng nhập để tiếp tục thanh toán');
+                    window.location.href = '${pageContext.request.contextPath}/user/login.jsp';
+                    return;
+                }
                 
                 if (!form.checkValidity()) {
                     form.reportValidity();

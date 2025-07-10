@@ -31,7 +31,8 @@ class CartManager {
             });
         });
 
-        // Remove buttons
+        // Remove buttons - Comment out to avoid conflict with JSP form submit
+        /*
         document.querySelectorAll('.remove-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -39,6 +40,7 @@ class CartManager {
                 this.removeItem(variantId);
             });
         });
+        */
 
         // Clear cart button
         const clearBtn = document.querySelector('.clear-cart-btn');

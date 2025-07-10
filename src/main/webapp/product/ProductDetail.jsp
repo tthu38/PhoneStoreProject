@@ -388,7 +388,8 @@
                                  alt="${variant.color} ${variant.rom}GB"
                                  class="thumbnail-img ${loop.index == 0 ? 'selected' : ''}"
                                  data-image="${variant.imageURLs}"
-                                 data-index="${loop.index}">
+                                 data-index="${loop.index}"
+                                 data-variant-id="${variant.id}">
                         </c:forEach>
                     </div>
                 </div>
@@ -585,14 +586,27 @@
                     let rom = $("#rom").val();
                     let color = $("#color").val();
                     let quantity = $("#quantity").val();
+                    let variantId = ""; // Khởi tạo biến để lưu variantId
+
+                    // Tìm variantId dựa trên rom và color
+                    $thumbnailItems.each(function() {
+                        if ($(this).data("image") === $("#mainImage").attr("src")) {
+                            variantId = $(this).data("variant-id"); // Sử dụng variantId làm variantId
+                            return false; // Dừng vòng lặp
+                        }
+                    });
+
+                    if (!variantId) {
+                        alert("Không thể xác định variantId. Vui lòng chọn lại.");
+                        return;
+                    }
+
                     $.ajax({
                         type: "POST",
                         url: "carts",
                         data: {
                             action: "add",
-                            productId: productId,
-                            rom: rom,
-                            color: color,
+                            variantId: variantId,
                             quantity: quantity
                         },
                         success: function (response) {
