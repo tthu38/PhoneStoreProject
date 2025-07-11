@@ -58,13 +58,20 @@ public class OrderDetailService {
     public List<OrderDetails> getOrderDetailsByOrderId(int orderId) {
         EntityManager em = emf.createEntityManager();
         try {
-            return em.createQuery(
+            System.out.println("[OrderDetailService] Getting order details for order ID: " + orderId);
+            List<OrderDetails> details = em.createQuery(
                 "SELECT od FROM OrderDetails od " +
                 "LEFT JOIN FETCH od.productVariant pv " +
                 "LEFT JOIN FETCH pv.product " +
                 "WHERE od.order.id = :orderID", OrderDetails.class)
                 .setParameter("orderID", orderId)
                 .getResultList();
+            System.out.println("[OrderDetailService] Found " + details.size() + " order details for order ID: " + orderId);
+            return details;
+        } catch (Exception e) {
+            System.out.println("[OrderDetailService] Error getting order details for order ID " + orderId + ": " + e.getMessage());
+            e.printStackTrace();
+            return new java.util.ArrayList<>();
         } finally {
             em.close();
         }

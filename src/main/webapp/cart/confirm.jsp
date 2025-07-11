@@ -563,11 +563,11 @@
                     // Chuyển form action đến PayPalServlet
                     form.action = '${pageContext.request.contextPath}/paypal';
                 } else if (paymentMethod === 'vnpay') {
-                    // Chuyển form action đến PayPalServlet
+                    // Chuyển form action đến VNPayServlet
                     form.action = '${pageContext.request.contextPath}/vnpay';
-                }else {
-                    // Giữ nguyên action đến CartServlet cho các phương thức khác
-                    form.action = '${pageContext.request.contextPath}/carts';
+                } else {
+                    // Chuyển form action đến OrderServlet cho COD
+                    form.action = '${pageContext.request.contextPath}/order';
                 }
                 
                 // Submit form
