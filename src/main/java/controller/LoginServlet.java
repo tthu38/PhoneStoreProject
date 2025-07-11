@@ -127,7 +127,7 @@ public class LoginServlet extends HttpServlet {
             Optional<User> rememberedUser = userService.checkRememberToken(request);
             if (rememberedUser.isPresent()) {
                 request.getSession().setAttribute("user", rememberedUser.get());
-                response.sendRedirect(request.getContextPath() + "/indexFirst.jsp");
+                  response.sendRedirect("home");
                 return;
             }
         }
@@ -143,6 +143,7 @@ public class LoginServlet extends HttpServlet {
 
     if (user != null) {
         request.getSession().setAttribute("user", user);
+        request.getSession().setAttribute("userId", user.getUserID());
 
         String rememberMe = request.getParameter("rememberMe");
         if ("on".equals(rememberMe)) {
@@ -166,7 +167,7 @@ public class LoginServlet extends HttpServlet {
             response.addCookie(phoneCookie);
         }
 
-        response.sendRedirect(request.getContextPath() + "/indexFirst.jsp");
+          response.sendRedirect("home");
     } else {
         request.setAttribute("error", "Sai email/số điện thoại hoặc mật khẩu");
         request.getRequestDispatcher("/user/login.jsp").forward(request, response);
@@ -232,7 +233,7 @@ public class LoginServlet extends HttpServlet {
             }
         }
 
-        response.sendRedirect(request.getContextPath() + "/indexFirst.jsp");
+          response.sendRedirect("home");
     }
 
     private void handleLoginGoogle(HttpServletRequest request, HttpServletResponse response)
@@ -284,6 +285,7 @@ public class LoginServlet extends HttpServlet {
         }
 
         request.getSession().setAttribute("user", userToLogin);
+        request.getSession().setAttribute("userId", userToLogin.getUserID());
         request.getSession().setAttribute("userName", userToLogin.getFullName());
         request.getSession().setAttribute("userEmail", userToLogin.getEmail());
 
@@ -299,7 +301,7 @@ public class LoginServlet extends HttpServlet {
         }
         request.getSession().removeAttribute("rememberMe");
 
-        response.sendRedirect(request.getContextPath() + "/indexFirst.jsp");
+          response.sendRedirect("home");
     } catch (Exception e) {
         e.printStackTrace();
         request.setAttribute("error", "Lỗi khi đăng nhập bằng Google: " + e.getMessage());

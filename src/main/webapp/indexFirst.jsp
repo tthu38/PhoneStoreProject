@@ -397,29 +397,29 @@
                 <button class="btn btn-link text-primary">Giá</button>
             </div>
         </div>
-       <div class="content-frame">
-    <c:if test="${not empty recommendedProducts}">
-        <h2>Sản phẩm Gợi Ý</h2>
-        <div class="row">
-            <c:forEach var="product" items="${recommendedProducts}">
-                <div class="col-4">
-                    <div class="card">
-                        <img src="${product.image}" class="card-img-top" alt="${product.name}">
-                        <div class="card-body">
-                            <h5 class="card-title">${product.name}</h5>
-                            <p class="card-text">${product.description}</p>
-                            <p class="card-text text-danger">Giá: ${product.price}</p>
+        <div class="content-frame">
+            <c:if test="${not empty recommendedProducts}">
+                <h2>Sản phẩm Gợi Ý</h2>
+                <div class="row">
+                    <c:forEach var="product" items="${recommendedProducts}">
+                        <div class="col-4">
+                            <div class="card">
+                                <img src="${product.image}" class="card-img-top" alt="${product.name}">
+                                <div class="card-body">
+                                    <h5 class="card-title">${product.name}</h5>
+                                    <p class="card-text">${product.description}</p>
+                                    <p class="card-text text-danger">Giá: ${product.price}</p>
+                                </div>
+                            </div>
                         </div>
-                    </div>
+                    </c:forEach>
                 </div>
-            </c:forEach>
-        </div>
-    </c:if>
+            </c:if>
 
-    <c:if test="${empty recommendedProducts}">
-        <p>Không có sản phẩm gợi ý.</p>
-    </c:if>
-</div>
+            <c:if test="${empty recommendedProducts}">
+                <p>Không có sản phẩm gợi ý.</p>
+            </c:if>
+        </div>
 
         <div class="content-frame">
             <section id="products-section" class="products-section">
@@ -502,5 +502,7 @@
                                     document.querySelector('#products-section')?.scrollIntoView({behavior: 'smooth'});
                                 }
         </script>
+        
+
     </body>
 </html>

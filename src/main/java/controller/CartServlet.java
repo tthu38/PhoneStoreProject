@@ -15,6 +15,8 @@ import java.io.PrintWriter;
 import model.CartItem;
 import model.ProductVariant;
 import service.ProductVariantService;
+import utils.InteractionLogger;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.math.BigDecimal;
@@ -111,43 +113,53 @@ public class CartServlet extends HttpServlet {
         }
     }
 
-    private void addToCart(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        int variantId = Integer.parseInt(request.getParameter("variantId"));
-        int quantity = Integer.parseInt(request.getParameter("quantity"));
+   private void addToCart(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    int variantId = Integer.parseInt(request.getParameter("variantId"));
+    int quantity = Integer.parseInt(request.getParameter("quantity"));
 
-        HttpSession session = request.getSession();
-        List<CartItem> cart = (List<CartItem>) session.getAttribute("cart");
-        if (cart == null) {
-            cart = new ArrayList<>();
-            session.setAttribute("cart", cart);
-        }
-
-        // Lấy variant
-        ProductVariantService variantService = new ProductVariantService();
-        ProductVariant variant = variantService.getProductVariantById(variantId);
-
-        // Kiểm tra đã có trong giỏ chưa
-        boolean found = false;
-        for (CartItem item : cart) {
-            if (item.getProductVariant().getId() == variantId) {
-                item.setQuantity(item.getQuantity() + quantity);
-                found = true;
-                break;
-            }
-        }
-        if (!found) {
-            cart.add(new CartItem(variant, quantity));
-        }
-
-        // Tính tổng số lượng
-        int totalQuantity = 0;
-        for (CartItem item : cart) {
-            totalQuantity += item.getQuantity();
-        }
-
-        response.setContentType("application/json");
-        response.getWriter().write("{\"cartCount\": " + totalQuantity + "}");
+    HttpSession session = request.getSession();
+    List<CartItem> cart = (List<CartItem>) session.getAttribute("cart");
+    if (cart == null) {
+        cart = new ArrayList<>();
+        session.setAttribute("cart", cart);
     }
+
+    // Lấy variant
+    ProductVariantService variantService = new ProductVariantService();
+    ProductVariant variant = variantService.getProductVariantById(variantId);
+
+    // Kiểm tra đã có trong giỏ chưa
+    boolean found = false;
+    for (CartItem item : cart) {
+        if (item.getProductVariant().getId() == variantId) {
+            item.setQuantity(item.getQuantity() + quantity);
+            found = true;
+            break;
+        }
+    }
+    if (!found) {
+        cart.add(new CartItem(variant, quantity));
+    }
+
+    // Ghi nhận tương tác "cart"
+    try {
+        int userId = (int) session.getAttribute("userId"); // giả sử bạn đã lưu userId khi đăng nhập
+        int productId = variant.getProduct().getId();
+        InteractionLogger.logInteraction(userId, productId, "cart");
+    } catch (Exception e) {
+        System.out.println("Không thể ghi log tương tác cart: " + e.getMessage());
+    }
+
+    // Tính tổng số lượng
+    int totalQuantity = 0;
+    for (CartItem item : cart) {
+        totalQuantity += item.getQuantity();
+    }
+
+    response.setContentType("application/json");
+    response.getWriter().write("{\"cartCount\": " + totalQuantity + "}");
+}
+
 
     private void removeFromCart(HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {

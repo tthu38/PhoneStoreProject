@@ -32,6 +32,7 @@ import service.ProductService;
  */
 @WebServlet("/home")
 public class HomeServlet extends HttpServlet {
+
     private ProductService productService = new ProductService();
 
     @Override
@@ -44,51 +45,59 @@ public class HomeServlet extends HttpServlet {
 
         // ====== GỢI Ý SẢN PHẨM TỪ FLASK API =======
         // Kiểm tra nếu user đã đăng nhập
-HttpSession session = request.getSession(false);
-if (session != null && session.getAttribute("userId") != null) {
-    int userId = (int) session.getAttribute("userId");
+        HttpSession session = request.getSession(false);
+        if (session != null && session.getAttribute("userId") != null) {
+            int userId = (int) session.getAttribute("userId");
 
-    try {
-        String apiUrl = "http://localhost:5555/api?user_id=" + userId + "&method=hybrid";
-        java.net.URL url = new java.net.URL(apiUrl);
-        java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
-        conn.setRequestMethod("GET");
+// Gọi reload Flask
+            try {
+                URL reloadUrl = new URL("http://localhost:5555/api/reload");
+                HttpURLConnection reloadConn = (HttpURLConnection) reloadUrl.openConnection();
+                reloadConn.setRequestMethod("POST");
+                int reloadCode = reloadConn.getResponseCode();
+                System.out.println("Reload response code: " + reloadCode);
+            } catch (Exception ex) {
+                System.out.println("Không thể reload từ Flask: " + ex.getMessage());
+            }
 
-        java.io.BufferedReader in = new java.io.BufferedReader(
-                new java.io.InputStreamReader(conn.getInputStream()));
-        String inputLine;
-        StringBuilder responseStr = new StringBuilder();
-        while ((inputLine = in.readLine()) != null) {
-            responseStr.append(inputLine);
+// Gọi API gợi ý sản phẩm
+            String apiUrl = "http://localhost:5555/api?user_id=" + userId + "&method=hybrid";
+            try {
+                URL apiCallUrl = new URL(apiUrl);
+                HttpURLConnection conn = (HttpURLConnection) apiCallUrl.openConnection();
+                conn.setRequestMethod("GET");
+
+                BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                String inputLine;
+                StringBuilder responseStr = new StringBuilder();
+                while ((inputLine = in.readLine()) != null) {
+                    responseStr.append(inputLine);
+                }
+                in.close();
+
+                org.json.JSONObject jsonResponse = new org.json.JSONObject(responseStr.toString());
+                org.json.JSONArray productArray = jsonResponse.getJSONArray("san pham goi y");
+
+                List<Map<String, Object>> recommendedProducts = new ArrayList<>();
+                for (int i = 0; i < productArray.length(); i++) {
+                    org.json.JSONObject p = productArray.getJSONObject(i);
+                    Map<String, Object> product = new HashMap<>();
+                    product.put("id", p.getInt("id"));
+                    product.put("name", p.getString("name"));
+                    product.put("description", p.getString("description"));
+                    product.put("price", p.getString("price"));
+                    product.put("image", p.getString("image"));
+                    recommendedProducts.add(product);
+                }
+
+                request.setAttribute("recommendedProducts", recommendedProducts);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
         }
-        in.close();
-
-        org.json.JSONObject jsonResponse = new org.json.JSONObject(responseStr.toString());
-        org.json.JSONArray productArray = jsonResponse.getJSONArray("san pham goi y");
-
-        List<Map<String, Object>> recommendedProducts = new java.util.ArrayList<>();
-        for (int i = 0; i < productArray.length(); i++) {
-            org.json.JSONObject p = productArray.getJSONObject(i);
-            Map<String, Object> product = new java.util.HashMap<>();
-            product.put("id", p.getInt("id"));
-            product.put("name", p.getString("name"));
-            product.put("description", p.getString("description"));
-            product.put("price", p.getString("price"));
-            product.put("image", p.getString("image"));
-            recommendedProducts.add(product);
-        }
-
-        request.setAttribute("recommendedProducts", recommendedProducts);
-    } catch (Exception e) {
-        e.printStackTrace();
-        // Log lỗi nếu có
-    }
-}
-
 
         // Forward sang trang chính
         request.getRequestDispatcher("indexFirst.jsp").forward(request, response);
     }
 }
-
-
