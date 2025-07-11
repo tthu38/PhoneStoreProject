@@ -8,12 +8,15 @@ import java.io.*;
 import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import model.Category;
 import model.Product;
 import model.ProductBrand;
@@ -36,6 +39,8 @@ public class ProductServlet extends HttpServlet {
     private ProductVariantService productVariantService;
     private ProductStockService productStockService;
     private BrandService brandService;
+    private static final String INTERACTION_API_URL = "http://localhost:5555/api/interaction";
+    private static final String SUGGESTION_API_URL = "http://localhost:5555/api";
 
     @Override
     public void init() {
@@ -45,6 +50,36 @@ public class ProductServlet extends HttpServlet {
         brandService = new BrandService();
     }
 
+    // Gửi tương tác đến Flask API
+   private void logInteraction(int userId, int productId, String interactionType) {
+        try {
+            String jsonPayload = String.format("{\"user_id\":%d,\"product_id\":%d,\"interaction_type\":\"%s\"}", 
+                                              userId, productId, interactionType);
+            URL url = new URL(INTERACTION_API_URL);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+            conn.setDoOutput(true);
+
+            try (OutputStream os = conn.getOutputStream()) {
+                os.write(jsonPayload.getBytes(StandardCharsets.UTF_8));
+            }
+
+            int responseCode = conn.getResponseCode();
+            if (responseCode != 200) {
+                try (BufferedReader br = new BufferedReader(new InputStreamReader(conn.getErrorStream()))) {
+                    String errorResponse = br.lines().collect(Collectors.joining());
+                    System.out.println("Lỗi API /api/interaction: Code=" + responseCode + ", Response=" + errorResponse);
+                }
+            } else {
+                System.out.println("Tương tác " + interactionType + " đã lưu: UserID=" + userId + ", ProductID=" + productId);
+            }
+            conn.disconnect();
+        } catch (Exception e) {
+            System.out.println("Lỗi gọi API /api/interaction: UserID=" + userId + ", ProductID=" + productId + 
+                               ", Type=" + interactionType + ", Error=" + e.getMessage());
+        }
+    }
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -94,6 +129,7 @@ public class ProductServlet extends HttpServlet {
                 listProducts(request, response);
         }
     }
+    
 
     private void listProducts(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -406,55 +442,56 @@ public class ProductServlet extends HttpServlet {
         request.getRequestDispatcher("/product/productListCart.jsp").forward(request, response);
     }
 
-    private void detailProduct(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+    private void detailProduct(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
             int id = Integer.parseInt(request.getParameter("productId"));
+            int userId = Optional.ofNullable(request.getSession(false))
+                    .map(s -> (Integer) s.getAttribute("userId"))
+                    .orElse(1); // Giá trị mặc định để test
+
+            // Ghi tương tác view và click
+            logInteraction(userId, id, "view");
+            logInteraction(userId, id, "click");
+
+            // Lấy chi tiết sản phẩm
             List<Map<String, Object>> productDetails = productService.detailProduct(id);
-            List<ProductStock> productStocks = productStockService.getStockByProductId(id);
-            Map<Integer, Integer> stockMap = new HashMap<>();
-
-            for (ProductStock ps : productStocks) {
-                stockMap.put(ps.getVariant().getId(), ps.getAmount());
-            }
-
             if (productDetails.isEmpty()) {
-                response.sendError(HttpServletResponse.SC_NOT_FOUND, "Product không được tìm thấy");
+                response.sendError(HttpServletResponse.SC_NOT_FOUND, "Sản phẩm không tồn tại");
                 return;
             }
 
+            // Lấy stock và variants
+            Map<Integer, Integer> stockMap = productStockService.getStockByProductId(id).stream()
+                    .collect(HashMap::new, (m, ps) -> m.put(ps.getVariant().getId(), ps.getAmount()), HashMap::putAll);
             List<ProductVariant> productVariants = productVariantService.getVariantsByProductId(id);
 
-            // --- Gọi Flask API ---
+            // Gọi API gợi ý (chỉ content-based)
             List<Map<String, String>> suggestedProducts = new ArrayList<>();
             try {
-                String apiURL = "http://localhost:5555/api?id=" + id;
-                URL url = new URL(apiURL);
+                String apiUrl = SUGGESTION_API_URL + "?id=" + id + "&user_id=" + userId + "&method=content";
+                URL url = new URL(apiUrl);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("GET");
 
-                BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                StringBuilder jsonBuilder = new StringBuilder();
-                String line;
-                while ((line = in.readLine()) != null) {
-                    jsonBuilder.append(line);
+                try (BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
+                    String json = in.lines().collect(Collectors.joining());
+                    JSONArray arr = new JSONObject(json).getJSONArray("san pham goi y");
+                    for (int i = 0; i < arr.length(); i++) {
+                        JSONObject obj = arr.getJSONObject(i);
+                        Map<String, String> item = new HashMap<>();
+                        item.put("id", String.valueOf(obj.getInt("id")));
+                        item.put("name", obj.getString("name"));
+                        item.put("price", obj.getString("price"));
+                        item.put("image", obj.optString("image", "default.jpg"));
+                        suggestedProducts.add(item);
+                        // Ghi tương tác view cho sản phẩm gợi ý
+                        logInteraction(userId, obj.getInt("id"), "view");
+                    }
                 }
-                in.close();
                 conn.disconnect();
-
-                JSONObject json = new JSONObject(jsonBuilder.toString());
-                JSONArray arr = json.getJSONArray("san pham goi y");
-
-                for (int i = 0; i < arr.length(); i++) {
-                    JSONObject obj = arr.getJSONObject(i);
-                    Map<String, String> item = new HashMap<>();
-                    item.put("name", obj.getString("name"));
-                    item.put("price", obj.getString("price"));
-                    item.put("image", obj.optString("image", "default.jpg"));
-                    suggestedProducts.add(item);
-                }
-            } catch (Exception ex) {
-                ex.printStackTrace();
+            } catch (Exception e) {
+                System.out.println("Lỗi gọi API gợi ý: " + e.getMessage());
+                
             }
 
             // Gửi dữ liệu sang JSP
@@ -465,12 +502,12 @@ public class ProductServlet extends HttpServlet {
             request.getRequestDispatcher("/product/ProductDetail.jsp").forward(request, response);
 
         } catch (NumberFormatException e) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "ID must be an integer");
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "ID phải là số nguyên");
         } catch (Exception e) {
-            e.printStackTrace();
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "An error occurred");
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Lỗi hệ thống: " + e.getMessage());
         }
     }
+
 
     private void getProductBestSeller(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {

@@ -4,6 +4,10 @@
  */
 package controller;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
@@ -11,6 +15,13 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import service.ProductService;
@@ -31,14 +42,53 @@ public class HomeServlet extends HttpServlet {
         List<Map<String, Object>> discountedProducts = productService.getMostDiscountedProducts(10);
         request.setAttribute("discountedProducts", discountedProducts);
 
-        // Gợi ý sản phẩm nếu người dùng đã đăng nhập
-        Integer userId = (Integer) request.getSession().getAttribute("userId");
-        if (userId != null) {
-            List<Map<String, Object>> recommendedProducts = utils.ProductRecommendationClient.getRecommendations(userId);
-            request.setAttribute("recommendedProducts", recommendedProducts);
+        // ====== GỢI Ý SẢN PHẨM TỪ FLASK API =======
+        // Kiểm tra nếu user đã đăng nhập
+HttpSession session = request.getSession(false);
+if (session != null && session.getAttribute("userId") != null) {
+    int userId = (int) session.getAttribute("userId");
+
+    try {
+        String apiUrl = "http://localhost:5555/api?user_id=" + userId + "&method=hybrid";
+        java.net.URL url = new java.net.URL(apiUrl);
+        java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("GET");
+
+        java.io.BufferedReader in = new java.io.BufferedReader(
+                new java.io.InputStreamReader(conn.getInputStream()));
+        String inputLine;
+        StringBuilder responseStr = new StringBuilder();
+        while ((inputLine = in.readLine()) != null) {
+            responseStr.append(inputLine);
+        }
+        in.close();
+
+        org.json.JSONObject jsonResponse = new org.json.JSONObject(responseStr.toString());
+        org.json.JSONArray productArray = jsonResponse.getJSONArray("san pham goi y");
+
+        List<Map<String, Object>> recommendedProducts = new java.util.ArrayList<>();
+        for (int i = 0; i < productArray.length(); i++) {
+            org.json.JSONObject p = productArray.getJSONObject(i);
+            Map<String, Object> product = new java.util.HashMap<>();
+            product.put("id", p.getInt("id"));
+            product.put("name", p.getString("name"));
+            product.put("description", p.getString("description"));
+            product.put("price", p.getString("price"));
+            product.put("image", p.getString("image"));
+            recommendedProducts.add(product);
         }
 
+        request.setAttribute("recommendedProducts", recommendedProducts);
+    } catch (Exception e) {
+        e.printStackTrace();
+        // Log lỗi nếu có
+    }
+}
+
+
+        // Forward sang trang chính
         request.getRequestDispatcher("indexFirst.jsp").forward(request, response);
     }
 }
+
 

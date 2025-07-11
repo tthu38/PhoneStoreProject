@@ -397,38 +397,30 @@
                 <button class="btn btn-link text-primary">Giá</button>
             </div>
         </div>
-        <!--<div class="content-frame">
-        <c:if test="${not empty recommendedProducts}">
-            <section class="products-section bg-light py-5">
-                <div class="container">
-                    <h2 class="text-success text-center mb-4">Gợi Ý Dành Riêng Cho Bạn</h2>
-                    <div class="row">
+       <div class="content-frame">
+    <c:if test="${not empty recommendedProducts}">
+        <h2>Sản phẩm Gợi Ý</h2>
+        <div class="row">
             <c:forEach var="product" items="${recommendedProducts}">
-                <div class="col-custom-5 mb-4 d-flex">
-                    <div class="card w-100">
-                        <a href="products?action=productDetail&productId=${product.id}">
-                            <img src="${product.thumbnailImage}" class="card-img-top" alt="${product.productName}">
-                            <div class="card-body">
-                                <h5 class="card-title">${product.productName}</h5>
-                                <p class="card-text">
-                                    <span class="text-danger fw-bold">${product.price}₫</span>
-                                </p>
-                            </div>
-                        </a>
-                        <div class="card-footer">
-                            <form action="${pageContext.request.contextPath}/carts?action=add" method="get">
-                                <input type="hidden" name="variantId" value="${product.variantId}">
-                                <button type="submit" class="btn btn-success">Thêm vào giỏ hàng</button>
-                            </form>
+                <div class="col-4">
+                    <div class="card">
+                        <img src="${product.image}" class="card-img-top" alt="${product.name}">
+                        <div class="card-body">
+                            <h5 class="card-title">${product.name}</h5>
+                            <p class="card-text">${product.description}</p>
+                            <p class="card-text text-danger">Giá: ${product.price}</p>
                         </div>
                     </div>
                 </div>
             </c:forEach>
         </div>
-    </div>
-</section>
-        </c:if>
-</div>-->
+    </c:if>
+
+    <c:if test="${empty recommendedProducts}">
+        <p>Không có sản phẩm gợi ý.</p>
+    </c:if>
+</div>
+
         <div class="content-frame">
             <section id="products-section" class="products-section">
                 <div class="container">
