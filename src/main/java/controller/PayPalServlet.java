@@ -15,9 +15,14 @@ import model.CartItem;
 import model.Order;
 import model.OrderDetails;
 import model.User;
+import model.ProductStock;
 import service.OrderService;
 import service.OrderDetailService;
+import service.MailService;
+import service.ProductStockService;
 import Payment.PaypalConfig;
+import model.UserAddress;
+import service.UserAddressService;
 
 /**
  *
@@ -61,19 +66,38 @@ public class PayPalServlet extends HttpServlet {
             throws ServletException, IOException {
         HttpSession session = request.getSession();
         
+        // Kiểm tra user đã đăng nhập chưa
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            request.setAttribute("error", "Vui lòng đăng nhập để tiếp tục thanh toán");
+            request.getRequestDispatcher("/user/login.jsp").forward(request, response);
+            return;
+        }
+        
+        // Kiểm tra user có địa chỉ không
+        UserAddressService userAddressService = new UserAddressService();
+        UserAddress defaultAddress = userAddressService.getDefaultAddressByUserId(user.getUserID());
+        if (defaultAddress == null) {
+            defaultAddress = userAddressService.getFirstActiveAddressByUserId(user.getUserID());
+        }
+        
+        if (defaultAddress == null) {
+            // Chuyển hướng đến trang profile để cập nhật thông tin
+            response.sendRedirect(request.getContextPath() + "/user/profile.jsp?error=no_address&message=" + 
+                java.net.URLEncoder.encode("Vui lòng cập nhật địa chỉ giao hàng để tiếp tục thanh toán", "UTF-8"));
+            return;
+        }
+        
         // Lấy thông tin giao hàng từ form (nếu có)
         String fullName = request.getParameter("fullName");
         String phone = request.getParameter("phone");
         String address = request.getParameter("address");
-        String city = request.getParameter("city");
-        String district = request.getParameter("district");
-        String ward = request.getParameter("ward");
         String note = request.getParameter("note");
         
         // Lưu thông tin giao hàng vào session nếu có
         if (fullName != null && !fullName.trim().isEmpty()) {
             session.setAttribute("shippingInfo", new String[]{
-                fullName, phone, address + ", " + ward + ", " + district + ", " + city, note
+                fullName, phone, address, note
             });
         }
         
@@ -82,7 +106,7 @@ public class PayPalServlet extends HttpServlet {
         
         if (cart == null || cart.isEmpty()) {
             request.setAttribute("error", "Giỏ hàng trống");
-            response.sendRedirect(request.getContextPath() + "/carts");
+            request.getRequestDispatcher("/carts").forward(request, response);
             return;
         }
         
@@ -114,23 +138,52 @@ public class PayPalServlet extends HttpServlet {
         
         if (totalAmountVND.compareTo(BigDecimal.ZERO) == 0) {
             request.setAttribute("error", "Vui lòng chọn ít nhất một sản phẩm để thanh toán");
-            response.sendRedirect(request.getContextPath() + "/carts");
+            request.getRequestDispatcher("/carts").forward(request, response);
             return;
         }
+        
+        // Kiểm tra số lượng sản phẩm trong kho trước khi thanh toán
+        ProductStockService productStockService = new ProductStockService();
+        StringBuilder stockError = new StringBuilder();
+        
+        System.out.println("[PayPalServlet] Kiểm tra số lượng trong kho cho " + selectedItems.size() + " sản phẩm");
+        
+        for (CartItem item : selectedItems) {
+            ProductStock stock = productStockService.getStockByVariantId(item.getProductVariant().getId());
+            System.out.println("[PayPalServlet] Kiểm tra sản phẩm: " + item.getProductVariant().getProduct().getName() + 
+                             " - Số lượng yêu cầu: " + item.getQuantity() + 
+                             " - Số lượng trong kho: " + (stock != null ? stock.getAmount() : "null"));
+            
+            if (stock != null && stock.getId() != null) {
+                if (item.getQuantity() > stock.getAmount()) {
+                    stockError.append("Sản phẩm '").append(item.getProductVariant().getProduct().getName())
+                            .append(" (").append(item.getProductVariant().getColor()).append(" - ")
+                            .append(item.getProductVariant().getRom()).append("GB)")
+                            .append("' chỉ còn ").append(stock.getAmount())
+                            .append(" sản phẩm trong kho. Bạn đã chọn ").append(item.getQuantity()).append(" sản phẩm.\n");
+                }
+            } else {
+                stockError.append("Sản phẩm '").append(item.getProductVariant().getProduct().getName())
+                        .append(" (").append(item.getProductVariant().getColor()).append(" - ")
+                        .append(item.getProductVariant().getRom()).append("GB)")
+                        .append("' hiện không có trong kho.\n");
+            }
+        }
+        
+        if (stockError.length() > 0) {
+            System.out.println("[PayPalServlet] Lỗi số lượng trong kho: " + stockError.toString());
+            request.setAttribute("error", "Không đủ số lượng sản phẩm trong kho:\n" + stockError.toString());
+            request.getRequestDispatcher("/cart/confirm.jsp").forward(request, response);
+            return;
+        }
+        
+        System.out.println("[PayPalServlet] Kiểm tra số lượng trong kho thành công, tiếp tục xử lý thanh toán");
         
         // Tạo đơn hàng trong database
-        User user = (User) session.getAttribute("user");
-        if (user == null) {
-            request.setAttribute("error", "Vui lòng đăng nhập để tiếp tục thanh toán");
-            response.sendRedirect(request.getContextPath() + "/user/login.jsp");
-            return;
-        }
-        
-        // Tạo đơn hàng
         Order order = new Order();
         order.setUser(user);
         order.setPhoneNumber(phone != null ? phone : "");
-        order.setShippingAddress(address + ", " + ward + ", " + district + ", " + city);
+        order.setShippingAddress(address);
         order.setNote(note);
         order.setTotalAmount(totalAmountVND);
         order.setStatus("pending");
@@ -142,7 +195,7 @@ public class PayPalServlet extends HttpServlet {
         
         if (!orderCreated) {
             request.setAttribute("error", "Có lỗi xảy ra khi tạo đơn hàng. Vui lòng thử lại.");
-            response.sendRedirect(request.getContextPath() + "/carts");
+            request.getRequestDispatcher("/carts").forward(request, response);
             return;
         }
         
@@ -226,7 +279,48 @@ public class PayPalServlet extends HttpServlet {
         Integer orderId = (Integer) session.getAttribute("currentOrderId");
         if (orderId != null) {
             OrderService orderService = new OrderService();
-            orderService.updateOrderStatus(orderId, "paid");
+            boolean updated = orderService.updateOrderStatus(orderId, "paid");
+            
+            if (updated) {
+                // Trừ số lượng trong kho sau khi thanh toán thành công
+                List<CartItem> selectedItems = (List<CartItem>) session.getAttribute("selectedItems");
+                if (selectedItems != null) {
+                    ProductStockService productStockService = new ProductStockService();
+                    for (CartItem item : selectedItems) {
+                        boolean stockUpdated = productStockService.updateStockAfterPayment(
+                            item.getProductVariant().getId(), 
+                            item.getQuantity()
+                        );
+                        if (stockUpdated) {
+                            System.out.println("[PayPalServlet] Đã trừ " + item.getQuantity() + 
+                                             " sản phẩm khỏi kho cho variant ID: " + item.getProductVariant().getId());
+                        } else {
+                            System.out.println("[PayPalServlet] Lỗi khi trừ số lượng trong kho cho variant ID: " + 
+                                             item.getProductVariant().getId());
+                        }
+                    }
+                }
+                
+                // Gửi email xác nhận đơn hàng
+                try {
+                    User user = (User) session.getAttribute("user");
+                    Order order = orderService.getOrderWithUserById(orderId);
+                    OrderDetailService orderDetailService = new OrderDetailService();
+                    List<OrderDetails> orderDetails = orderDetailService.getOrderDetailsByOrderId(orderId);
+                    
+                    MailService mailService = new MailService();
+                    boolean emailSent = mailService.sendOrderConfirmation(user, order, orderId, orderDetails, order.getTotalAmount());
+                    
+                    if (emailSent) {
+                        System.out.println("[PayPalServlet] Email xác nhận đơn hàng #" + orderId + " đã được gửi thành công");
+                    } else {
+                        System.out.println("[PayPalServlet] Không thể gửi email xác nhận đơn hàng #" + orderId);
+                    }
+                } catch (Exception e) {
+                    System.out.println("[PayPalServlet] Lỗi khi gửi email: " + e.getMessage());
+                    e.printStackTrace();
+                }
+            }
         }
         
         // Xóa các sản phẩm đã thanh toán khỏi giỏ hàng

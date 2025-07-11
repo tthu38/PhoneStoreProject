@@ -59,6 +59,7 @@
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                                 <li><a class="dropdown-item" href="${pageContext.request.contextPath}/user/profile.jsp">Trang cá nhân</a></li>
+                                <li><a class="dropdown-item" href="${pageContext.request.contextPath}/order-history">Lịch sử đơn hàng</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item" href="${pageContext.request.contextPath}/logout">Đăng xuất</a></li>
                             </ul>

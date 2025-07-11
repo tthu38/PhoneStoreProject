@@ -12,8 +12,14 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
+import java.util.Map;
+import model.Category;
 import model.Product;
+import model.User;
 import service.ProductService;
+import service.UserService;
+import service.OrderService;
+import service.ProductStockService;
 
 /**
  *
@@ -21,6 +27,10 @@ import service.ProductService;
  */
 @WebServlet(name = "AdminServlet", urlPatterns = {"/admin"})
 public class AdminServlet extends HttpServlet {
+
+    UserService userService = new UserService();
+    OrderService orderService = new OrderService();
+    ProductStockService productStockService = new ProductStockService();
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -61,35 +71,64 @@ public class AdminServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String menu = request.getParameter("menu");
-        String contentPage = null;
+        String contentPage;
 
         if (menu == null || menu.equals("dashboard")) {
-            contentPage = "../dashboard/dashboard.jsp";
+            contentPage = handleDashboard(request);
         } else if (menu.equals("products")) {
-            // Lấy danh sách sản phẩm
-            ProductService productService = new ProductService();
-            List<Product> products = productService.getAllProducts();
-            request.setAttribute("products", products);
-            contentPage = "../../product/ProductList.jsp";
-        } else if (menu.equals("categories")) {
-            // TODO: Lấy danh sách category, set vào request
-            contentPage = "../../product/CategoryList.jsp";
-        } else if (menu.equals("orders")) {
-            // TODO: Lấy danh sách orders, set vào request
-            contentPage = "../orders/orders.jsp";
+            contentPage = handleProductList(request);
         } else if (menu.equals("customers")) {
-            // TODO: Lấy danh sách customers, set vào request
-            contentPage = "../users/customers.jsp";
-        } else if (menu.equals("reports")) {
-            contentPage = "../reports/reports.jsp";
-        } else if (menu.equals("settings")) {
-            contentPage = "../settings/settings.jsp";
+            contentPage = handleCustomerList(request);
+        } else if (menu.equals("orders")) {
+            contentPage = handleOrders(request);
+        } else if (menu.equals("discounts")) {
+            contentPage = handleDiscounts(request);
+        } else if (menu.equals("report")) {
+            contentPage = handleReport(request);
         } else {
-            contentPage = "../dashboard/dashboard.jsp";
+            contentPage = "../dashboard/dashboard.jsp"; // fallback
         }
 
         request.setAttribute("contentPage", contentPage);
         request.getRequestDispatcher("/admin/layout/admin-header.jsp").forward(request, response);
+    }
+
+    private String handleDashboard(HttpServletRequest request) {
+        Map<String, Double> monthlyRevenue = orderService.getMonthlyRevenue();
+        request.setAttribute("monthlyRevenue", monthlyRevenue);
+
+//        List<Map<String, Object>> lowStockVariants = productStockService.getVariantDetailsWithLowStock(10);
+//        request.setAttribute("lowStockVariants", lowStockVariants);
+
+        return "../dashboard/dashboard.jsp";
+    }
+
+    private String handleProductList(HttpServletRequest request) {
+        ProductService productService = new ProductService();
+        List<Product> products = productService.getAllProducts();
+        request.setAttribute("products", products);
+
+        return "/product/ProductList.jsp";
+    }
+
+    private String handleCustomerList(HttpServletRequest request) {
+        List<User> users = userService.getAllUsers();
+        request.setAttribute("users", users);
+        return "/user/userList.jsp";
+    }
+
+    private String handleOrders(HttpServletRequest request) {
+        // TODO: xử lý hiển thị danh sách đơn hàng
+        return "/admin/orders/list.jsp"; // hoặc một file tương ứng
+    }
+
+    private String handleDiscounts(HttpServletRequest request) {
+        return "/product/DiscountManagement.jsp";
+    }
+
+    private String handleReport(HttpServletRequest request) {
+        // TODO: xử lý báo cáo
+        return "/WEB-INF/views/report/report.jsp"; // hoặc một file tương ứng
     }
 
     /**
@@ -100,9 +139,6 @@ public class AdminServlet extends HttpServlet {
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
      */
-    
-    
-    
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {

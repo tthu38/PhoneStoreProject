@@ -5,7 +5,7 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>Kết quả thanh toán - Thế Giới Công Nghệ</title>
+        <title>Thanh toán PayPal thành công - Thế Giới Công Nghệ</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/header.css">
@@ -39,7 +39,7 @@
             }
 
             .result-icon.success {
-                background: linear-gradient(135deg, #28a745, #20c997);
+                background: linear-gradient(135deg, #0070ba, #003087);
                 color: white;
             }
 
@@ -98,7 +98,7 @@
             }
 
             .btn-primary {
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                background: linear-gradient(135deg, #0070ba 0%, #003087 100%);
                 border: none;
                 padding: 12px 30px;
                 border-radius: 10px;
@@ -108,7 +108,7 @@
 
             .btn-primary:hover {
                 transform: translateY(-2px);
-                box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+                box-shadow: 0 5px 15px rgba(0,112,186,0.4);
             }
 
             .btn-secondary {
@@ -140,7 +140,7 @@
                 width: 20px;
                 height: 20px;
                 border: 3px solid #f3f3f3;
-                border-top: 3px solid #667eea;
+                border-top: 3px solid #0070ba;
                 border-radius: 50%;
                 animation: spin 1s linear infinite;
                 margin-right: 10px;
@@ -178,29 +178,15 @@
 
         <div class="payment-result-container">
             <div class="result-card">
-                <c:choose>
-                    <c:when test="${transResult == true}">
-                        <!-- Success Result -->
-                        <div class="result-icon success">
-                            <i class="fas fa-check"></i>
-                        </div>
-                        <h1 class="result-title text-success">Thanh toán thành công!</h1>
-                        <p class="result-message">
-                            Đơn hàng của bạn đã được xác nhận và đang được xử lý.
-                            Email xác nhận đã được gửi đến địa chỉ email của bạn.
-                        </p>
-                    </c:when>
-                    <c:otherwise>
-                        <!-- Failure Result -->
-                        <div class="result-icon failure">
-                            <i class="fas fa-times"></i>
-                        </div>
-                        <h1 class="result-title text-danger">Thanh toán thất bại!</h1>
-                        <p class="result-message">
-                            Có lỗi xảy ra trong quá trình thanh toán. Vui lòng thử lại.
-                        </p>
-                    </c:otherwise>
-                </c:choose>
+                <!-- Success Result -->
+                <div class="result-icon success">
+                    <i class="fab fa-paypal"></i>
+                </div>
+                <h1 class="result-title text-success">Thanh toán PayPal thành công!</h1>
+                <p class="result-message">
+                    Đơn hàng của bạn đã được xác nhận và đang được xử lý.
+                    Email xác nhận đã được gửi đến địa chỉ email của bạn.
+                </p>
 
                 <!-- Transaction Details -->
                 <div class="transaction-details">
@@ -215,10 +201,21 @@
                         </div>
                     </c:if>
                     
-                    <c:if test="${not empty paymentCode}">
+                    <c:if test="${not empty amountVND}">
                         <div class="detail-item">
-                            <span class="detail-label">Mã giao dịch:</span>
-                            <span class="detail-value">${paymentCode}</span>
+                            <span class="detail-label">Tổng tiền (VND):</span>
+                            <span class="detail-value">
+                                <fmt:formatNumber value="${amountVND}" type="currency" currencySymbol="₫" />
+                            </span>
+                        </div>
+                    </c:if>
+                    
+                    <c:if test="${not empty amountUSD}">
+                        <div class="detail-item">
+                            <span class="detail-label">Tổng tiền (USD):</span>
+                            <span class="detail-value">
+                                $${amountUSD}
+                            </span>
                         </div>
                     </c:if>
                     
@@ -232,38 +229,26 @@
                     <div class="detail-item">
                         <span class="detail-label">Phương thức:</span>
                         <span class="detail-value">
-                            <i class="fas fa-credit-card"></i> VNPay
+                            <i class="fab fa-paypal"></i> PayPal
                         </span>
                     </div>
                     
-                    <c:if test="${not empty message}">
+                    <c:if test="${not empty itemCount}">
                         <div class="detail-item">
-                            <span class="detail-label">Thông báo:</span>
-                            <span class="detail-value">${message}</span>
+                            <span class="detail-label">Số sản phẩm:</span>
+                            <span class="detail-value">${itemCount} sản phẩm</span>
                         </div>
                     </c:if>
                 </div>
 
                 <!-- Action Buttons -->
                 <div class="action-buttons">
-                    <c:choose>
-                        <c:when test="${transResult == true}">
-                            <a href="${pageContext.request.contextPath}/user/orders.jsp" class="btn btn-primary">
-                                <i class="fas fa-list"></i> Xem đơn hàng
-                            </a>
-                            <a href="${pageContext.request.contextPath}/" class="btn btn-secondary">
-                                <i class="fas fa-home"></i> Về trang chủ
-                            </a>
-                        </c:when>
-                        <c:otherwise>
-                            <a href="${pageContext.request.contextPath}/cart/confirm.jsp" class="btn btn-primary">
-                                <i class="fas fa-redo"></i> Thử lại
-                            </a>
-                            <a href="${pageContext.request.contextPath}/cart/cart.jsp" class="btn btn-secondary">
-                                <i class="fas fa-shopping-cart"></i> Giỏ hàng
-                            </a>
-                        </c:otherwise>
-                    </c:choose>
+                    <a href="${pageContext.request.contextPath}/user/orders.jsp" class="btn btn-primary">
+                        <i class="fas fa-list"></i> Xem đơn hàng
+                    </a>
+                    <a href="${pageContext.request.contextPath}/" class="btn btn-secondary">
+                        <i class="fas fa-home"></i> Về trang chủ
+                    </a>
                 </div>
 
                 <!-- Auto Redirect Countdown -->
@@ -286,14 +271,7 @@
                 
                 if (timeLeft <= 0) {
                     clearInterval(countdown);
-                    
-                    // Redirect based on result - using simple approach
-                    var isSuccess = document.querySelector('.result-icon.success') !== null;
-                    if (isSuccess) {
-                        window.location.href = '${pageContext.request.contextPath}/';
-                    } else {
-                        window.location.href = '${pageContext.request.contextPath}/cart/confirm.jsp';
-                    }
+                    window.location.href = '${pageContext.request.contextPath}/';
                 }
             }, 1000);
             
