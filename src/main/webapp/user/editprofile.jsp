@@ -60,7 +60,7 @@
                     <div class="mb-3">
                         <label class="form-label">Số điện thoại</label>
                         <input type="text" class="form-control" name="phone"
-                               value="<%= user.getPhoneNumber() != null ? user.getPhoneNumber() : "" %>" required>
+                               value="<%= user.getPhoneNumber() != null ? user.getPhoneNumber() : "" %>">
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Ngày sinh</label>

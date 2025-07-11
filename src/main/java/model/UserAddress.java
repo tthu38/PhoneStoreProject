@@ -124,7 +124,7 @@ public class UserAddress {
         return createAt;
     }
 
-    public void setCreateAt(Instant createAt) {
+    public void setCreatedAt(Instant createAt) {
         this.createAt = createAt;
     }
 

@@ -16,8 +16,8 @@
     <div class="otp-container">
         <div class="otp-title">Xác nhận email Google</div>
         <div class="otp-desc">Nhập mã xác nhận đã gửi về email Google của bạn để tiếp tục.</div>
-        <form action="${pageContext.request.contextPath}/login" method="post" class="otp-form">
-            <input type="hidden" name="action" value="verify-google-otp">
+        <form action="${pageContext.request.contextPath}/register" method="post" class="otp-form">
+            <input type="hidden" name="action" value="verify-otp">
             <input type="text" class="otp-input" name="otp" placeholder="Nhập mã OTP" required autocomplete="off">
             <button type="submit" class="otp-btn">Xác nhận</button>
         </form>

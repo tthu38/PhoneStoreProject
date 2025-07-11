@@ -5,7 +5,12 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.time.format.DateTimeFormatter;
+import java.time.LocalDate;
 import model.Order;
+import jakarta.persistence.TypedQuery;
 
 public class OrderService {
 
@@ -139,8 +144,24 @@ public class OrderService {
     }
 
     // Tìm đơn theo User ID
-    public List<Order> getOrdersByUserId(int userId) {
-        return orderDAO.findByNamedQuery("Order.findByUserID", "userID", userId);
+    public List<Order> getOrdersByUserId(Integer userId) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            System.out.println("[OrderService] Getting orders for user ID: " + userId);
+            TypedQuery<Order> query = em.createQuery(
+                "SELECT o FROM Order o LEFT JOIN FETCH o.user WHERE o.user.userID = :userId ORDER BY o.orderDate DESC", 
+                Order.class);
+            query.setParameter("userId", userId);
+            List<Order> orders = query.getResultList();
+            System.out.println("[OrderService] Found " + orders.size() + " orders for user ID: " + userId);
+            return orders;
+        } catch (Exception e) {
+            System.out.println("[OrderService] Error getting orders for user ID " + userId + ": " + e.getMessage());
+            e.printStackTrace();
+            return new java.util.ArrayList<>();
+        } finally {
+            em.close();
+        }
     }
 
     // Lấy đơn hàng đã thanh toán
@@ -165,6 +186,29 @@ public class OrderService {
                 "SELECT o FROM Order o LEFT JOIN FETCH o.user WHERE o.id = :id", Order.class)
                 .setParameter("id", id)
                 .getSingleResult();
+        } finally {
+            em.close();
+        }
+    }
+
+    // Lấy doanh thu theo tháng (key: yyyy-MM, value: tổng doanh thu)
+    public Map<String, Double> getMonthlyRevenue() {
+        EntityManager em = emf.createEntityManager();
+        try {
+            List<Object[]> results = em.createNativeQuery(
+                "SELECT FORMAT(OrderDate, 'yyyy-MM') AS Month, SUM(TotalAmount) " +
+                "FROM Orders WHERE Status = 'Paid' " +
+                "GROUP BY FORMAT(OrderDate, 'yyyy-MM')"
+            ).getResultList();
+
+            // Sắp xếp theo tháng tăng dần
+            Map<String, Double> revenueMap = new java.util.TreeMap<>();
+            for (Object[] row : results) {
+                String month = (String) row[0];
+                Double total = row[1] != null ? ((Number) row[1]).doubleValue() : 0.0;
+                revenueMap.put(month, total);
+            }
+            return revenueMap;
         } finally {
             em.close();
         }

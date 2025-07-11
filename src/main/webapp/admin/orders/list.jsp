@@ -19,10 +19,10 @@
 <%
     // Khởi tạo OrderService
     OrderService orderService = new OrderService();
-    
+
     // Lấy tham số filter từ request
     String statusFilter = request.getParameter("status");
-    
+
     // Lấy danh sách đơn hàng từ database
     List<Order> orders = new ArrayList<>();
     try {
@@ -36,7 +36,7 @@
         e.printStackTrace();
 
     }
-    
+
     // Đặt vào request attribute
     request.setAttribute("orders", orders);
     request.setAttribute("statusFilter", statusFilter);
@@ -58,9 +58,11 @@
     request.setAttribute("detailList", detailList);
 %>
 
-<%! 
+<%!
     public static String formatInstant(Instant instant) {
-        if (instant == null) return "";
+        if (instant == null) {
+            return "";
+        }
         LocalDateTime ldt = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
         return ldt.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
     }
@@ -72,92 +74,145 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Quản lý đơn hàng - Admin</title>
-        
+
         <!-- Bootstrap CSS -->
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
         <!-- Font Awesome -->
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
         <!-- DataTables -->
         <link href="https://cdn.datatables.net/1.13.0/css/dataTables.bootstrap5.min.css" rel="stylesheet">
-        
+
         <style>
             body {
                 background-color: #f8f9fa;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             }
-            
+
             .card {
                 border: none;
                 border-radius: 15px;
-                box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+                box-shadow: 0 0.25rem 1rem rgba(0, 0, 0, 0.05);
+                overflow: hidden;
             }
-            
+
             .card-header {
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                background: linear-gradient(135deg, #d32f2f, #9a0007);
                 color: white;
-                border-radius: 15px 15px 0 0 !important;
-                border: none;
+                font-weight: bold;
+                padding: 1rem 1.5rem;
+                font-size: 1.25rem;
             }
-            
+
+            .card-body {
+                background-color: #fff;
+                padding: 1.5rem;
+            }
+
+            .table th {
+                background-color: #f1f3f5;
+                border-top: none;
+                font-weight: 600;
+                color: #343a40;
+                vertical-align: middle;
+            }
+
+            .table td {
+                vertical-align: middle;
+            }
+
             .status-badge {
                 font-size: 0.75rem;
                 padding: 0.375rem 0.75rem;
                 border-radius: 20px;
+                font-weight: 500;
             }
-            
+
             .status-pending {
-                background-color: #fff3cd;
-                color: #856404;
+                background-color: #ffe082;
+                color: #7f6000;
             }
-            
+
             .status-paid {
-                background-color: #d1edff;
-                color: #0c5460;
+                background-color: #c8e6c9;
+                color: #2e7d32;
             }
-            
+
             .status-cancelled {
-                background-color: #f8d7da;
-                color: #721c24;
+                background-color: #ffcdd2;
+                color: #c62828;
             }
-            
+
             .btn-action {
-                padding: 0.25rem 0.5rem;
+                padding: 0.25rem 0.6rem;
                 font-size: 0.875rem;
-                border-radius: 0.375rem;
+                border-radius: 0.4rem;
+                transition: all 0.2s ease-in-out;
             }
-            
-            .table th {
-                background-color: #f8f9fa;
-                border-top: none;
-                font-weight: 600;
-                color: #495057;
+
+            .btn-action:hover {
+                background-color: #efefef;
             }
-            
+
             .alert {
                 border-radius: 10px;
                 border: none;
+                font-size: 0.9rem;
+                padding: 0.75rem 1rem;
+            }
+
+            .form-select, .form-label {
+                font-size: 0.9rem;
+            }
+
+            .badge {
+                font-size: 0.75rem;
+                padding: 0.4rem 0.6rem;
+            }
+
+            .modal-header {
+                background-color: #d32f2f;
+                color: white;
+            }
+
+            .modal-body {
+                background-color: #fafafa;
+            }
+
+            .modal-title {
+                font-size: 1.1rem;
+                font-weight: bold;
+            }
+            .h{
+                padding-top: 20px;
+            }
+            .lm button{
+                margin-right: 50px;
             }
         </style>
     </head>
     <body>
         <div class="container-fluid py-4">
             <!-- Header -->
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div>
+            <div class="row align-items-center mb-4 h">
+                <div class="col-md-4 text-start d-none d-md-block"></div>
+
+                <div class="col-md-4 text-center">
                     <h2 class="mb-0">
                         <i class="fas fa-shopping-cart me-2"></i>
                         Quản lý đơn hàng
                     </h2>
-                    <p class="text-muted mb-0">Danh sách tất cả đơn hàng trong hệ thống</p>
                 </div>
-                <div>
-                    <button class="btn btn-primary" onclick="refreshOrders()">
-                        <i class="fas fa-sync-alt me-2"></i>
-                        Làm mới
-                    </button>
+
+                <div class="col-md-4 text-end lm">
+                    <form method="GET" action="${pageContext.request.contextPath}/admin/orders/list.jsp" class="d-inline-block">
+                        <button class="btn btn-sm btn-success" onclick="refreshOrders()" type="button">
+                            <i class="fas fa-sync-alt me-1"></i> Làm mới
+                        </button>
+                    </form>
                 </div>
             </div>
-            
-            <!-- Alerts -->
+
+            <!-- Alesrts -->
             <c:if test="${not empty param.success}">
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
                     <i class="fas fa-check-circle me-2"></i>
@@ -165,7 +220,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             </c:if>
-            
+
             <c:if test="${not empty param.error}">
                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
                     <i class="fas fa-exclamation-circle me-2"></i>
@@ -173,7 +228,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             </c:if>
-            
+
             <c:if test="${not empty error}">
                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
                     <i class="fas fa-exclamation-circle me-2"></i>
@@ -181,34 +236,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             </c:if>
-            
-            <!-- Filters -->
-            <div class="card mb-4">
-                <div class="card-body">
-                    <form method="GET" action="${pageContext.request.contextPath}/admin/orders/list.jsp" class="row g-3">
-                        <div class="col-md-4">
-                            <label for="status" class="form-label">Lọc theo trạng thái</label>
-                            <select class="form-select" id="status" name="status">
-                                <option value="">Tất cả trạng thái</option>
-                                <option value="Pending" ${statusFilter == 'Pending' ? 'selected' : ''}>Đang chờ</option>
-                                <option value="Paid" ${statusFilter == 'Paid' ? 'selected' : ''}>Đã thanh toán</option>
-                                <option value="Cancelled" ${statusFilter == 'Cancelled' ? 'selected' : ''}>Đã hủy</option>
-                            </select>
-                        </div>
-                        <div class="col-md-4 d-flex align-items-end">
-                            <button type="submit" class="btn btn-primary me-2">
-                                <i class="fas fa-filter me-2"></i>
-                                Lọc
-                            </button>
-                            <a href="${pageContext.request.contextPath}/admin/orders/list.jsp" class="btn btn-outline-secondary">
-                                <i class="fas fa-times me-2"></i>
-                                Xóa bộ lọc
-                            </a>
-                        </div>
-                    </form>
-                </div>
-            </div>
-            
+
             <!-- Orders Table -->
             <div class="card">
                 <div class="card-header">
@@ -339,7 +367,7 @@
                                         </c:forEach>
                                     </tbody>
                                 </table>
-                                
+
                                 <!-- Order Details Sections (Outside DataTable) -->
                                 <c:forEach var="order" items="${orders}">
                                     <div class="order-details-section" id="order-details-${order.id}" style="display: none;">
@@ -382,7 +410,7 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Bootstrap JS -->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
         <!-- jQuery -->
@@ -390,93 +418,93 @@
         <!-- DataTables -->
         <script src="https://cdn.datatables.net/1.13.0/js/jquery.dataTables.min.js"></script>
         <script src="https://cdn.datatables.net/1.13.0/js/dataTables.bootstrap5.min.js"></script>
-        
+
         <script>
-            // Get context path from JSP
-            var contextPath = '${pageContext.request.contextPath}';
-            
-            $(document).ready(function() {
-                // Initialize DataTable
-                $('#ordersTable').DataTable({
-                    language: {
-                        url: '//cdn.datatables.net/plug-ins/1.13.0/i18n/vi.json'
-                    },
-                    pageLength: 25,
-                    order: [[0, 'desc']],
-                    responsive: true
-                });
-            });
-            
-            function refreshOrders() {
-                window.location.reload();
-            }
-            
-            function showOrderDetails(orderId) {
-                // Hiện modal và loading
-                var modal = new bootstrap.Modal(document.getElementById('orderDetailModal'));
-                modal.show();
-                document.getElementById('orderDetailModalBody').innerHTML = '<div class="text-center text-muted"><i class="fas fa-spinner fa-spin"></i> Đang tải...</div>';
-                // Gửi AJAX lấy chi tiết
-                fetch(contextPath + '/admin/orders?action=details&id=' + orderId)
-                    .then(response => response.text())
-                    .then(html => {
-                        document.getElementById('orderDetailModalBody').innerHTML = html;
-                    })
-                    .catch(error => {
-                        document.getElementById('orderDetailModalBody').innerHTML = '<div class="text-danger">Không thể tải chi tiết đơn hàng!</div>';
+                // Get context path from JSP
+                var contextPath = '${pageContext.request.contextPath}';
+
+                $(document).ready(function () {
+                    // Initialize DataTable
+                    $('#ordersTable').DataTable({
+                        language: {
+                            url: '//cdn.datatables.net/plug-ins/1.13.0/i18n/vi.json'
+                        },
+                        pageLength: 25,
+                        order: [[0, 'desc']],
+                        responsive: true
                     });
-            }
+                });
+
+                function refreshOrders() {
+                    window.location.reload();
+                }
+
+                function showOrderDetails(orderId) {
+                    // Hiện modal và loading
+                    var modal = new bootstrap.Modal(document.getElementById('orderDetailModal'));
+                    modal.show();
+                    document.getElementById('orderDetailModalBody').innerHTML = '<div class="text-center text-muted"><i class="fas fa-spinner fa-spin"></i> Đang tải...</div>';
+                    // Gửi AJAX lấy chi tiết
+                    fetch(contextPath + '/admin/orders?action=details&id=' + orderId)
+                            .then(response => response.text())
+                            .then(html => {
+                                document.getElementById('orderDetailModalBody').innerHTML = html;
+                            })
+                            .catch(error => {
+                                document.getElementById('orderDetailModalBody').innerHTML = '<div class="text-danger">Không thể tải chi tiết đơn hàng!</div>';
+                            });
+                }
         </script>
-        
+
         <!-- Modal hiển thị chi tiết đơn hàng -->
         <div class="modal fade" id="orderDetailModal" tabindex="-1" aria-labelledby="orderDetailModalLabel" aria-hidden="true">
-          <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title" id="orderDetailModalLabel">Chi tiết đơn hàng</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
-              </div>
-              <div class="modal-body">
-                <h5>Thông tin đơn hàng #${detailOrder.id}</h5>
-                <p>Khách hàng: <strong>${detailOrder.user.fullName}</strong></p>
-                <p>Ngày đặt: ${detailOrder.orderDateFormatted}</p>
-                <p>Địa chỉ giao hàng: ${detailOrder.shippingAddress}</p>
-                <p>Số điện thoại: ${detailOrder.phoneNumber}</p>
-                <p>Ghi chú: ${detailOrder.note}</p>
-                <hr>
-                <h6>Danh sách sản phẩm</h6>
-                <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>Sản phẩm</th>
-                            <th>Giá</th>
-                            <th>Số lượng</th>
-                            <th>Thành tiền</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <c:forEach var="d" items="${detailList}">
-                            <tr>
-                                <td>
-                                    <c:choose>
-                                        <c:when test="${not empty d.productVariant and not empty d.productVariant.product}">
-                                            ${d.productVariant.product.name} (${d.productVariant.variantName})
-                                        </c:when>
-                                        <c:otherwise>
-                                            <span class="text-danger">Thiếu thông tin sản phẩm</span>
-                                        </c:otherwise>
-                                    </c:choose>
-                                </td>
-                                <td><fmt:formatNumber value="${d.unitPrice}" type="currency" currencySymbol="₫"/></td>
-                                <td>${d.quantity}</td>
-                                <td><fmt:formatNumber value="${d.totalPrice}" type="currency" currencySymbol="₫"/></td>
-                            </tr>
-                        </c:forEach>
-                    </tbody>
-                </table>
-              </div>
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="orderDetailModalLabel">Chi tiết đơn hàng</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                    </div>
+                    <div class="modal-body">
+                        <h5>Thông tin đơn hàng #${detailOrder.id}</h5>
+                        <p>Khách hàng: <strong>${detailOrder.user.fullName}</strong></p>
+                        <p>Ngày đặt: ${detailOrder.orderDateFormatted}</p>
+                        <p>Địa chỉ giao hàng: ${detailOrder.shippingAddress}</p>
+                        <p>Số điện thoại: ${detailOrder.phoneNumber}</p>
+                        <p>Ghi chú: ${detailOrder.note}</p>
+                        <hr>
+                        <h6>Danh sách sản phẩm</h6>
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Sản phẩm</th>
+                                    <th>Giá</th>
+                                    <th>Số lượng</th>
+                                    <th>Thành tiền</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <c:forEach var="d" items="${detailList}">
+                                    <tr>
+                                        <td>
+                                            <c:choose>
+                                                <c:when test="${not empty d.productVariant and not empty d.productVariant.product}">
+                                                    ${d.productVariant.product.name} (${d.productVariant.variantName})
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <span class="text-danger">Thiếu thông tin sản phẩm</span>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </td>
+                                        <td><fmt:formatNumber value="${d.unitPrice}" type="currency" currencySymbol="₫"/></td>
+                                        <td>${d.quantity}</td>
+                                        <td><fmt:formatNumber value="${d.totalPrice}" type="currency" currencySymbol="₫"/></td>
+                                    </tr>
+                                </c:forEach>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
-          </div>
         </div>
     </body>
 </html>
