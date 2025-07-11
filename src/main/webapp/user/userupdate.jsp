@@ -1,4 +1,5 @@
 <%@page contentType="text/html" pageEncoding="UTF-8" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
     <%@ page import="model.User" %>
         <% User user=(User) session.getAttribute("user"); if (user==null) {
             response.sendRedirect(request.getContextPath() + "/user/login.jsp" ); return; } %>
@@ -8,6 +9,7 @@
             <head>
                 <title>Cập nhật thông tin</title>
                 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
                 <style>
                     .update-form-container {
                         max-width: 700px;
@@ -56,6 +58,25 @@
                         padding: 0.75rem 1rem;
                     }
 
+                    .alert {
+                        border-radius: 10px;
+                        border: none;
+                        padding: 15px 20px;
+                        margin-bottom: 25px;
+                    }
+
+                    .alert-warning {
+                        background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+                        color: #856404;
+                        border-left: 4px solid #ffc107;
+                    }
+
+                    .alert-info {
+                        background: linear-gradient(135deg, #d1ecf1, #bee5eb);
+                        color: #0c5460;
+                        border-left: 4px solid #17a2b8;
+                    }
+
                     @media (max-width: 768px) {
                         .update-form-container {
                             padding: 1rem;
@@ -68,6 +89,23 @@
                 <jsp:include page="/templates/header.jsp" />
                 <div class="update-form-container">
                     <div class="update-title">Cập nhật thông tin</div>
+                    
+                    <!-- Hiển thị thông báo lỗi nếu có -->
+                    <c:if test="${param.error == 'no_address' and not empty param.message}">
+                        <div class="alert alert-warning" role="alert">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <strong>Thông báo:</strong> ${param.message}
+                        </div>
+                    </c:if>
+                    
+                    <!-- Hiển thị thông báo thông thường -->
+                    <c:if test="${not empty param.message and param.error != 'no_address'}">
+                        <div class="alert alert-info" role="alert">
+                            <i class="fas fa-info-circle"></i>
+                            ${param.message}
+                        </div>
+                    </c:if>
+                    
                     <form action="${pageContext.request.contextPath}/login" method="post">
                         <input type="hidden" name="action" value="update-profile">
                         <div class="row mb-3">
@@ -126,8 +164,18 @@
                                 href="#">Chính sách bảo mật của PhoneStore</a>.
                         </div>
                         <div class="d-flex justify-content-between">
-                            <a href="${pageContext.request.contextPath}/user/login.jsp"
-                                class="btn btn-outline-secondary">&lt; Quay lại đăng nhập</a>
+                            <c:choose>
+                                <c:when test="${param.error == 'no_address'}">
+                                    <a href="${pageContext.request.contextPath}/cart/confirm.jsp" 
+                                       class="btn btn-outline-secondary">
+                                        <i class="fas fa-arrow-left"></i> Quay lại giỏ hàng
+                                    </a>
+                                </c:when>
+                                <c:otherwise>
+                                    <a href="${pageContext.request.contextPath}/user/login.jsp"
+                                       class="btn btn-outline-secondary">&lt; Quay lại đăng nhập</a>
+                                </c:otherwise>
+                            </c:choose>
                             <button type="submit" class="btn btn-primary">Hoàn tất đăng ký</button>
                         </div>
                     </form>

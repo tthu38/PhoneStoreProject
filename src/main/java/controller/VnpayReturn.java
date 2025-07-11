@@ -17,8 +17,15 @@ import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 import model.Order;
+import model.OrderDetails;
+import model.User;
+import model.ProductStock;
 import service.OrderService;
+import service.OrderDetailService;
+import service.MailService;
+import service.ProductStockService;
 
 /**
  *
@@ -28,6 +35,8 @@ import service.OrderService;
 public class VnpayReturn extends HttpServlet {
     
     private final OrderService orderService = new OrderService();
+    private final OrderDetailService orderDetailService = new OrderDetailService();
+    private final ProductStockService productStockService = new ProductStockService();
     
     /** 
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
@@ -75,6 +84,42 @@ public class VnpayReturn extends HttpServlet {
                         if (updated) {
                             transSuccess = true;
                             message = "Thanh toán thành công! Đơn hàng #" + orderId + " đã được xác nhận.";
+                            
+                            // Trừ số lượng trong kho sau khi thanh toán thành công
+                            List<OrderDetails> orderDetails = orderDetailService.getOrderDetailsByOrderId(orderId);
+                            if (orderDetails != null) {
+                                for (OrderDetails orderDetail : orderDetails) {
+                                    boolean stockUpdated = productStockService.updateStockAfterPayment(
+                                        orderDetail.getProductVariant().getId(), 
+                                        orderDetail.getQuantity()
+                                    );
+                                    if (stockUpdated) {
+                                        System.out.println("[VnpayReturn] Đã trừ " + orderDetail.getQuantity() + 
+                                                         " sản phẩm khỏi kho cho variant ID: " + orderDetail.getProductVariant().getId());
+                                    } else {
+                                        System.out.println("[VnpayReturn] Lỗi khi trừ số lượng trong kho cho variant ID: " + 
+                                                         orderDetail.getProductVariant().getId());
+                                    }
+                                }
+                            }
+                            
+                            // Gửi email xác nhận đơn hàng
+                            try {
+                                Order order = orderService.getOrderWithUserById(orderId);
+                                User user = order.getUser();
+                                
+                                MailService mailService = new MailService();
+                                boolean emailSent = mailService.sendOrderConfirmation(user, order, orderId, orderDetails, order.getTotalAmount());
+                                
+                                if (emailSent) {
+                                    System.out.println("[VnpayReturn] Email xác nhận đơn hàng #" + orderId + " đã được gửi thành công");
+                                } else {
+                                    System.out.println("[VnpayReturn] Không thể gửi email xác nhận đơn hàng #" + orderId);
+                                }
+                            } catch (Exception e) {
+                                System.out.println("[VnpayReturn] Lỗi khi gửi email: " + e.getMessage());
+                                e.printStackTrace();
+                            }
                         } else {
                             message = "Thanh toán thành công nhưng không thể cập nhật trạng thái đơn hàng.";
                         }

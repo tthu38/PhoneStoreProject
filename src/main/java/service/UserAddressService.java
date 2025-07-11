@@ -85,4 +85,34 @@ public class UserAddressService {
             em.close();
         }
     }
+    
+    public UserAddress getDefaultAddressByUserId(Integer userId) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<UserAddress> query = em.createNamedQuery("UserAddress.findDefaultByUserId", UserAddress.class);
+            query.setParameter("userId", userId);
+            List<UserAddress> results = query.getResultList();
+            return results.isEmpty() ? null : results.get(0);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        } finally {
+            em.close();
+        }
+    }
+    
+    public UserAddress getFirstActiveAddressByUserId(Integer userId) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<UserAddress> query = em.createNamedQuery("UserAddress.findActiveByUserId", UserAddress.class);
+            query.setParameter("userId", userId);
+            List<UserAddress> results = query.getResultList();
+            return results.isEmpty() ? null : results.get(0);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        } finally {
+            em.close();
+        }
+    }
 }

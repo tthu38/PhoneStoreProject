@@ -10,6 +10,8 @@
 <%@ page import="java.time.LocalDateTime" %>
 <%@ page import="java.util.List" %>
 <%@ page import="model.CartItem" %>
+<%@ page import="model.UserAddress" %>
+<%@ page import="service.UserAddressService" %>
 <%
     // Set current time for discount checking
     request.setAttribute("currentTime", LocalDateTime.now());
@@ -35,6 +37,59 @@
         }
     }
     request.setAttribute("selectedTotal", selectedTotal);
+    
+    // Lấy thông tin địa chỉ từ user
+    model.User currentUser = (model.User) session.getAttribute("user");
+    String userCity = "";
+    String userDistrict = "";
+    String userWard = "";
+    String userAddress = "";
+    String userPhone = "";
+    String userFullName = "";
+    
+    if (currentUser != null) {
+        userPhone = currentUser.getPhoneNumber() != null ? currentUser.getPhoneNumber() : "";
+        userFullName = currentUser.getFullName() != null ? currentUser.getFullName() : "";
+        
+        // Lấy địa chỉ mặc định của user
+        UserAddressService userAddressService = new UserAddressService();
+        UserAddress defaultAddress = userAddressService.getDefaultAddressByUserId(currentUser.getUserID());
+        
+        // Nếu không có địa chỉ mặc định, lấy địa chỉ đầu tiên
+        if (defaultAddress == null) {
+            defaultAddress = userAddressService.getFirstActiveAddressByUserId(currentUser.getUserID());
+        }
+        
+        // Kiểm tra nếu người dùng không có địa chỉ nào
+        if (defaultAddress == null) {
+            // Chuyển hướng đến trang profile để cập nhật thông tin
+            response.sendRedirect(request.getContextPath() + "/user/profile.jsp?error=no_address&message=" + 
+                java.net.URLEncoder.encode("Vui lòng cập nhật địa chỉ giao hàng để tiếp tục thanh toán", "UTF-8"));
+            return;
+        }
+        
+        if (defaultAddress != null) {
+            userAddress = defaultAddress.getAddress() != null ? defaultAddress.getAddress() : "";
+            // Chỉ sử dụng số điện thoại từ địa chỉ nếu user không có số điện thoại
+            boolean userPhoneEmpty = (userPhone == null || userPhone.trim().isEmpty());
+            boolean addressPhoneExists = (defaultAddress.getPhoneNumber() != null && !defaultAddress.getPhoneNumber().trim().isEmpty());
+            
+            if (userPhoneEmpty && addressPhoneExists) {
+                userPhone = defaultAddress.getPhoneNumber();
+            }
+            // Chỉ sử dụng tên từ địa chỉ nếu user không có tên
+            if ((userFullName == null || userFullName.trim().isEmpty()) && defaultAddress.getFullName() != null) {
+                userFullName = defaultAddress.getFullName();
+            }
+        }
+    }
+    
+    request.setAttribute("userCity", userCity);
+    request.setAttribute("userDistrict", userDistrict);
+    request.setAttribute("userWard", userWard);
+    request.setAttribute("userAddress", userAddress);
+    request.setAttribute("userPhone", userPhone);
+    request.setAttribute("userFullName", userFullName);
 %>
 <!DOCTYPE html>
 <html>
@@ -275,6 +330,14 @@
                     <i class="fas fa-exclamation-triangle"></i> ${error}
                 </div>
             </c:if>
+            
+            <c:if test="${param.error == 'insufficient_stock' and not empty param.message}">
+                <div class="alert alert-warning" role="alert">
+                    <i class="fas fa-exclamation-triangle"></i> 
+                    <strong>Không đủ số lượng sản phẩm trong kho:</strong><br>
+                    <pre style="white-space: pre-wrap; margin: 10px 0 0; font-family: inherit;">${param.message}</pre>
+                </div>
+            </c:if>
 
             <div class="row">
                 <div class="col-lg-8">
@@ -291,14 +354,14 @@
                                     <div class="form-group">
                                         <label class="form-label">Họ và tên *</label>
                                         <input type="text" class="form-control" name="fullName" required 
-                                               value="${sessionScope.user != null ? sessionScope.user.fullName : ''}" placeholder="Nhập họ và tên">
+                                               value="${userFullName}" placeholder="Nhập họ và tên">
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label class="form-label">Số điện thoại *</label>
                                         <input type="tel" class="form-control" name="phone" required 
-                                               value="${sessionScope.user != null ? sessionScope.user.phoneNumber : ''}" placeholder="Nhập số điện thoại">
+                                               value="${userPhone}" placeholder="Nhập số điện thoại">
                                     </div>
                                 </div>
                             </div>
@@ -306,45 +369,24 @@
                             <div class="form-group">
                                 <label class="form-label">Địa chỉ giao hàng *</label>
                                 <textarea class="form-control" name="address" rows="3" required 
-                                          placeholder="Nhập địa chỉ giao hàng chi tiết"></textarea>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <label class="form-label">Tỉnh/Thành phố *</label>
-                                        <select class="form-control" name="city" required>
-                                            <option value="">Chọn tỉnh/thành phố</option>
-                                            <option value="hanoi">Hà Nội</option>
-                                            <option value="hcm">TP. Hồ Chí Minh</option>
-                                            <option value="danang">Đà Nẵng</option>
-                                            <option value="haiphong">Hải Phòng</option>
-                                            <option value="cantho">Cần Thơ</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <label class="form-label">Quận/Huyện *</label>
-                                        <select class="form-control" name="district" >
-                                            <option value="">Chọn quận/huyện</option>
-                                        </select>
-                                    </div>  
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <label class="form-label">Phường/Xã *</label>
-                                        <select class="form-control" name="ward" >
-                                            <option value="">Chọn phường/xã</option>
-                                        </select>
-                                    </div>
-                                </div>
+                                          placeholder="Nhập địa chỉ giao hàng chi tiết">${userAddress}</textarea>
                             </div>
 
                             <div class="form-group">
                                 <label class="form-label">Ghi chú</label>
                                 <textarea class="form-control" name="note" rows="2" 
                                           placeholder="Ghi chú cho đơn hàng (tùy chọn)"></textarea>
+                            </div>
+                            
+                            <!-- Link cập nhật thông tin -->
+                            <div class="form-group">
+                                <div class="alert alert-info" role="alert">
+                                    <i class="fas fa-info-circle"></i>
+                                    <strong>Lưu ý:</strong> Thông tin trên được lấy từ tài khoản của bạn. 
+                                    <a href="${pageContext.request.contextPath}/user/profile.jsp" class="alert-link">
+                                        <i class="fas fa-edit"></i> Cập nhật thông tin cá nhân
+                                    </a>
+                                </div>
                             </div>
                         </form>
                     </div>

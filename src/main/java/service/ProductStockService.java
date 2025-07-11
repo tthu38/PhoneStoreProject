@@ -108,4 +108,57 @@ public class ProductStockService {
     }
 }
 
+    // Cập nhật số lượng trong kho sau khi thanh toán thành công
+    public boolean updateStockAfterPayment(Integer variantId, int quantityToReduce) {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction transaction = em.getTransaction();
+        try {
+            transaction.begin();
+            
+            // Tìm stock record cho variant
+            List<ProductStock> results = em.createQuery(
+                "SELECT ps FROM ProductStock ps WHERE ps.variant.id = :variantId", ProductStock.class)
+                .setParameter("variantId", variantId)
+                .getResultList();
+
+            if (results.isEmpty()) {
+                System.out.println("[ProductStockService] Không tìm thấy stock cho variant ID: " + variantId);
+                transaction.rollback();
+                return false;
+            }
+
+            ProductStock stock = results.get(0);
+            int currentAmount = stock.getAmount();
+            
+            // Kiểm tra xem có đủ số lượng để trừ không
+            if (currentAmount < quantityToReduce) {
+                System.out.println("[ProductStockService] Không đủ số lượng trong kho. Hiện có: " + currentAmount + ", cần trừ: " + quantityToReduce);
+                transaction.rollback();
+                return false;
+            }
+
+            // Trừ số lượng
+            int newAmount = currentAmount - quantityToReduce;
+            stock.setAmount(newAmount);
+            em.merge(stock);
+            
+            System.out.println("[ProductStockService] Cập nhật stock thành công. Variant ID: " + variantId + 
+                             ", Số lượng cũ: " + currentAmount + ", Số lượng mới: " + newAmount + 
+                             ", Đã trừ: " + quantityToReduce);
+            
+            transaction.commit();
+            return true;
+            
+        } catch (Exception e) {
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
+            System.out.println("[ProductStockService] Lỗi khi cập nhật stock: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        } finally {
+            em.close();
+        }
+    }
+
 }
