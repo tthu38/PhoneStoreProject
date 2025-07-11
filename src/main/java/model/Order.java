@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import org.hibernate.annotations.Nationalized;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import java.util.List;
 
 @Entity
 @Table(name = "Orders")
@@ -51,6 +52,9 @@ public class Order {
     @Nationalized
     @Column(name = "Note", length = 500)
     private String note;
+
+    @Transient
+    private List<OrderDetails> orderDetails;
 
     // === Constructor mặc định ===
     public Order() {
@@ -135,6 +139,14 @@ public class Order {
 
     public void setNote(String note) {
         this.note = note;
+    }
+
+    public List<OrderDetails> getOrderDetails() {
+        return orderDetails;
+    }
+
+    public void setOrderDetails(List<OrderDetails> orderDetails) {
+        this.orderDetails = orderDetails;
     }
 
     // Backward compatibility method

@@ -34,6 +34,10 @@ import service.OrderService;
 import service.OrderDetailService;
 import Payment.VnpayConfig;
 import model.Product;
+import model.ProductStock;
+import service.ProductStockService;
+import model.UserAddress;
+import service.UserAddressService;
 
 /**
  *
@@ -107,6 +111,20 @@ public class VnpayServlet extends HttpServlet {
             return;
         }
         
+        // Kiểm tra user có địa chỉ không
+        UserAddressService userAddressService = new UserAddressService();
+        UserAddress defaultAddress = userAddressService.getDefaultAddressByUserId(currentUser.getUserID());
+        if (defaultAddress == null) {
+            defaultAddress = userAddressService.getFirstActiveAddressByUserId(currentUser.getUserID());
+        }
+        
+        if (defaultAddress == null) {
+            // Chuyển hướng đến trang profile để cập nhật thông tin
+            resp.sendRedirect(req.getContextPath() + "/user/profile.jsp?error=no_address&message=" + 
+                java.net.URLEncoder.encode("Vui lòng cập nhật địa chỉ giao hàng để tiếp tục thanh toán", "UTF-8"));
+            return;
+        }
+        
         // Lấy cart từ session
         List<CartItem> cart = (List<CartItem>) session.getAttribute("cart");
         if (cart == null || cart.isEmpty()) {
@@ -134,30 +152,38 @@ public class VnpayServlet extends HttpServlet {
             return;
         }
         
+        // Kiểm tra số lượng sản phẩm trong kho trước khi thanh toán
+        ProductStockService productStockService = new ProductStockService();
+        StringBuilder stockError = new StringBuilder();
+        
+        for (CartItem item : selectedItems) {
+            ProductStock stock = productStockService.getStockByVariantId(item.getProductVariant().getId());
+            if (stock != null && stock.getId() != null) {
+                if (item.getQuantity() > stock.getAmount()) {
+                    stockError.append("Sản phẩm '").append(item.getProductVariant().getProduct().getName())
+                            .append(" (").append(item.getProductVariant().getColor()).append(" - ")
+                            .append(item.getProductVariant().getRom()).append("GB)")
+                            .append("' chỉ còn ").append(stock.getAmount())
+                            .append(" sản phẩm trong kho. Bạn đã chọn ").append(item.getQuantity()).append(" sản phẩm.\n");
+                }
+            } else {
+                stockError.append("Sản phẩm '").append(item.getProductVariant().getProduct().getName())
+                        .append(" (").append(item.getProductVariant().getColor()).append(" - ")
+                        .append(item.getProductVariant().getRom()).append("GB)")
+                        .append("' hiện không có trong kho.\n");
+            }
+        }
+        
+        if (stockError.length() > 0) {
+            resp.sendRedirect(req.getContextPath() + "/cart/confirm.jsp?error=insufficient_stock&message=" + 
+                java.net.URLEncoder.encode(stockError.toString(), "UTF-8"));
+            return;
+        }
+        
         // Lấy thông tin đơn hàng từ form
         String shippingAddress = req.getParameter("address"); // Changed from shippingAddress to address
         String phoneNumber = req.getParameter("phone"); // Changed from phoneNumber to phone
         String note = req.getParameter("note");
-        
-        // Lấy thông tin địa chỉ chi tiết
-        String city = req.getParameter("city");
-        String district = req.getParameter("district");
-        String ward = req.getParameter("ward");
-        
-        // Tạo địa chỉ đầy đủ nếu có thông tin chi tiết
-        if (shippingAddress != null && !shippingAddress.trim().isEmpty()) {
-            StringBuilder fullAddress = new StringBuilder(shippingAddress);
-            if (ward != null && !ward.trim().isEmpty()) {
-                fullAddress.append(", ").append(ward);
-            }
-            if (district != null && !district.trim().isEmpty()) {
-                fullAddress.append(", ").append(district);
-            }
-            if (city != null && !city.trim().isEmpty()) {
-                fullAddress.append(", ").append(city);
-            }
-            shippingAddress = fullAddress.toString();
-        }
         
         if (shippingAddress == null || shippingAddress.trim().isEmpty()) {
             resp.sendRedirect(req.getContextPath() + "/cart/confirm.jsp?error=missing_address");
@@ -310,4 +336,4 @@ public class VnpayServlet extends HttpServlet {
     public String getServletInfo() {
         return "VNPay Payment Servlet";
     }// </editor-fold>
-}
+} 

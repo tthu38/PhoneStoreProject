@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.time.format.DateTimeFormatter;
 import java.time.LocalDate;
 import model.Order;
+import jakarta.persistence.TypedQuery;
 
 public class OrderService {
 
@@ -143,8 +144,24 @@ public class OrderService {
     }
 
     // Tìm đơn theo User ID
-    public List<Order> getOrdersByUserId(int userId) {
-        return orderDAO.findByNamedQuery("Order.findByUserID", "userID", userId);
+    public List<Order> getOrdersByUserId(Integer userId) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            System.out.println("[OrderService] Getting orders for user ID: " + userId);
+            TypedQuery<Order> query = em.createQuery(
+                "SELECT o FROM Order o LEFT JOIN FETCH o.user WHERE o.user.userID = :userId ORDER BY o.orderDate DESC", 
+                Order.class);
+            query.setParameter("userId", userId);
+            List<Order> orders = query.getResultList();
+            System.out.println("[OrderService] Found " + orders.size() + " orders for user ID: " + userId);
+            return orders;
+        } catch (Exception e) {
+            System.out.println("[OrderService] Error getting orders for user ID " + userId + ": " + e.getMessage());
+            e.printStackTrace();
+            return new java.util.ArrayList<>();
+        } finally {
+            em.close();
+        }
     }
 
     // Lấy đơn hàng đã thanh toán
