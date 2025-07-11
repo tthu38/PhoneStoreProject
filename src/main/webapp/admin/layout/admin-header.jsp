@@ -17,42 +17,72 @@
         <!-- Font Awesome -->
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
         <style>
-            .sidebar {
-                min-height: 100vh;
+            html, body {
+                height: 100%;
+                margin: 0;
+                overflow: hidden; /* Ngăn cuộn toàn trang */
+            }
+
+            .sidebar {    
+                position: fixed;
+                top: 0;
+                bottom: 0;
+                left: 0;
                 background: #343a40;
                 color: white;
+                z-index: 1000;
+                overflow-y: auto;
             }
-            .content {
-                padding: 20px;
+
+            .header {
+                height: 50px;
+                background: #f8f9fa;
+                position: fixed;
+                top: 0;
+                left: 250px; /* bằng width của sidebar */
+                right: 0;
+                z-index: 999;
+                border-bottom: 1px solid #ddd;
+                padding: 10px 0px;
             }
-            .nav-link {
-                color: rgba(255,255,255,.8);
+
+            .main-area {
+                margin-left: 250px; /* để tránh đè lên sidebar */
+                padding-top: 40px;  /* để tránh đè lên header */
+                height: 100vh;
+                display: flex;
+                flex-direction: column;
             }
-            .nav-link:hover {
-                color: white;
+
+            .content-area {
+                flex: 1;
+                overflow-y: auto;
+               
             }
         </style>
     </head>
     <body>
-        <div class="container-fluid">
-            <div class="row">
-                <!-- Sidebar -->
-                <div class="col-md-3 col-lg-2 px-0 sidebar">
-                    <jsp:include page="sidebar.jsp" />
-                </div>
-                
-                <!-- Main Content -->
-                <div class="col-md-9 col-lg-10 px-0">
-                    <!-- Header -->
+
+        <div class="d-flex">
+            <!-- Sidebar (fixed) -->
+            <div class="sidebar">
+                <jsp:include page="sidebar.jsp" />
+            </div>
+
+            <!-- Right content -->
+            <div class="main-area flex-grow-1">
+                <!-- Header (fixed) -->
+                <div class="header">
                     <jsp:include page="header.jsp" />
-                    
-                    <!-- Content Area -->
-                    <main class="content">
-                        <jsp:include page="${contentPage}" />
-                    </main>
                 </div>
+
+                <!-- Content area (scrollable) -->
+                <main class="content-area">
+                    <jsp:include page="${contentPage}" />
+                </main>
             </div>
         </div>
+
 
         <!-- Bootstrap Bundle with Popper -->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

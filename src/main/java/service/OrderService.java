@@ -5,6 +5,10 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.time.format.DateTimeFormatter;
+import java.time.LocalDate;
 import model.Order;
 
 public class OrderService {
@@ -165,6 +169,29 @@ public class OrderService {
                 "SELECT o FROM Order o LEFT JOIN FETCH o.user WHERE o.id = :id", Order.class)
                 .setParameter("id", id)
                 .getSingleResult();
+        } finally {
+            em.close();
+        }
+    }
+
+    // Lấy doanh thu theo tháng (key: yyyy-MM, value: tổng doanh thu)
+    public Map<String, Double> getMonthlyRevenue() {
+        EntityManager em = emf.createEntityManager();
+        try {
+            List<Object[]> results = em.createNativeQuery(
+                "SELECT FORMAT(OrderDate, 'yyyy-MM') AS Month, SUM(TotalAmount) " +
+                "FROM Orders WHERE Status = 'Paid' " +
+                "GROUP BY FORMAT(OrderDate, 'yyyy-MM')"
+            ).getResultList();
+
+            // Sắp xếp theo tháng tăng dần
+            Map<String, Double> revenueMap = new java.util.TreeMap<>();
+            for (Object[] row : results) {
+                String month = (String) row[0];
+                Double total = row[1] != null ? ((Number) row[1]).doubleValue() : 0.0;
+                revenueMap.put(month, total);
+            }
+            return revenueMap;
         } finally {
             em.close();
         }
