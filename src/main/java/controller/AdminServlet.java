@@ -97,8 +97,8 @@ public class AdminServlet extends HttpServlet {
         Map<String, Double> monthlyRevenue = orderService.getMonthlyRevenue();
         request.setAttribute("monthlyRevenue", monthlyRevenue);
 
-        List<Map<String, Object>> lowStockVariants = productStockService.getVariantDetailsWithLowStock(10);
-        request.setAttribute("lowStockVariants", lowStockVariants);
+//        List<Map<String, Object>> lowStockVariants = productStockService.getVariantDetailsWithLowStock(10);
+//        request.setAttribute("lowStockVariants", lowStockVariants);
 
         return "../dashboard/dashboard.jsp";
     }
