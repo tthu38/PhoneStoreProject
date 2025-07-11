@@ -393,34 +393,6 @@ public class UserService {
         }
     }
 
-    public User findByEmailOrPhoneAndPassword(String username, String password) {
-        EntityManager em = emf.createEntityManager();
-        try {
-            System.out.println("DEBUG - Username input: " + username);
-            System.out.println("DEBUG - Password input: " + password);
-
-            TypedQuery<User> query = em.createQuery(
-                "SELECT u FROM User u WHERE (u.email = :username OR u.phoneNumber = :username) AND u.password = :password AND u.isActive = true",
-                User.class
-            );
-            query.setParameter("username", username);
-            query.setParameter("password", password);
-            List<User> users = query.getResultList();
-
-            System.out.println("DEBUG - Query result size: " + users.size());
-            if (!users.isEmpty()) {
-                User u = users.get(0);
-                System.out.println("DEBUG - Found user: " + u.getEmail() + " | " + u.getPhoneNumber());
-            } else {
-                System.out.println("DEBUG - No user found with given credentials.");
-            }
-
-            return users.isEmpty() ? null : users.get(0);
-        } finally {
-            em.close();
-        }
-    }
-
     public boolean updatePasswordByEmail(String email, String newPassword) {
         Optional<User> userOpt = getUserByEmail(email);
         if (userOpt.isPresent()) {
@@ -429,5 +401,21 @@ public class UserService {
             return updateUser(user);
         }
         return false;
+    }
+
+    public User findByEmailOrPhoneAndPassword(String login, String password) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<User> query = em.createQuery(
+                "SELECT u FROM User u WHERE (u.email = :login OR u.phoneNumber = :login) AND u.password = :password AND u.isActive = true",
+                User.class
+            );
+            query.setParameter("login", login);
+            query.setParameter("password", password);
+            List<User> users = query.getResultList();
+            return users.isEmpty() ? null : users.get(0);
+        } finally {
+            em.close();
+        }
     }
 }
