@@ -102,23 +102,23 @@
                             </div>
                         </div>
                         <input type="hidden" name="address" id="address"
-                               value="<%= request.getAttribute("address") != null ? request.getAttribute("address") : "" %>">
+                               value="<%= request.getAttribute("address") != null ? request.getAttribute("address") : ""%>">
                         <div class="mb-3">
                             <label class="form-label">Mật khẩu</label>
                             <input type="password" class="form-control"
                                    id="password" name="password" required
                                    value="<%= request.getAttribute("password") != null ? request.getAttribute("password") : ""%>">
-                            <% if (request.getAttribute("error") != null && ((String) request.getAttribute("error")).contains("Mật khẩu")) { %>
-                                <div class="form-text text-danger">
-                                    <%= request.getAttribute("error") %>
-                                </div>
-                            <% } %>
+                            <% if (request.getAttribute("error") != null && ((String) request.getAttribute("error")).contains("Mật khẩu")) {%>
+                            <div class="form-text text-danger">
+                                <%= request.getAttribute("error")%>
+                            </div>
+                            <% }%>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Nhập lại mật khẩu</label>
                             <input type="password" class="form-control"
                                    name="confirmPassword"
-                                   value="<%= request.getAttribute("confirmPassword") != null ? request.getAttribute("confirmPassword") : "" %>"
+                                   value="<%= request.getAttribute("confirmPassword") != null ? request.getAttribute("confirmPassword") : ""%>"
                                    placeholder="Nhập lại mật khẩu" required>
                         </div>
                         <div class="form-text mb-3">

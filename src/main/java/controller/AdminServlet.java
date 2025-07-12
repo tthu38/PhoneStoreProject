@@ -12,6 +12,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
+import java.util.HashMap;
 import java.util.Map;
 import model.Category;
 import model.Product;
@@ -99,7 +100,6 @@ public class AdminServlet extends HttpServlet {
 
 //        List<Map<String, Object>> lowStockVariants = productStockService.getVariantDetailsWithLowStock(10);
 //        request.setAttribute("lowStockVariants", lowStockVariants);
-
         return "../dashboard/dashboard.jsp";
     }
 
@@ -113,8 +113,18 @@ public class AdminServlet extends HttpServlet {
 
     private String handleCustomerList(HttpServletRequest request) {
         List<User> users = userService.getAllUsers();
+        service.UserAddressService addressService = new service.UserAddressService();
+
+        Map<Integer, model.UserAddress> addressMap = new HashMap<>();
+        for (User u : users) {
+            List<model.UserAddress> addresses = addressService.getAllAddressesByUserId(u.getUserID());
+            if (addresses != null && !addresses.isEmpty()) {
+                addressMap.put(u.getUserID(), addresses.get(0));
+            }
+        }
         request.setAttribute("users", users);
-        return "/user/userList.jsp";
+        request.setAttribute("addressMap", addressMap);
+        return "/user/listuser.jsp";
     }
 
     private String handleOrders(HttpServletRequest request) {

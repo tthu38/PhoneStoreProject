@@ -10,7 +10,7 @@
         </session-timeout>
     </session-config>
     <welcome-file-list>
-        <welcome-file>home</welcome-file>
+        <welcome-file>indexFirst.jsp</welcome-file>
     </welcome-file-list>
     <context-param>
         <param-name>email.sender</param-name>
