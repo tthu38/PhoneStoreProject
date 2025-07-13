@@ -72,7 +72,9 @@ public class LoginServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String action = request.getParameter("action");
-        if (action == null) action = "";
+        if (action == null) {
+            action = "";
+        }
         switch (action) {
             case "login-google":
                 handleLoginGoogle(request, response);
@@ -98,7 +100,9 @@ public class LoginServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String action = request.getParameter("action");
-        if (action == null) action = "";
+        if (action == null) {
+            action = "";
+        }
         switch (action) {
             case "verify-google-otp":
                 handleVerifyGoogleOtp(request, response);
@@ -123,56 +127,72 @@ public class LoginServlet extends HttpServlet {
 
     private void handleLoginGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        if (request.getSession().getAttribute("user") == null) {
-            Optional<User> rememberedUser = userService.checkRememberToken(request);
-            if (rememberedUser.isPresent()) {
-                request.getSession().setAttribute("user", rememberedUser.get());
-                  response.sendRedirect("home");
-                return;
+        HttpSession session = request.getSession(false);
+        User user = (session != null) ? (User) session.getAttribute("user") : null;
+
+        if (user != null) {
+            if (user.getRoleID() == 1) {
+                response.sendRedirect(request.getContextPath() + "/admin");
+            } else {
+                response.sendRedirect(request.getContextPath() + "/indexFirst.jsp");
             }
+            return;
         }
+
+        Optional<User> rememberedUser = userService.checkRememberToken(request);
+        if (rememberedUser.isPresent()) {
+            request.getSession().setAttribute("user", rememberedUser.get());
+            response.sendRedirect(request.getContextPath() + "/indexFirst.jsp");
+            return;
+        }
+
         request.getRequestDispatcher("/user/login.jsp").forward(request, response);
     }
 
     private void handleLoginPost(HttpServletRequest request, HttpServletResponse response)
-        throws ServletException, IOException {
-    String login = request.getParameter("login");
-    String password = request.getParameter("password");
+            throws ServletException, IOException {
+        String login = request.getParameter("login");
+        String password = request.getParameter("password");
 
-    User user = userService.findByEmailOrPhoneAndPassword(login, password);
+        User user = userService.findByEmailOrPhoneAndPassword(login, password);
 
-    if (user != null) {
-        request.getSession().setAttribute("user", user);
-        request.getSession().setAttribute("userId", user.getUserID());
+        if (user != null) {
+            HttpSession session = request.getSession();
+            session.setAttribute("user", user);
+            session.setAttribute("userId", user.getUserID());
 
-        String rememberMe = request.getParameter("rememberMe");
-        if ("on".equals(rememberMe)) {
-            String token = java.util.UUID.randomUUID().toString();
-            userService.saveRememberToken(user.getUserID(), token);
+            String rememberMe = request.getParameter("rememberMe");
+            if ("on".equals(rememberMe)) {
+                String token = java.util.UUID.randomUUID().toString();
+                userService.saveRememberToken(user.getUserID(), token);
 
-            jakarta.servlet.http.Cookie tokenCookie = new jakarta.servlet.http.Cookie("remember_token", token);
-            tokenCookie.setMaxAge(60 * 60 * 24 * 30);
-            tokenCookie.setPath(request.getContextPath().isEmpty() ? "/" : request.getContextPath());
-            tokenCookie.setHttpOnly(true);
-            response.addCookie(tokenCookie);
+                jakarta.servlet.http.Cookie tokenCookie = new jakarta.servlet.http.Cookie("remember_token", token);
+                tokenCookie.setMaxAge(60 * 60 * 24 * 30);
+                tokenCookie.setPath(request.getContextPath().isEmpty() ? "/" : request.getContextPath());
+                tokenCookie.setHttpOnly(true);
+                response.addCookie(tokenCookie);
 
-            jakarta.servlet.http.Cookie phoneCookie = new jakarta.servlet.http.Cookie("remember_phone", login);
-            phoneCookie.setMaxAge(7 * 24 * 60 * 60); // 7 ngày
-            phoneCookie.setPath("/");
-            response.addCookie(phoneCookie);
+                jakarta.servlet.http.Cookie phoneCookie = new jakarta.servlet.http.Cookie("remember_phone", login);
+                phoneCookie.setMaxAge(7 * 24 * 60 * 60); // 7 ngày
+                phoneCookie.setPath("/");
+                response.addCookie(phoneCookie);
+            } else {
+                jakarta.servlet.http.Cookie phoneCookie = new jakarta.servlet.http.Cookie("remember_phone", "");
+                phoneCookie.setMaxAge(0);
+                phoneCookie.setPath("/");
+                response.addCookie(phoneCookie);
+            }
+
+            if (user.getRoleID() == 1) {
+                response.sendRedirect(request.getContextPath() + "/admin");
+            } else {
+                response.sendRedirect(request.getContextPath() + "/indexFirst.jsp");
+            }
         } else {
-            jakarta.servlet.http.Cookie phoneCookie = new jakarta.servlet.http.Cookie("remember_phone", "");
-            phoneCookie.setMaxAge(0);
-            phoneCookie.setPath("/");
-            response.addCookie(phoneCookie);
+            request.setAttribute("error", "Sai email/số điện thoại hoặc mật khẩu");
+            request.getRequestDispatcher("/user/login.jsp").forward(request, response);
         }
-
-          response.sendRedirect("home");
-    } else {
-        request.setAttribute("error", "Sai email/số điện thoại hoặc mật khẩu");
-        request.getRequestDispatcher("/user/login.jsp").forward(request, response);
     }
-}
 
     private void handleUpdateProfile(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -232,8 +252,8 @@ public class LoginServlet extends HttpServlet {
                 addressService.addAddress(userAddress);
             }
         }
-
-          response.sendRedirect("home");
+        request.setAttribute("message", "Cập nhật thông tin thành công.");
+        request.getRequestDispatcher("/user/profile.jsp").forward(request, response);
     }
 
     private void handleLoginGoogle(HttpServletRequest request, HttpServletResponse response)
@@ -254,136 +274,135 @@ public class LoginServlet extends HttpServlet {
     }
 
     private void handleOauth2Google(HttpServletRequest request, HttpServletResponse response)
-        throws ServletException, IOException {
-    String error = request.getParameter("error");
-    if (error != null) {
-        request.setAttribute("error", "Bạn đã từ chối cấp quyền cho ứng dụng hoặc có lỗi xác thực: " + error);
-        request.getRequestDispatcher("/user/login.jsp").forward(request, response);
-        return;
-    }
-    String code = request.getParameter("code");
-    if (code == null || code.isEmpty()) {
-        request.setAttribute("error", "Không nhận được mã xác thực từ Google. Vui lòng thử lại.");
-        request.getRequestDispatcher("/user/login.jsp").forward(request, response);
-        return;
-    }
-    try {
-        String accessToken = utils.GoogleUtils.getToken(code);
-        User googleUserInfo = utils.GoogleUtils.getUserInfo(accessToken);
-
-        Optional<User> existedUser = userService.getUserByEmail(googleUserInfo.getEmail());
-
-        User userToLogin;
-        if (existedUser.isPresent()) {
-            userToLogin = existedUser.get();
-        } else {
-            googleUserInfo.setIsOauthUser(true);
-            googleUserInfo.setOauthProvider("GOOGLE");
-            googleUserInfo.setIsActive(true);
-            userService.register(googleUserInfo); // hoặc userService.createGoogleUser(googleUserInfo);
-            userToLogin = userService.getUserByEmail(googleUserInfo.getEmail()).orElse(googleUserInfo);
-        }
-
-        request.getSession().setAttribute("user", userToLogin);
-        request.getSession().setAttribute("userId", userToLogin.getUserID());
-        request.getSession().setAttribute("userName", userToLogin.getFullName());
-        request.getSession().setAttribute("userEmail", userToLogin.getEmail());
-
-        Boolean rememberMe = (Boolean) request.getSession().getAttribute("rememberMe");
-        if (Boolean.TRUE.equals(rememberMe)) {
-            String token = java.util.UUID.randomUUID().toString();
-            userService.saveRememberToken(userToLogin.getUserID(), token);
-            jakarta.servlet.http.Cookie rememberCookie = new jakarta.servlet.http.Cookie("remember_token", token);
-            rememberCookie.setMaxAge(60 * 60 * 24 * 30);
-            rememberCookie.setPath("/");
-            rememberCookie.setHttpOnly(true);
-            response.addCookie(rememberCookie);
-        }
-        request.getSession().removeAttribute("rememberMe");
-
-          response.sendRedirect("home");
-    } catch (Exception e) {
-        e.printStackTrace();
-        request.setAttribute("error", "Lỗi khi đăng nhập bằng Google: " + e.getMessage());
-        request.getRequestDispatcher("/user/login.jsp").forward(request, response);
-    }
-}
-
-    private void handleVerifyGoogleOtp(HttpServletRequest request, HttpServletResponse response)
-        throws ServletException, IOException {
-    String otpInput = request.getParameter("otp");
-    User user = (User) request.getSession().getAttribute("user");
-    String otpSession = (String) request.getSession().getAttribute("google_otp");
-
-    if (user != null && otpSession != null && otpSession.equals(otpInput)) {
-        request.getSession().removeAttribute("google_otp");
-        response.sendRedirect(request.getContextPath() + "/user/userupdate.jsp");
-    } else {
-        request.setAttribute("error", "Mã xác nhận không đúng hoặc đã hết hạn.");
-        request.getRequestDispatcher("/templates/googleotp.jsp").forward(request, response);
-    }
-}
-
-    private void handleForgotPasswordSendOtp(HttpServletRequest request, HttpServletResponse response)
-        throws ServletException, IOException {
-    String email = request.getParameter("email");
-    Optional<User> userOpt = userService.getUserByEmail(email);
-    if (userOpt.isPresent()) {
-        service.MailService mailService = new service.MailService();
-        String otp = mailService.generateOTP(email);
-        boolean sent = mailService.sendOtpForResetPassword(email, otp);
-        if (sent) {
-            request.getSession().setAttribute("reset_otp", otp);
-            request.getSession().setAttribute("reset_email", email);
-            request.setAttribute("message", "Mã xác nhận đã được gửi về email của bạn.");
-            request.getRequestDispatcher("/user/forgotpassword.jsp?step=otp&email=" + email).forward(request, response);
-            return;
-        } else {
-            request.setAttribute("error", "Không thể gửi mã xác nhận. Vui lòng thử lại.");
-        }
-    } else {
-        request.setAttribute("error", "Email không tồn tại trong hệ thống.");
-    }
-    request.getRequestDispatcher("/user/forgotpassword.jsp").forward(request, response);
-}
-
-    private void handleForgotPasswordVerifyOtp(HttpServletRequest request, HttpServletResponse response)
-        throws ServletException, IOException {
-    String otpInput = request.getParameter("otp");
-    String otpSession = (String) request.getSession().getAttribute("reset_otp");
-    if (otpSession != null && otpSession.equals(otpInput)) {
-        request.getRequestDispatcher("/user/reset-password.jsp").forward(request, response);
-    } else {
-        request.setAttribute("error", "Mã xác nhận không đúng hoặc đã hết hạn.");
-        request.getRequestDispatcher("/user/forgotpassword.jsp").forward(request, response);
-    }
-}
-
-    private void handleForgotPasswordReset(HttpServletRequest request, HttpServletResponse response)
-        throws ServletException, IOException {
-    String email = request.getParameter("email");
-    String otpInput = request.getParameter("otp");
-    String newPassword = request.getParameter("newPassword");
-    String otpSession = (String) request.getSession().getAttribute("reset_otp");
-    String emailSession = (String) request.getSession().getAttribute("reset_email");
-
-    if (emailSession != null && emailSession.equals(email)
-            && otpSession != null && otpSession.equals(otpInput)) {
-        boolean updated = userService.updatePasswordByEmail(email, newPassword);
-        if (updated) {
-            request.getSession().removeAttribute("reset_otp");
-            request.getSession().removeAttribute("reset_email");
-            request.setAttribute("message", "Đổi mật khẩu thành công. Bạn có thể đăng nhập lại.");
+            throws ServletException, IOException {
+        String error = request.getParameter("error");
+        if (error != null) {
+            request.setAttribute("error", "Bạn đã từ chối cấp quyền cho ứng dụng hoặc có lỗi xác thực: " + error);
             request.getRequestDispatcher("/user/login.jsp").forward(request, response);
             return;
-        } else {
-            request.setAttribute("error", "Không thể đổi mật khẩu. Vui lòng thử lại.");
         }
-    } else {
-        request.setAttribute("error", "Mã xác nhận không đúng hoặc đã hết hạn.");
+        String code = request.getParameter("code");
+        if (code == null || code.isEmpty()) {
+            request.setAttribute("error", "Không nhận được mã xác thực từ Google. Vui lòng thử lại.");
+            request.getRequestDispatcher("/user/login.jsp").forward(request, response);
+            return;
+        }
+        try {
+            String accessToken = utils.GoogleUtils.getToken(code);
+            User googleUserInfo = utils.GoogleUtils.getUserInfo(accessToken);
+
+            Optional<User> existedUser = userService.getUserByEmail(googleUserInfo.getEmail());
+
+            User userToLogin;
+            if (existedUser.isPresent()) {
+                userToLogin = existedUser.get();
+            } else {
+                googleUserInfo.setIsOauthUser(true);
+                googleUserInfo.setOauthProvider("GOOGLE");
+                googleUserInfo.setIsActive(true);
+                userService.register(googleUserInfo); // hoặc userService.createGoogleUser(googleUserInfo);
+                userToLogin = userService.getUserByEmail(googleUserInfo.getEmail()).orElse(googleUserInfo);
+            }
+
+            request.getSession().setAttribute("user", userToLogin);
+            request.getSession().setAttribute("userId", userToLogin.getUserID());
+            request.getSession().setAttribute("userName", userToLogin.getFullName());
+            request.getSession().setAttribute("userEmail", userToLogin.getEmail());
+
+            Boolean rememberMe = (Boolean) request.getSession().getAttribute("rememberMe");
+            if (Boolean.TRUE.equals(rememberMe)) {
+                String token = java.util.UUID.randomUUID().toString();
+                userService.saveRememberToken(userToLogin.getUserID(), token);
+                jakarta.servlet.http.Cookie rememberCookie = new jakarta.servlet.http.Cookie("remember_token", token);
+                rememberCookie.setMaxAge(60 * 60 * 24 * 30);
+                rememberCookie.setPath("/");
+                rememberCookie.setHttpOnly(true);
+                response.addCookie(rememberCookie);
+            }
+            request.getSession().removeAttribute("rememberMe");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            request.setAttribute("error", "Lỗi khi đăng nhập bằng Google: " + e.getMessage());
+            request.getRequestDispatcher("/user/login.jsp").forward(request, response);
+        }
     }
-    request.getRequestDispatcher("/user/forgotpassword.jsp?step=otp&email=" + email).forward(request, response);
-}
+
+    private void handleVerifyGoogleOtp(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String otpInput = request.getParameter("otp");
+        User user = (User) request.getSession().getAttribute("user");
+        String otpSession = (String) request.getSession().getAttribute("google_otp");
+
+        if (user != null && otpSession != null && otpSession.equals(otpInput)) {
+            request.getSession().removeAttribute("google_otp");
+            response.sendRedirect(request.getContextPath() + "/user/userupdate.jsp");
+        } else {
+            request.setAttribute("error", "Mã xác nhận không đúng hoặc đã hết hạn.");
+            request.getRequestDispatcher("/templates/googleotp.jsp").forward(request, response);
+        }
+    }
+
+    private void handleForgotPasswordSendOtp(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String email = request.getParameter("email");
+        Optional<User> userOpt = userService.getUserByEmail(email);
+        if (userOpt.isPresent()) {
+            service.MailService mailService = new service.MailService();
+            String otp = mailService.generateOTP(email);
+            boolean sent = mailService.sendOtpForResetPassword(email, otp);
+            if (sent) {
+                request.getSession().setAttribute("reset_otp", otp);
+                request.getSession().setAttribute("reset_email", email);
+                request.setAttribute("message", "Mã xác nhận đã được gửi về email của bạn.");
+                request.getRequestDispatcher("/user/forgotpassword.jsp?step=otp&email=" + email).forward(request, response);
+                return;
+            } else {
+                request.setAttribute("error", "Không thể gửi mã xác nhận. Vui lòng thử lại.");
+            }
+        } else {
+            request.setAttribute("error", "Email không tồn tại trong hệ thống.");
+        }
+        request.getRequestDispatcher("/user/forgotpassword.jsp").forward(request, response);
+    }
+
+    private void handleForgotPasswordVerifyOtp(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String otpInput = request.getParameter("otp");
+        String otpSession = (String) request.getSession().getAttribute("reset_otp");
+        if (otpSession != null && otpSession.equals(otpInput)) {
+            request.getRequestDispatcher("/user/reset-password.jsp").forward(request, response);
+        } else {
+            request.setAttribute("error", "Mã xác nhận không đúng hoặc đã hết hạn.");
+            request.getRequestDispatcher("/user/forgotpassword.jsp").forward(request, response);
+        }
+    }
+
+    private void handleForgotPasswordReset(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String email = request.getParameter("email");
+        String otpInput = request.getParameter("otp");
+        String newPassword = request.getParameter("newPassword");
+        String otpSession = (String) request.getSession().getAttribute("reset_otp");
+        String emailSession = (String) request.getSession().getAttribute("reset_email");
+
+        if (emailSession != null && emailSession.equals(email)
+                && otpSession != null && otpSession.equals(otpInput)) {
+            boolean updated = userService.updatePasswordByEmail(email, newPassword);
+            if (updated) {
+                request.getSession().removeAttribute("reset_otp");
+                request.getSession().removeAttribute("reset_email");
+                request.setAttribute("message", "Đổi mật khẩu thành công. Bạn có thể đăng nhập lại.");
+                request.getRequestDispatcher("/user/login.jsp").forward(request, response);
+                return;
+            } else {
+                request.setAttribute("error", "Không thể đổi mật khẩu. Vui lòng thử lại.");
+            }
+        } else {
+            request.setAttribute("error", "Mã xác nhận không đúng hoặc đã hết hạn.");
+        }
+        request.getRequestDispatcher("/user/forgotpassword.jsp?step=otp&email=" + email).forward(request, response);
+    }
 
     /**
      * Returns a short description of the servlet.
