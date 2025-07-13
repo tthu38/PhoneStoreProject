@@ -121,10 +121,13 @@ public class AdminServlet extends HttpServlet {
 
     private String handleDashboard(HttpServletRequest request) {
         Map<String, Double> monthlyRevenue = orderService.getMonthlyRevenue();
+        Map<String, Double> brandSalesData = orderService.getBrandSalesData();
+        
         request.setAttribute("monthlyRevenue", monthlyRevenue);
+        request.setAttribute("brandSalesData", brandSalesData);
 
-//        List<Map<String, Object>> lowStockVariants = productStockService.getVariantDetailsWithLowStock(10);
-//        request.setAttribute("lowStockVariants", lowStockVariants);
+        List<Map<String, Object>> lowStockVariants = productStockService.getVariantDetailsWithLowStock(10);
+        request.setAttribute("lowStockVariants", lowStockVariants);
         return "../dashboard/dashboard.jsp";
     }
 
