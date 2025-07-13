@@ -5,12 +5,16 @@
 
 <%
     User user = (User) request.getAttribute("user");
-    UserAddress address = (UserAddress) request.getAttribute("address");
-    String province = (String) request.getAttribute("province");
-    String district = (String) request.getAttribute("district");
-    String ward = (String) request.getAttribute("ward");
+    if (user == null) {
 %>
-
+    <div class="alert alert-danger">Không tìm thấy thông tin người dùng.</div>
+<%
+    } else {
+        UserAddress address = (UserAddress) request.getAttribute("address");
+        String province = (String) request.getAttribute("province");
+        String district = (String) request.getAttribute("district");
+        String ward = (String) request.getAttribute("ward");
+%>
 <!DOCTYPE html>
 <html>
     <head>
@@ -141,3 +145,6 @@
         </script>
     </body>
 </html>
+<%
+    }
+%>

@@ -23,7 +23,8 @@ public class AuthenticationFilter implements Filter {
             "/user/adduser.jsp",
             "/user/edituser.jsp",
             "/user/listuser.jsp",
-            "/paypal/cancel.jsp"
+            "/paypal/cancel.jsp",
+            "/admin/dashboard/dashboard.jsp"
     ));
 
     private static final Set<String> USER_ONLY_PAGES = new HashSet<>(Arrays.asList(
@@ -55,7 +56,8 @@ public class AuthenticationFilter implements Filter {
             "/product/ProductList.jsp",
             "/product/ProductDetail.jsp",
             "/product/BestSeller.jsp",
-            "/login"
+            "/login",
+            "/products"
     ));
 
     private static final Set<String> STATIC_RESOURCES = new HashSet<>(Arrays.asList(
@@ -72,6 +74,7 @@ public class AuthenticationFilter implements Filter {
         String contextPath = req.getContextPath();
         String path = uri.substring(contextPath.length());
 
+        // Nếu là tài nguyên tĩnh hoặc trang public thì cho qua
         if (isStaticResource(path) || isPublicPage(path)) {
             chain.doFilter(request, response);
             return;
@@ -89,7 +92,7 @@ public class AuthenticationFilter implements Filter {
 
         if (!hasPermission(path, role)) {
             if ("admin".equals(role)) {
-                res.sendRedirect(contextPath + "/admin/dashboard/dashboard.jsp"); // nên redirect về dashboard
+                res.sendRedirect(contextPath + "/admin/dashboard/dashboard.jsp");
             } else {
                 res.sendRedirect(contextPath + "/indexFirst.jsp");
             }
@@ -108,15 +111,14 @@ public class AuthenticationFilter implements Filter {
     }
 
     private boolean hasPermission(String path, String role) {
-        if (PUBLIC_PAGES.contains(path)) {
-            return true; // Ai cũng vào được
-        }
         if ("admin".equals(role)) {
-            return true; // Admin được quyền vào tất cả
+            return !USER_ONLY_PAGES.contains(path); // admin KHÔNG vào được trang user
         }
+
         if ("user".equals(role)) {
-            return !ADMIN_ONLY_PAGES.contains(path); // User không vào được trang admin
+            return !ADMIN_ONLY_PAGES.contains(path); // user KHÔNG vào được trang admin
         }
+
         return false;
     }
 
