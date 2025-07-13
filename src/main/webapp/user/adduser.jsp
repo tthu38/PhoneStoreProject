@@ -3,68 +3,105 @@
 <html>
     <head>
         <title>Thêm người dùng</title>
-        <script src="${pageContext.request.contextPath}/js/address.js"></script>
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/adduser.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+        <script src="${pageContext.request.contextPath}/js/address.js"></script>            
     </head>
+
     <body>
-        <h2>Thêm người dùng</h2>
+        <main class="add-user-page">
+            <div class="container">
+                <a href="${pageContext.request.contextPath}/admin?menu=customers" class="back-link">
+                    <i class="fas fa-arrow-left"></i> Trở lại danh sách người dùng
+                </a>
 
-        <c:if test="${not empty error}">
-            <p style="color:red">${error}</p>
-        </c:if>
+                <h2 class="title"><i class="fas fa-user-plus"></i> Thêm người dùng</h2>
 
-        <form action="${pageContext.request.contextPath}/users?action=add" method="post" enctype="multipart/form-data">
-            <input type="hidden" name="action" value="add" />
+                <c:if test="${not empty error}">
+                    <p class="error-text">${error}</p>
+                </c:if>
 
-            <label>Họ và tên:</label><br>
-            <input type="text" name="fullName" value="${fullName}" required><br><br>
+                <form action="${pageContext.request.contextPath}/users?action=add" method="post" enctype="multipart/form-data">
+                    <input type="hidden" name="action" value="add"/>
 
-            <label>Email:</label><br>
-            <input type="email" name="email" value="${email}" required><br><br>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label><i class="fas fa-user"></i> Họ và tên:</label>
+                            <input type="text" name="fullName" value="${fullName}" required>
+                        </div>
 
-            <label>Mật khẩu:</label><br>
-            <input type="password" name="password" required><br><br>
+                        <div class="form-group">
+                            <label><i class="fas fa-envelope"></i> Email:</label>
+                            <input type="email" name="email" value="${email}" required>
+                        </div>
 
-            <label>Số điện thoại:</label><br>
-            <input type="text" name="phoneNumber" value="${phoneNumber}"
-                   pattern="0[0-9]{9}" title="Số điện thoại phải bắt đầu bằng 0 và đủ 10 chữ số" required><br><br>
+                        <div class="form-group">
+                            <label><i class="fas fa-lock"></i> Mật khẩu:</label>
+                            <input type="password" name="password" required>
+                        </div>
 
-            <label>Ngày sinh:</label><br>
-            <input type="date" name="dob" max="<%= java.time.LocalDate.now()%>" value="${dob}"><br><br>
+                        <div class="form-group">
+                            <label><i class="fas fa-phone"></i> Số điện thoại:</label>
+                            <input type="text" name="phoneNumber" value="${phoneNumber}"
+                                   pattern="0[0-9]{9}" title="Số điện thoại phải bắt đầu bằng 0 và đủ 10 chữ số" required>
+                        </div>
 
-            <label>Vai trò:</label><br>
-            <select name="roleID">
-                <option value="1">Admin</option>
-                <option value="2" selected>Người dùng</option>
-            </select><br><br>
+                        <div class="form-group">
+                            <label><i class="fas fa-calendar"></i> Ngày sinh:</label>
+                            <input type="date" name="dob" max="<%= java.time.LocalDate.now()%>" value="${dob}">
+                        </div>
 
-            <label>Trạng thái:</label><br>
-            <select name="isActive">
-                <option value="1" selected>Hoạt động</option>
-                <option value="0">Vô hiệu hóa</option>
-            </select><br><br>
+                        <div class="form-group">
+                            <label><i class="fas fa-user-tag"></i> Vai trò:</label>
+                            <select name="roleID">
+                                <option value="1">Admin</option>
+                                <option value="2" selected>Người dùng</option>
+                            </select>
+                        </div>
 
-            <label>Tỉnh/Thành phố:</label><br>
-            <select id="province" name="province" required>
-                <option value="">-- Chọn tỉnh --</option>
-            </select><br><br>
+                        <div class="form-group">
+                            <label><i class="fas fa-toggle-on"></i> Trạng thái:</label>
+                            <select name="isActive">
+                                <option value="1" selected>Hoạt động</option>
+                                <option value="0">Vô hiệu hóa</option>
+                            </select>
+                        </div>
 
-            <label>Quận/Huyện:</label><br>
-            <select id="district" name="district" required>
-                <option value="">-- Chọn quận/huyện --</option>
-            </select><br><br>
+                        <div class="form-group">
+                            <label><i class="fas fa-map-marker-alt"></i> Tỉnh/Thành phố:</label>
+                            <select id="province" name="province" required>
+                                <option value="">-- Chọn tỉnh --</option>
+                            </select>
+                        </div>
 
-            <label>Phường/Xã:</label><br>
-            <select id="ward" name="ward" required>
-                <option value="">-- Chọn phường/xã --</option>
-            </select><br><br>
+                        <div class="form-group">
+                            <label><i class="fas fa-map"></i> Quận/Huyện:</label>
+                            <select id="district" name="district" required>
+                                <option value="">-- Chọn quận/huyện --</option>
+                            </select>
+                        </div>
 
-            <input type="hidden" id="address" name="address" value="${address}">
+                        <div class="form-group">
+                            <label><i class="fas fa-location-arrow"></i> Phường/Xã:</label>
+                            <select id="ward" name="ward" required>
+                                <option value="">-- Chọn phường/xã --</option>
+                            </select>
+                        </div>
 
-            <label>Ảnh đại diện:</label><br>
-            <input type="file" name="picture"><br><br>
+                        <input type="hidden" id="address" name="address" value="${address}">
 
-            <button type="submit">Thêm người dùng</button>
-        </form>
+                        <div class="form-group">
+                            <label><i class="fas fa-image"></i> Ảnh đại diện:</label>
+                            <input type="file" name="picture">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="submit-btn">
+                        <i class="fas fa-user-plus"></i> Thêm người dùng
+                    </button>
+                </form>
+            </div>
+        </main>
 
         <script>
             document.addEventListener("DOMContentLoaded", function () {

@@ -65,7 +65,9 @@ public class UserService {
             em.getTransaction().commit();
             return true;
         } catch (Exception e) {
-            if (em.getTransaction().isActive()) em.getTransaction().rollback();
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
             e.printStackTrace();
             return false;
         } finally {
@@ -374,7 +376,9 @@ public class UserService {
             em.merge(user); // Cập nhật thông tin user
             em.getTransaction().commit();
         } catch (Exception e) {
-            if (em.getTransaction().isActive()) em.getTransaction().rollback();
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
             throw e;
         } finally {
             em.close();
@@ -385,9 +389,9 @@ public class UserService {
         EntityManager em = emf.createEntityManager();
         try {
             return em.createNamedQuery("User.findByOauthId", User.class)
-                     .setParameter("oauthId", oauthId)
-                     .getResultList()
-                     .stream().findFirst();
+                    .setParameter("oauthId", oauthId)
+                    .getResultList()
+                    .stream().findFirst();
         } finally {
             em.close();
         }
@@ -407,15 +411,21 @@ public class UserService {
         EntityManager em = emf.createEntityManager();
         try {
             TypedQuery<User> query = em.createQuery(
-                "SELECT u FROM User u WHERE (u.email = :login OR u.phoneNumber = :login) AND u.password = :password AND u.isActive = true",
-                User.class
+                    "SELECT u FROM User u WHERE (u.email = :login OR u.phoneNumber = :login) AND u.isActive = true",
+                    User.class
             );
             query.setParameter("login", login);
-            query.setParameter("password", password);
             List<User> users = query.getResultList();
-            return users.isEmpty() ? null : users.get(0);
+
+            for (User u : users) {
+                if (u.getPassword() != null && u.getPassword().equals(password)) {
+                    return u;
+                }
+            }
+            return null;
         } finally {
             em.close();
         }
     }
+
 }

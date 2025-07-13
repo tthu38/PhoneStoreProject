@@ -21,6 +21,8 @@ import service.ProductService;
 import service.UserService;
 import service.OrderService;
 import service.ProductStockService;
+import model.UserAddress;
+import java.util.Comparator;
 
 /**
  *
@@ -72,9 +74,32 @@ public class AdminServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String menu = request.getParameter("menu");
+        String action = request.getParameter("action");
         String contentPage;
 
-        if (menu == null || menu.equals("dashboard")) {
+        if (action != null && action.equals("editadmin")) {
+            User admin = (User) request.getSession().getAttribute("user");
+            if (admin == null || admin.getRoleID() != 1) {
+                response.sendRedirect(request.getContextPath() + "/login.jsp");
+                return;
+            }
+            UserAddress address = null;
+            List<UserAddress> addresses = new service.UserAddressService().getAllAddressesByUserId(admin.getUserID());
+            if (addresses != null && !addresses.isEmpty()) {
+                address = addresses.get(0);
+                if (address.getAddress() != null) {
+                    String[] parts = address.getAddress().split(",\\s*");
+                    request.setAttribute("ward", parts.length > 0 ? parts[0] : "");
+                    request.setAttribute("district", parts.length > 1 ? parts[1] : "");
+                    request.setAttribute("province", parts.length > 2 ? parts[2] : "");
+                }
+            }
+            request.setAttribute("user", admin);
+            request.setAttribute("address", address);
+            request.setAttribute("contentPage", "../../user/edituser.jsp");
+            request.getRequestDispatcher("/admin/layout/admin-header.jsp").forward(request, response);
+            return;
+        } else if (menu == null || menu.equals("dashboard")) {
             contentPage = handleDashboard(request);
         } else if (menu.equals("products")) {
             contentPage = handleProductList(request);
@@ -96,10 +121,13 @@ public class AdminServlet extends HttpServlet {
 
     private String handleDashboard(HttpServletRequest request) {
         Map<String, Double> monthlyRevenue = orderService.getMonthlyRevenue();
+        Map<String, Double> brandSalesData = orderService.getBrandSalesData();
+        
         request.setAttribute("monthlyRevenue", monthlyRevenue);
+        request.setAttribute("brandSalesData", brandSalesData);
 
-//        List<Map<String, Object>> lowStockVariants = productStockService.getVariantDetailsWithLowStock(10);
-//        request.setAttribute("lowStockVariants", lowStockVariants);
+        List<Map<String, Object>> lowStockVariants = productStockService.getVariantDetailsWithLowStock(10);
+        request.setAttribute("lowStockVariants", lowStockVariants);
         return "../dashboard/dashboard.jsp";
     }
 
@@ -116,8 +144,34 @@ public class AdminServlet extends HttpServlet {
 
     private String handleCustomerList(HttpServletRequest request) {
         List<User> users = userService.getAllUsers();
-        service.UserAddressService addressService = new service.UserAddressService();
+        users.removeIf(u -> u.getRoleID() != 2);
 
+        String sort = request.getParameter("sort");
+        String status = request.getParameter("status");
+        String searchName = request.getParameter("searchName");
+
+        if ("active".equals(status)) {
+            users.removeIf(u -> !u.getIsActive());
+        } else if ("inactive".equals(status)) {
+            users.removeIf(User::getIsActive);
+        }
+
+        if (searchName != null && !searchName.trim().isEmpty()) {
+            String search = searchName.trim().toLowerCase();
+            users.removeIf(u -> !(u.getFullName().toLowerCase().contains(search) || u.getEmail().toLowerCase().contains(search)));
+        }
+
+        if ("name_asc".equals(sort)) {
+            users.sort(Comparator.comparing(u -> getLastName(((User)u).getFullName()), String.CASE_INSENSITIVE_ORDER));
+        } else if ("name_desc".equals(sort)) {
+            users.sort(Comparator.comparing(u -> getLastName(((User)u).getFullName()), String.CASE_INSENSITIVE_ORDER).reversed());
+        } else if ("id_asc".equals(sort)) {
+            users.sort(Comparator.comparingInt(User::getUserID));
+        } else if ("id_desc".equals(sort)) {
+            users.sort(Comparator.comparingInt(User::getUserID).reversed());
+        }
+
+        service.UserAddressService addressService = new service.UserAddressService();
         Map<Integer, model.UserAddress> addressMap = new HashMap<>();
         for (User u : users) {
             List<model.UserAddress> addresses = addressService.getAllAddressesByUserId(u.getUserID());
@@ -127,6 +181,11 @@ public class AdminServlet extends HttpServlet {
         }
         request.setAttribute("users", users);
         request.setAttribute("addressMap", addressMap);
+
+        request.setAttribute("sort", sort);
+        request.setAttribute("status", status);
+        request.setAttribute("searchName", searchName);
+
         return "/user/listuser.jsp";
     }
 
@@ -155,7 +214,52 @@ public class AdminServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        String action = request.getParameter("action");
+        if ("editadmin".equals(action)) {
+            handleEditAdmin(request, response);
+        } else {
+            processRequest(request, response);
+        }
+    }
+
+    private void handleEditAdmin(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        User admin = (User) request.getSession().getAttribute("user");
+        if (admin == null || admin.getRoleID() != 1) {
+            response.sendRedirect(request.getContextPath() + "/login.jsp");
+            return;
+        }
+
+        String fullName = request.getParameter("fullName");
+        String email = request.getParameter("email");
+        String password = request.getParameter("password");
+        String phoneNumber = request.getParameter("phoneNumber");
+        String dob = request.getParameter("dob");
+
+
+        admin.setFullName(fullName);
+        admin.setEmail(email);
+        admin.setPhoneNumber(phoneNumber);
+        if (dob != null && !dob.isEmpty()) {
+            admin.setDob(java.time.LocalDate.parse(dob));
+        }
+        if (password != null && !password.isEmpty()) {
+            admin.setPassword(password);
+        }
+
+        boolean success = userService.updateUser(admin);
+
+        request.getSession().setAttribute("user", admin);
+
+        if (success) {
+            request.setAttribute("message", "Cập nhật thông tin thành công!");
+        } else {
+            request.setAttribute("error", "Có lỗi xảy ra, vui lòng thử lại.");
+        }
+
+        request.setAttribute("user", admin);
+        request.setAttribute("contentPage", "../../user/edituser.jsp");
+        request.getRequestDispatcher("/admin/layout/admin-header.jsp").forward(request, response);
     }
 
     /**
@@ -168,4 +272,9 @@ public class AdminServlet extends HttpServlet {
         return "Short description";
     }// </editor-fold>
 
+    private String getLastName(String fullName) {
+        if (fullName == null || fullName.isEmpty()) return "";
+        String[] parts = fullName.trim().split("\\s+");
+        return parts[parts.length - 1];
+    }
 }

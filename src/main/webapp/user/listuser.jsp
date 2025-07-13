@@ -21,17 +21,17 @@
             <div class="filters-row">
                 <select name="sort">
                     <option value="">Sắp xếp</option>
-                    <option value="name_asc">Tên: A → Z</option>
-                    <option value="name_desc">Tên: Z → A</option>
-                    <option value="id_asc">ID: Tăng dần</option>
-                    <option value="id_desc">ID: Giảm dần</option>
+                    <option value="name_asc" ${sort == 'name_asc' ? 'selected' : ''}>Tên: A → Z</option>
+                    <option value="name_desc" ${sort == 'name_desc' ? 'selected' : ''}>Tên: Z → A</option>
+                    <option value="id_asc" ${sort == 'id_asc' ? 'selected' : ''}>ID: Tăng dần</option>
+                    <option value="id_desc" ${sort == 'id_desc' ? 'selected' : ''}>ID: Giảm dần</option>
                 </select>
                 <select name="status">
                     <option value="">Trạng thái</option>
-                    <option value="active">Hoạt động</option>
-                    <option value="inactive">Khóa</option>
+                    <option value="active" ${status == 'active' ? 'selected' : ''}>Hoạt động</option>
+                    <option value="inactive" ${status == 'inactive' ? 'selected' : ''}>Khóa</option>
                 </select>
-                <input type="text" name="searchName" placeholder="Tìm theo tên hoặc email..." />
+                <input type="text" name="searchName" value="${searchName != null ? searchName : ''}" placeholder="Tìm theo tên hoặc email..." />
                 <button type="submit"><i class="fas fa-filter"></i> Lọc</button>
                 <a href="${pageContext.request.contextPath}/users?action=add" class="add-user-btn">
                     <i class="fas fa-plus"></i> Thêm mới

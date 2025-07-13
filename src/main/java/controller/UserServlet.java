@@ -81,6 +81,8 @@ public class UserServlet extends HttpServlet {
     private void showUserList(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         List<User> users = userService.getAllUsers();
+        // Lọc chỉ lấy user roleID = 2
+        users.removeIf(u -> u.getRoleID() != 2);
         Map<Integer, UserAddress> addressMap = new HashMap<>();
         for (User u : users) {
             List<UserAddress> addresses = addressService.getAllAddressesByUserId(u.getUserID());

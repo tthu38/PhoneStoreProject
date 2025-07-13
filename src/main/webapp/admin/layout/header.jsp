@@ -41,7 +41,7 @@
                                         </li>
                                     </c:when>
                                     
-                                <li><a class="dropdown-item" href="${pageContext.request.contextPath}/user/editprofile.jsp"><i class="fas fa-user-edit me-2"></i>Chỉnh sửa thông tin</a></li>
+                                <li><a class="dropdown-item" href="${pageContext.request.contextPath}/admin?action=editadmin"><i class="fas fa-user-edit me-2"></i>Chỉnh sửa thông tin</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item" href="${pageContext.request.contextPath}/logout"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
                             </ul>
