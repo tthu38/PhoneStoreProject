@@ -37,7 +37,6 @@
             text-align: center;
         }
 
-     /* Card styling */
         .card {
             border: none;
             border-radius: 15px;
@@ -59,7 +58,7 @@
         .card-img-top {
             border-radius: 15px 15px 0 0;
             width: 100%;
-            height: 200px; /* Adjusted for smaller column width */
+            height: 200px;
             object-fit: contain;
             background-color: #f9f9f9;
             padding: 1rem;
@@ -82,7 +81,7 @@
             font-family: 'Poppins', sans-serif;
             color: #ff2e63;
             font-weight: 600;
-            font-size: 1.2rem; /* Slightly smaller for narrower cards */
+            font-size: 1.2rem;
             margin-bottom: 0.8rem;
             height: 2.8em;
             overflow: hidden;
@@ -90,15 +89,15 @@
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
-             min-height: 40px;
+            min-height: 40px;
         }
 
         .card-text {
             color: #555;
             font-weight: 400;
             margin-bottom: 1rem;
-            font-size: 0.95rem; /* Adjusted for narrower cards */
-             min-height: 40px;
+            font-size: 0.95rem;
+            min-height: 40px;
         }
 
         .card-text .text-decoration-line-through {
@@ -106,14 +105,13 @@
             font-size: 0.8rem;
             margin-bottom: 0.3rem;
             display: block;
-            text-decoration: none; /* ← Thêm dòng này */
+            text-decoration: none;
         }
-
 
         .card-text .discount-price {
             color: #ff2e63;
             font-weight: 700;
-            font-size: 1.3rem; /* Slightly smaller for balance */
+            font-size: 1.3rem;
         }
 
         .card-footer {
@@ -121,8 +119,6 @@
             border-top: 1px solid rgba(255, 46, 99, 0.1);
             padding: 0.8rem;
             text-align: center;
-        }
-        .card-footer {
             margin-top: auto;
         }
 
@@ -189,13 +185,14 @@
             padding: 0;
             margin: 0;
         }
+
         .col-custom-5 {
-            flex: 0 0 20%; /* 100% / 5 = 20% width per column */
+            flex: 0 0 20%;
             max-width: 20%;
             padding-left: 10px;
             padding-right: 10px;
         }
-        /* Discount badge */
+
         .discount-badge {
             position: absolute;
             top: 15px;
@@ -209,21 +206,16 @@
             justify-content: center;
             align-items: center;
             font-weight: 700;
-            font-size: 1rem; /* Adjusted for smaller badge */
+            font-size: 1rem;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
             z-index: 10;
             animation: pulse 1.5s infinite;
         }
+
         @keyframes pulse {
-            0% {
-                transform: scale(1);
-            }
-            50% {
-                transform: scale(1.1);
-            }
-            100% {
-                transform: scale(1);
-            }
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
         }
 
         @keyframes slideUp {
@@ -237,28 +229,20 @@
             }
         }
 
-        .col-custom-5:nth-child(1) .card {
-            --animation-order: 1;
-        }
-        .col-custom-5:nth-child(2) .card {
-            --animation-order: 2;
-        }
-        .col-custom-5:nth-child(3) .card {
-            --animation-order: 3;
-        }
-        .col-custom-5:nth-child(4) .card {
-            --animation-order: 4;
-        }
-        .col-custom-5:nth-child(5) .card {
-            --animation-order: 5;
-        }
+        .col-custom-5:nth-child(1) .card { --animation-order: 1; }
+        .col-custom-5:nth-child(2) .card { --animation-order: 2; }
+        .col-custom-5:nth-child(3) .card { --animation-order: 3; }
+        .col-custom-5:nth-child(4) .card { --animation-order: 4; }
+        .col-custom-5:nth-child(5) .card { --animation-order: 5; }
+
         .card a {
             text-decoration: none !important;
             color: inherit;
         }
+
         @media (max-width: 1200px) {
             .col-custom-5 {
-                flex: 0 0 33.333%; /* 3 columns */
+                flex: 0 0 33.333%;
                 max-width: 33.333%;
             }
             .card-img-top {
@@ -281,86 +265,78 @@
 </head>
 <body>
 <%--<jsp:include page="/templates/header.jsp"/>--%>
-    <div class="container">
-        <h2 class="text-primary">Danh sách sản phẩm</h2>
+<div class="container">
+    <h2 class="text-primary">Danh sách sản phẩm</h2>
 
-        <form method="GET" action="products" class="row g-3 mb-4">
-            <input type="hidden" name="action" value="find">
-            <div class="col-md-3">
-                <select name="categoryId" class="form-select">
-                    <option value="" ${empty param.categoryId ? 'selected' : ''}>Tất cả danh mục</option>
-                    <c:forEach var="category" items="${categories}">
-                        <option value="${category.id}" ${param.categoryId == category.id ? 'selected' : ''}>${category.name}</option>
-                    </c:forEach>
-                </select>
-            </div>
-            <div class="col-md-3">
-                <input type="text" name="searchName" value="${param.searchName}" class="form-control" placeholder="Tìm theo tên sản phẩm...">
-            </div>
-            <div class="col-md-3">
-                <select name="sort" class="form-select">
-                    <option value="price_asc" ${param.sort == 'price_asc' ? 'selected' : ''}>Giá: Thấp → Cao</option>
-                    <option value="price_desc" ${param.sort == 'price_desc' ? 'selected' : ''}>Giá: Cao → Thấp</option>
-                    <option value="name_asc" ${param.sort == 'name_asc' ? 'selected' : ''}>Tên: A → Z</option>
-                    <option value="name_desc" ${param.sort == 'name_desc' ? 'selected' : ''}>Tên: Z → A</option>
-                </select>
-            </div>
-            <div class="col-md-3">
-                <button type="submit" class="btn btn-primary w-100"><i class="fas fa-search me-2"></i>Lọc & Tìm kiếm</button>
-            </div>
-        </form>
-
-        <!-- Lọc theo hãng (brandId) -->
-        <div class="filter-container">
-            <a href="products?action=find&brandId=2"><img src="${pageContext.request.contextPath}/images/samsung.png" alt="Samsung" class="brand-logo"></a>
-            <a href="products?action=find&brandId=1"><img src="${pageContext.request.contextPath}/images/iphone.png" alt="iPhone" class="brand-logo"></a>
-            <a href="products?action=find&brandId=5"><img src="${pageContext.request.contextPath}/images/oppo.png" alt="Oppo" class="brand-logo"></a>
-            <a href="products?action=find&brandId=3"><img src="${pageContext.request.contextPath}/images/xiaomi.png" alt="Xiaomi" class="brand-logo"></a>
-            <a href="products?action=find&brandId=4"><img src="${pageContext.request.contextPath}/images/realme.png" alt="Realme" class="brand-logo"></a>
-            <a href="products?action=find&brandId=6"><img src="${pageContext.request.contextPath}/images/vivo.png" alt="Vivo" class="brand-logo"></a>
-            
+    <form method="GET" action="products" class="row g-3 mb-4">
+        <input type="hidden" name="action" value="find">
+        <div class="col-md-3">
+            <select name="categoryId" class="form-select">
+                <option value="" ${empty param.categoryId ? 'selected' : ''}>Tất cả danh mục</option>
+                <c:forEach var="category" items="${categories}">
+                    <option value="${category.id}" ${param.categoryId == category.id ? 'selected' : ''}>${category.name}</option>
+                </c:forEach>
+            </select>
         </div>
+        <div class="col-md-3">
+            <input type="text" name="searchName" value="${param.searchName}" class="form-control" placeholder="Tìm theo tên sản phẩm...">
+        </div>
+        <div class="col-md-3">
+            <select name="sort" class="form-select">
+                <option value="price_asc" ${param.sort == 'price_asc' ? 'selected' : ''}>Giá: Thấp → Cao</option>
+                <option value="price_desc" ${param.sort == 'price_desc' ? 'selected' : ''}>Giá: Cao → Thấp</option>
+                <option value="name_asc" ${param.sort == 'name_asc' ? 'selected' : ''}>Tên: A → Z</option>
+                <option value="name_desc" ${param.sort == 'name_desc' ? 'selected' : ''}>Tên: Z → A</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <button type="submit" class="btn btn-primary w-100"><i class="fas fa-search me-2"></i>Lọc & Tìm kiếm</button>
+        </div>
+    </form>
 
-        <c:choose>
-            <c:when test="${empty products}">
-                <div class="alert alert-warning text-center">
-                    Không tìm thấy sản phẩm nào phù hợp!
-                </div>
-            </c:when>
-            <c:otherwise>
-                <div class="row">
-                    <c:forEach var="product" items="${products}">
-                        <div class="col-custom-5 mb-4 d-flex">
-                            <div class="card w-100">
-                                <c:if test="${product.discountPercent > 0}">
-                                    <div class="discount-badge">
-                                        -${product.discountPercent}%
-                                    </div>
-                                </c:if>
-                                <a href="products?action=productDetail&productId=${product.id}">
-                                    <img src="${product.thumbnailImage}" class="card-img-top" alt="${product.name}">
-                                    <div class="card-body">
-                                        <h5 class="card-title">${product.name}</h5>
-                                        <p class="card-text">
-                                            <c:choose>
-                                                <c:when test="${product.discountPercent > 0}">
-                                                    <span class="discount-price">${product.discountPrice}₫</span><br>
-                                                    <span class="text-decoration-line-through text-muted">${product.originalPrice}₫</span>
-                                                </c:when>
-                                                <c:otherwise>
-                                                    <span class="discount-price">${product.originalPrice}₫</span>
-                                                </c:otherwise>
-                                            </c:choose>
-                                        </p>
+    <!-- Lọc theo hãng (brandId) -->
+    <div class="filter-container">
+        <a href="<c:url value='/products?action=find&brandId=2'/>"><img src="${pageContext.request.contextPath}/images/samsung.png" alt="Samsung" class="brand-logo"></a>
+        <a href="<c:url value='/products?action=find&brandId=1'/>"><img src="${pageContext.request.contextPath}/images/iphone.png" alt="iPhone" class="brand-logo"></a>
+        <a href="<c:url value='/products?action=find&brandId=5'/>"><img src="${pageContext.request.contextPath}/images/oppo.png" alt="Oppo" class="brand-logo"></a>
+        <a href="<c:url value='/products?action=find&brandId=3'/>"><img src="${pageContext.request.contextPath}/images/xiaomi.png" alt="Xiaomi" class="brand-logo"></a>
+        <a href="<c:url value='/products?action=find&brandId=4'/>"><img src="${pageContext.request.contextPath}/images/realme.png" alt="Realme" class="brand-logo"></a>
+        <a href="<c:url value='/products?action=find&brandId=6'/>"><img src="${pageContext.request.contextPath}/images/vivo.png" alt="Vivo" class="brand-logo"></a>
+    </div>
 
-                                    </div>
-                                </a>
-                            <div class="card-footer">
-                                <form action="<%= request.getContextPath()%>/carts?action=add" method="get">
-                                    <input type="hidden" name="variantId" value="${variantId.id}">
-                                    <button type="submit" class="btn btn-primary w-100">Thêm vào giỏ hàng</button>
-                                </form>
-                            </div>
+    <c:choose>
+        <c:when test="${empty products}">
+            <div class="alert alert-warning text-center">
+                Không tìm thấy sản phẩm nào phù hợp!
+            </div>
+        </c:when>
+        <c:otherwise>
+            <div class="row">
+                <c:forEach var="product" items="${products}">
+                    <div class="col-custom-5 mb-4 d-flex">
+                        <div class="card w-100">
+                            <c:if test="${product.discountPercent > 0}">
+                                <div class="discount-badge">
+                                    -${product.discountPercent}%
+                                </div>
+                            </c:if>
+                            <a href="<c:url value='/products?action=productDetail&productId=${product.id}'/>">
+                                <img src="${product.thumbnailImage}" class="card-img-top" alt="${product.name}">
+                                <div class="card-body">
+                                    <h5 class="card-title">${product.name}</h5>
+                                    <p class="card-text">
+                                        <c:choose>
+                                            <c:when test="${product.discountPercent > 0}">
+                                                <span class="discount-price">${product.discountPrice}₫</span><br>
+                                                <span class="text-decoration-line-through text-muted">${product.originalPrice}₫</span>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <span class="discount-price">${product.originalPrice}₫</span>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </p>
+                                </div>
+                            </a>
                         </div>
                     </div>
                 </c:forEach>
@@ -371,28 +347,37 @@
                 <ul class="pagination">
                     <c:if test="${currentPage > 1}">
                         <li class="page-item">
-                            <a class="page-link"
-                               href="products?action=find&searchName=${param.searchName}&categoryId=${param.categoryId}&sort=${param.sort}&page=${currentPage-1}">
-                                «
-                            </a>
+                            <a class="page-link" href="<c:url value='/products'>
+                                <c:param name='action' value='find'/>
+                                <c:param name='searchName' value='${param.searchName}'/>
+                                <c:param name='categoryId' value='${param.categoryId}'/>
+                                <c:param name='sort' value='${param.sort}'/>
+                                <c:param name='page' value='${currentPage-1}'/>
+                            </c:url>">«</a>
                         </li>
                     </c:if>
 
                     <c:forEach begin="1" end="${totalPages}" var="pageNumber">
                         <li class="page-item ${pageNumber == currentPage ? 'active' : ''}">
-                            <a class="page-link"
-                               href="products?action=find&searchName=${param.searchName}&categoryId=${param.categoryId}&sort=${param.sort}&page=${pageNumber}">
-                                ${pageNumber}
-                            </a>
+                            <a class="page-link" href="<c:url value='/products'>
+                                <c:param name='action' value='find'/>
+                                <c:param name='searchName' value='${param.searchName}'/>
+                                <c:param name='categoryId' value='${param.categoryId}'/>
+                                <c:param name='sort' value='${param.sort}'/>
+                                <c:param name='page' value='${pageNumber}'/>
+                            </c:url>">${pageNumber}</a>
                         </li>
                     </c:forEach>
 
                     <c:if test="${currentPage < totalPages}">
                         <li class="page-item">
-                            <a class="page-link"
-                               href="products?action=find&searchName=${param.searchName}&categoryId=${param.categoryId}&sort=${param.sort}&page=${currentPage+1}">
-                                »
-                            </a>
+                            <a class="page-link" href="<c:url value='/products'>
+                                <c:param name='action' value='find'/>
+                                <c:param name='searchName' value='${param.searchName}'/>
+                                <c:param name='categoryId' value='${param.categoryId}'/>
+                                <c:param name='sort' value='${param.sort}'/>
+                                <c:param name='page' value='${currentPage+1}'/>
+                            </c:url>">»</a>
                         </li>
                     </c:if>
                 </ul>

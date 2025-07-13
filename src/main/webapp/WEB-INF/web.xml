@@ -4,6 +4,10 @@
         <description>ServletContextListener</description>
         <listener-class>listener.appStartupListener</listener-class>
     </listener>
+    <listener>
+        <description>ServletContextListener, RequestAttributeListener</description>
+        <listener-class>listener.ProductViewListener</listener-class>
+    </listener>
     <session-config>
         <session-timeout>
             30
@@ -15,7 +19,7 @@
     <context-param>
         <param-name>email.sender</param-name>
         <param-value>de180497luongdanghoangluu@gmail.com</param-value>
-    </context-param>    
+    </context-param>
     <context-param>
         <param-name>email.password</param-name>
         <param-value>lryj mowk yoml wvhw</param-value>

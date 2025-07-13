@@ -555,18 +555,22 @@
                 <button id="prevSuggestion" class="nav-btn suggestion-nav-btn"><i class="fas fa-chevron-left"></i></button>
                 <div class="suggested-products-wrapper">
                     <div class="suggested-products" id="suggestedProducts">
-                        <c:forEach var="item" items="${suggestedProducts}" varStatus="loop">
-                            <div class="card suggestion-card border-0 p-2" style="width: 13rem; flex: 0 0 auto;">
-<!--                                href="products?action=productDetail&productId=${product.id}"-->
-                                <a href="products?action=productDetail&productId=${item['productId']}" class="text-decoration-none">
-                                    <img src="${item['image']}" class="card-img-top" alt="${item['name']}" style="height: 190px; object-fit: contain;">
-                                    <div class="card-body text-center p-1">
-                                        <h6 class="card-title m-0 text-dark">${item['name']}</h6>
-                                        <p class="card-text text-danger mb-0">${item['price']}đ</p>
-                                    </div>
-                                </a>
-                            </div>
+                        <c:forEach var="item" items="${suggestedProducts}">
+                            <c:if test="${item['id'] != null}">
+                                <div class="card suggestion-card border-0 p-2" style="width: 13rem; flex: 0 0 auto;">
+                                    <a href="products?action=productDetail&productId=${item['id']}"
+                                       class="text-decoration-none d-block w-100 h-100">
+                                        <img src="${item['image']}" class="card-img-top" alt="${item['name']}"
+                                             style="height: 190px; object-fit: contain;">
+                                        <div class="card-body text-center p-1">
+                                            <h6 class="card-title m-0 text-dark">${item['name']}</h6>
+                                            <p class="card-text text-danger mb-0">${item['price']}đ</p>
+                                        </div>
+                                    </a>
+                                </div>
+                            </c:if>
                         </c:forEach>
+
                     </div>
                 </div>
                 <button id="nextSuggestion" class="nav-btn suggestion-nav-btn"><i class="fas fa-chevron-right"></i></button>
@@ -574,9 +578,11 @@
         </div>
 
 
+
         <script>
             $(document).ready(function () {
-                const $suggestionContainer = $("#suggestedProducts");
+                const $suggestionWrapper = $(".suggested-products-wrapper");
+
                 const $prevBtn = $("#prevSuggestion");
                 const $nextBtn = $("#nextSuggestion");
                 let scrollPosition = 0;
@@ -839,6 +845,6 @@
 
         </script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
+<jsp:include page="/templates/footer.jsp"/>
     </body>
 </html>

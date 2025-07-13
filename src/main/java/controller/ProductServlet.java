@@ -51,10 +51,10 @@ public class ProductServlet extends HttpServlet {
     }
 
     // Gửi tương tác đến Flask API
-   private void logInteraction(int userId, int productId, String interactionType) {
+    private void logInteraction(int userId, int productId, String interactionType) {
         try {
-            String jsonPayload = String.format("{\"user_id\":%d,\"product_id\":%d,\"interaction_type\":\"%s\"}", 
-                                              userId, productId, interactionType);
+            String jsonPayload = String.format("{\"user_id\":%d,\"product_id\":%d,\"interaction_type\":\"%s\"}",
+                    userId, productId, interactionType);
             URL url = new URL(INTERACTION_API_URL);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
@@ -69,17 +69,20 @@ public class ProductServlet extends HttpServlet {
             if (responseCode != 200) {
                 try (BufferedReader br = new BufferedReader(new InputStreamReader(conn.getErrorStream()))) {
                     String errorResponse = br.lines().collect(Collectors.joining());
-                    System.out.println("Lỗi API /api/interaction: Code=" + responseCode + ", Response=" + errorResponse);
+                    System.out
+                            .println("Lỗi API /api/interaction: Code=" + responseCode + ", Response=" + errorResponse);
                 }
             } else {
-                System.out.println("Tương tác " + interactionType + " đã lưu: UserID=" + userId + ", ProductID=" + productId);
+                System.out.println(
+                        "Tương tác " + interactionType + " đã lưu: UserID=" + userId + ", ProductID=" + productId);
             }
             conn.disconnect();
         } catch (Exception e) {
-            System.out.println("Lỗi gọi API /api/interaction: UserID=" + userId + ", ProductID=" + productId + 
-                               ", Type=" + interactionType + ", Error=" + e.getMessage());
+            System.out.println("Lỗi gọi API /api/interaction: UserID=" + userId + ", ProductID=" + productId +
+                    ", Type=" + interactionType + ", Error=" + e.getMessage());
         }
     }
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -129,7 +132,6 @@ public class ProductServlet extends HttpServlet {
                 listProducts(request, response);
         }
     }
-    
 
     private void listProducts(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -442,7 +444,8 @@ public class ProductServlet extends HttpServlet {
         request.getRequestDispatcher("/product/productListCart.jsp").forward(request, response);
     }
 
-    private void detailProduct(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    private void detailProduct(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
         try {
             int id = Integer.parseInt(request.getParameter("productId"));
             int userId = Optional.ofNullable(request.getSession(false))
@@ -492,7 +495,7 @@ public class ProductServlet extends HttpServlet {
                 conn.disconnect();
             } catch (Exception e) {
                 System.out.println("Lỗi gọi API gợi ý: " + e.getMessage());
-                
+
             }
 
             // Gửi dữ liệu sang JSP
@@ -509,7 +512,6 @@ public class ProductServlet extends HttpServlet {
         }
     }
 
-
     private void getProductBestSeller(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         List<Map<String, Object>> products = productService.getMostOrderedProducts(20);
@@ -519,9 +521,10 @@ public class ProductServlet extends HttpServlet {
 
     private void showDiscountManagement(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
         List<Category> categories = productService.getAllCategories();
+        List<Product> discountedProducts = productService.getDiscountedProducts(0, 10); // Lấy sản phẩm có discount
         request.setAttribute("categories", categories);
+        request.setAttribute("discountedProducts", discountedProducts);
         request.getRequestDispatcher("/product/DiscountManagement.jsp").forward(request, response);
     }
 
@@ -552,39 +555,29 @@ public class ProductServlet extends HttpServlet {
             String name = request.getParameter("searchName");
             String categoryId = request.getParameter("categoryId");
 
-            productService.removeDiscount(name, categoryId);
+            // Log input
+            System.out.println("Removing discount - searchName: " + name + ", categoryId: " + categoryId);
 
+            // Validate input
+            if ((name == null || name.trim().isEmpty()) && (categoryId == null || categoryId.trim().isEmpty())) {
+                throw new IllegalArgumentException("Please provide a product name or select a category.");
+            }
+
+            // Call service
+            productService.removeDiscount(name, categoryId);
             request.setAttribute("successMessage", "Discounts have been successfully removed!");
 
-            showDiscountManagement(request, response);
+        } catch (IllegalArgumentException e) {
+            request.setAttribute("errorMessage", e.getMessage());
         } catch (Exception e) {
-
+            e.printStackTrace();
             request.setAttribute("errorMessage", "Failed to remove discounts: " + e.getMessage());
-            showDiscountManagement(request, response);
         }
+
+        showDiscountManagement(request, response);
     }
 
-    private void applyDiscount(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        try {
-            String name = request.getParameter("searchName");
-            String categoryId = request.getParameter("categoryId");
-            int discountPercent = Integer.parseInt(request.getParameter("discountPercent"));
-            String expireDateStr = request.getParameter("expireDate");
-
-            LocalDate expireDate = LocalDate.parse(expireDateStr);
-
-            productService.applyDiscount(name, categoryId, discountPercent, expireDate);
-
-            request.setAttribute("successMessage", "Discounts have been successfully applied!");
-
-            showDiscountManagement(request, response);
-        } catch (Exception e) {
-
-            request.setAttribute("errorMessage", "Failed to apply discounts: " + e.getMessage());
-            showDiscountManagement(request, response);
-        }
-    }
+   
 
     private void searchProductAdmin(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -634,5 +627,38 @@ public class ProductServlet extends HttpServlet {
 
         request.getRequestDispatcher("/product/ProductList.jsp").forward(request, response);
     }
+
+   private void applyDiscount(HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException {
+    try {
+        request.setCharacterEncoding("UTF-8");
+
+        String name = request.getParameter("searchName"); // tìm theo tên sản phẩm
+        String categoryId = request.getParameter("categoryId");
+        int discountPercent = Integer.parseInt(request.getParameter("discountPercent"));
+        String expireDateStr = request.getParameter("expireDate");
+
+        if ((name == null || name.trim().isEmpty()) && (categoryId == null || categoryId.trim().isEmpty())) {
+            throw new IllegalArgumentException("Vui lòng nhập tên sản phẩm hoặc chọn danh mục để áp dụng giảm giá.");
+        }
+
+        LocalDate expireDate = LocalDate.parse(expireDateStr);
+
+        // Gọi service xử lý theo name + categoryId
+        productService.applyDiscount(name, categoryId, discountPercent, expireDate);
+
+        request.setAttribute("successMessage", "✅ Giảm giá đã được áp dụng thành công!");
+
+    } catch (IllegalArgumentException e) {
+        request.setAttribute("errorMessage", "⚠ " + e.getMessage());
+    } catch (Exception e) {
+        e.printStackTrace();
+        request.setAttribute("errorMessage", "❌ Áp dụng khuyến mãi thất bại: " + e.getMessage());
+    }
+
+    // Reload lại trang quản lý
+    showDiscountManagement(request, response);
+}
+
 
 }
