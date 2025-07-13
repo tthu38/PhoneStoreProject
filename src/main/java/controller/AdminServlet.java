@@ -106,8 +106,11 @@ public class AdminServlet extends HttpServlet {
     private String handleProductList(HttpServletRequest request) {
         ProductService productService = new ProductService();
         List<Product> products = productService.getAllProducts();
+        Map<Integer, Integer> stockMap = productStockService.getProductStockQuantities();
         request.setAttribute("products", products);
+        request.setAttribute("productStockQuantity", stockMap);
 
+        
         return "/product/ProductList.jsp";
     }
 

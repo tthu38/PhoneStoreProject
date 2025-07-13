@@ -277,6 +277,44 @@
                 text-decoration: none !important;
                 color: inherit;
             }
+            .filter-buttons {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: 5px; /* khoảng cách giữa các logo */
+                margin-top: 10px;
+            }
+
+            /* CSS cho hình logo */
+            .brand-logo {
+                width: 100px;
+                height: 37px;
+                object-fit: contain;
+                padding: 5px;
+                background-color: white;
+                border-radius: 6px;
+                border: 1px solid #ccc;
+                transition: transform 0.2s ease;
+            }
+
+            /* Hiệu ứng hover cho logo */
+            .brand-logo:hover {
+                transform: scale(1.1);
+                border-color: red;
+            }
+
+            /* Bỏ style thừa từ thẻ a chứa logo (nếu có) */
+            .filter-buttons a {
+                display: inline-block;
+            }
+            .description-ellipsis {
+                display: -webkit-box;
+                -webkit-line-clamp: 2; /* Giới hạn 2 dòng */
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
 
 
             /* Style cho footer trải dài toàn màn hình */
@@ -362,64 +400,55 @@
         </div>
 
         <!-- Bộ lọc hãng -->
-        <div class="content-frame">
-            <div class="filter-buttons filter-container">
+<!--        <div class="content-frame">
+            <div class="filter-buttons">
                 <button class="btn btn-outline-primary">Lọc</button>
-                <button class="btn btn-outline-primary">
-                    <img src="https://cdnv2.tgdd.vn/mwg-static/common/Category/3f/68/3f68e22880dd800e9e34d55245048a0f.png" alt="Samsung" class="logo">
-                </button>
-                <button class="btn btn-outline-primary">
-                    <img src="https://cdnv2.tgdd.vn/mwg-static/common/Category/57/03/5703d996359650c57421b72f3f7ff5cd.png" alt="Iphone" class="logo">
-                </button>
-                <button class="btn btn-outline-primary">
-                    <img src="https://cdnv2.tgdd.vn/mwg-static/common/Category/2c/ea/2cea467041fb9effb3a6d3dcc88f38f8.png" alt="Oppo" class="logo">
-                </button>
-                <button class="btn btn-outline-primary">
-                    <img src="https://cdnv2.tgdd.vn/mwg-static/common/Category/e9/df/e9df3ae9fb60a1460e9030975d0e024a.png" alt="Xiaomi" class="logo">
-                </button>
-                <button class="btn btn-outline-primary">
-                    <img src="https://cdnv2.tgdd.vn/mwg-static/common/Category/54/2a/542a235b0e366a11fd855108dd9c499c.png" alt="Realme" class="logo">
-                </button>
-                <button class="btn btn-outline-primary">
-                    <img src="https://cdnv2.tgdd.vn/mwg-static/common/Category/78/38/783870ef310908b123c50cb43b8f6f92.png" alt="Vivo" class="logo">
-                </button>
-                <button class="btn btn-outline-primary">
-                    <img src="https://cdnv2.tgdd.vn/mwg-static/common/Category/b5/68/b5686886a3142a87df546889d8c14402.png" alt="Nokia" class="logo">
-                </button>
+                <a href="products?action=find&brandId=2"><img src="${pageContext.request.contextPath}/images/samsung.png" alt="Samsung" class="brand-logo"></a>
+                <a href="products?action=find&brandId=1"><img src="${pageContext.request.contextPath}/images/iphone.png" alt="iPhone" class="brand-logo"></a>
+                <a href="products?action=find&brandId=5"><img src="${pageContext.request.contextPath}/images/oppo.png" alt="Oppo" class="brand-logo"></a>
+                <a href="products?action=find&brandId=3"><img src="${pageContext.request.contextPath}/images/xiaomi.png" alt="Xiaomi" class="brand-logo"></a>
+                <a href="products?action=find&brandId=4"><img src="${pageContext.request.contextPath}/images/realme.png" alt="Realme" class="brand-logo"></a>
+                <a href="products?action=find&brandId=6"><img src="${pageContext.request.contextPath}/images/vivo.png" alt="Vivo" class="brand-logo"></a>
             </div>
-
-            <!-- Bộ lọc sắp xếp -->
-            <div class="sort-options filter-container2">
-                <strong>Sắp xếp theo:</strong>
-                <button class="btn btn-link text-primary">Nổi bật</button>
-                <button class="btn btn-link text-primary">Bán chạy</button>
-                <button class="btn btn-link text-primary">Giảm giá</button>
-                <button class="btn btn-link text-primary">Giá</button>
-            </div>
-        </div>
-        <div class="content-frame">
-            <c:if test="${not empty recommendedProducts}">
-                <h2>Sản phẩm Gợi Ý</h2>
-                <div class="row">
-                    <c:forEach var="product" items="${recommendedProducts}">
-                        <div class="col-4">
-                            <div class="card">
+            
+        </div>-->
+       <c:if test="${not empty sessionScope.userId}">
+    <div class="content-frame">
+        <c:if test="${not empty recommendedProducts}">
+            <h2 class="text-head text-center mb-4">Sản phẩm Gợi Ý</h2>
+            <div class="row">
+                <c:forEach var="product" items="${recommendedProducts}">
+                    <div class="col-custom-5 mb-4">
+                        <div class="card h-100">
+                            <!-- Click vào sẽ chuyển đến trang chi tiết -->
+                            <a href="products?action=productDetail&productId=${product.id}" class="text-decoration-none text-dark">
                                 <img src="${product.image}" class="card-img-top" alt="${product.name}">
                                 <div class="card-body">
                                     <h5 class="card-title">${product.name}</h5>
-                                    <p class="card-text">${product.description}</p>
-                                    <p class="card-text text-danger">Giá: ${product.price}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </c:forEach>
-                </div>
-            </c:if>
+                                    
+                                    <!-- Mô tả giới hạn 2 dòng và hiển thị ... nếu dài -->
+                                    <p class="card-text description-ellipsis">
+                                        ${product.description}
+                                    </p>
 
-            <c:if test="${empty recommendedProducts}">
-                <p>Không có sản phẩm gợi ý.</p>
-            </c:if>
-        </div>
+                                    <p class="card-text">
+                                        <span class="discount-price">${product.price}₫</span><br>
+                                    </p>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </c:forEach>
+            </div>
+        </c:if>
+
+        <c:if test="${empty recommendedProducts}">
+            <p>Không có sản phẩm gợi ý.</p>
+        </c:if>
+    </div>
+</c:if>
+
+
 
         <div class="content-frame">
             <section id="products-section" class="products-section">
@@ -501,8 +530,13 @@
                                 function scrollToProducts() {
                                     document.querySelector('#products-section')?.scrollIntoView({behavior: 'smooth'});
                                 }
+                                
+            document.getElementById("toggleSortSelect").addEventListener("click", function () {
+        const container = document.getElementById("sortSelectContainer");
+        container.style.display = (container.style.display === "none") ? "block" : "none";
+    });
         </script>
-        
+
 
     </body>
 </html>
