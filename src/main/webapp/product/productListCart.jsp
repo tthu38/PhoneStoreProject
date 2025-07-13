@@ -163,28 +163,25 @@
             margin-top: 20px;
         }
 
-        .brand-logo {
-            width: 60px;
-            height: 40px;
-            object-fit: contain;
-            padding: 5px;
-            background-color: white;
-            border-radius: 6px;
-            transition: transform 0.2s ease;
-            border: 1px solid #ccc;
-        }
+      .brand {
+    width: 80px;
+    height: 35px;
+    object-fit: contain;
+    padding: 6px;
+    background-color: #fff;
+    border-radius: 12px;
+    transition: transform 0.2s ease;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    cursor: pointer;
+    margin: 0 5px;
+}
+.brand:hover {
+    transform: scale(1.1);
+    border-color: red;
+    box-shadow: 0 4px 12px rgba(255, 0, 0, 0.2);
+}
 
-        .brand-logo:hover {
-            transform: scale(1.1);
-            border-color: red;
-        }
-
-        .brand-button {
-            border: none;
-            background: none;
-            padding: 0;
-            margin: 0;
-        }
 
         .col-custom-5 {
             flex: 0 0 20%;
@@ -264,7 +261,8 @@
     </style>
 </head>
 <body>
-<%--<jsp:include page="/templates/header.jsp"/>--%>
+    <jsp:include page="/templates/header.jsp"/>
+
 <div class="container">
     <h2 class="text-primary">Danh sách sản phẩm</h2>
 
@@ -296,12 +294,12 @@
 
     <!-- Lọc theo hãng (brandId) -->
     <div class="filter-container">
-        <a href="<c:url value='/products?action=find&brandId=2'/>"><img src="${pageContext.request.contextPath}/images/samsung.png" alt="Samsung" class="brand-logo"></a>
-        <a href="<c:url value='/products?action=find&brandId=1'/>"><img src="${pageContext.request.contextPath}/images/iphone.png" alt="iPhone" class="brand-logo"></a>
-        <a href="<c:url value='/products?action=find&brandId=5'/>"><img src="${pageContext.request.contextPath}/images/oppo.png" alt="Oppo" class="brand-logo"></a>
-        <a href="<c:url value='/products?action=find&brandId=3'/>"><img src="${pageContext.request.contextPath}/images/xiaomi.png" alt="Xiaomi" class="brand-logo"></a>
-        <a href="<c:url value='/products?action=find&brandId=4'/>"><img src="${pageContext.request.contextPath}/images/realme.png" alt="Realme" class="brand-logo"></a>
-        <a href="<c:url value='/products?action=find&brandId=6'/>"><img src="${pageContext.request.contextPath}/images/vivo.png" alt="Vivo" class="brand-logo"></a>
+        <a href="<c:url value='/products?action=find&brandId=2'/>"><img src="${pageContext.request.contextPath}/images/samsung.png" alt="Samsung" class="brand"></a>
+        <a href="<c:url value='/products?action=find&brandId=1'/>"><img src="${pageContext.request.contextPath}/images/iphone.png" alt="iPhone" class="brand"></a>
+        <a href="<c:url value='/products?action=find&brandId=5'/>"><img src="${pageContext.request.contextPath}/images/oppo.png" alt="Oppo" class="brand"></a>
+        <a href="<c:url value='/products?action=find&brandId=3'/>"><img src="${pageContext.request.contextPath}/images/xiaomi.png" alt="Xiaomi" class="brand"></a>
+        <a href="<c:url value='/products?action=find&brandId=4'/>"><img src="${pageContext.request.contextPath}/images/realme.png" alt="Realme" class="brand"></a>
+        <a href="<c:url value='/products?action=find&brandId=6'/>"><img src="${pageContext.request.contextPath}/images/vivo.png" alt="Vivo" class="brand"></a>
     </div>
 
     <c:choose>

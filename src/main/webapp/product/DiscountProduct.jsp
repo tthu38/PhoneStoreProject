@@ -386,7 +386,7 @@
 
         <div class="container">
             <h2 class="section-title">Sản Phẩm Khuyến Mãi</h2>
-            <div class="filter-buttons filter-container">
+<!--            <div class="filter-buttons filter-container">
                 <button class="btn btn-outline-primary">Lọc</button>
                 <button class="btn btn-outline-primary">
                     <img src="${pageContext.request.contextPath}/images/samsung.png" alt="Samsung" class="logo">
@@ -409,7 +409,7 @@
                 <button class="btn btn-outline-primary">
                     <img src="${pageContext.request.contextPath}/images/nokia.png" alt="Nokia" class="logo">
                 </button>
-            </div>
+            </div>-->
 
             <c:choose>
                 <c:when test="${empty discountedProducts}">

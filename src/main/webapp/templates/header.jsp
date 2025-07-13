@@ -18,14 +18,14 @@
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/register.css">
     </head>
     <body>
-<%@ page import="model.User" %>
+<%--<%@ page import="model.User" %>
 <%
     User currentUser = (User) session.getAttribute("user");
     request.setAttribute("currentUser", currentUser);
 %>
         <c:if test="${not empty user}">
             <c:set var="currentUser" value="${user}" scope="page"/>
-        </c:if>
+        </c:if>--%>
 
         <header class="header-main">
             <div class="header-container">
@@ -34,9 +34,10 @@
                     <span class="brand-name">Thế Giới Công Nghệ</span>
                 </a>
 
-                <form class="search-form" action="${pageContext.request.contextPath}/search" method="get" autocomplete="off">
+                <form class="search-form" action="products" method="GET">
+                    <input type="hidden" name="action" value="find">
                     <div class="search-input-group">
-                        <input class="search-input" type="search" name="q" id="searchInput" 
+                        <input class="search-input" type="search" name="searchName" id="searchInput" value="${param.searchName}"
                                placeholder="Tìm kiếm sản phẩm, hãng, phụ kiện..." aria-label="Search">
                         <button class="btn border-0 bg-white rounded-pill search-btn" type="submit">
                             <i class="fa fa-search"></i>
@@ -76,17 +77,31 @@
                 </a>
             </div>
 
-            <!-- Main Navigation -->
-            <nav class="main-nav">
-                <div class="nav-container">
-                    <ul class="nav main-menu flex-nowrap justify-content-center">
-                        <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/">Trang chủ</a></li>
-                        <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/category?type=phone">Điện thoại</a></li>
-                        <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/category?type=accessory">Phụ kiện</a></li>
-                        <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/promo">Khuyến mãi</a></li>
-                        <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/faq">Hỏi đáp</a></li>
-                        <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/contact">Liên hệ</a></li>
-                    </ul>
+                <!-- Main Navigation -->
+                <nav class="main-nav">
+                    <div class="nav-container">
+                        <ul class="nav main-menu flex-nowrap justify-content-center">
+                            <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/">Trang chủ</a></li>
+                            <li class="nav-item dropdown position-relative">
+                                <a class="nav-link dropdown-toggle" href="#" id="phoneDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Điện thoại
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="phoneDropdown">
+                                    <li><a class="dropdown-item" href="products?action=find">Tất cả sản phẩm</a></li>
+                                    <li><a class="dropdown-item" href="<c:url value='/products?action=find&brandId=2'/>">iPhone</a></li>
+                                    <li><a class="dropdown-item" href="<c:url value='/products?action=find&brandId=1'/>">Samsung</a></li>
+                                    <li><a class="dropdown-item" href="<c:url value='/products?action=find&brandId=5'/>">Oppo</a></li>
+                                    <li><a class="dropdown-item" href="<c:url value='/products?action=find&brandId=3'/>">Xiaomi</a></li>
+                                    <li><a class="dropdown-item" href="<c:url value='/products?action=find&brandId=4'/>">Realme</a></li>
+                                    <li><a class="dropdown-item" href="<c:url value='/products?action=find&brandId=6'/>">Vivo</a></li>
+                                </ul>
+                            </li>
+
+                            <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/products?action=productBestSeller">Best Seller</a></li>
+                            <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/products?action=showDiscountedProducts">Khuyến mãi</a></li>
+                            <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/faq">Hỏi đáp</a></li>
+                            <li class="nav-item"><a class="nav-link" href="https://www.facebook.com/01215532044a">Liên hệ</a></li>
+                        </ul>
                 </div>
             </nav>
         </header>
@@ -140,6 +155,19 @@
             }
 
             setInterval(rotatePlaceholder, 2500);
+            document.querySelectorAll('.nav-item.dropdown').forEach(function (dropdown) {
+        dropdown.addEventListener('mouseenter', function () {
+            const toggle = this.querySelector('[data-bs-toggle="dropdown"]');
+            if (toggle) bootstrap.Dropdown.getOrCreateInstance(toggle).show();
+        });
+        dropdown.addEventListener('mouseleave', function () {
+            const toggle = this.querySelector('[data-bs-toggle="dropdown"]');
+            if (toggle) bootstrap.Dropdown.getOrCreateInstance(toggle).hide();
+        });
+    });
         </script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
     </body>
+    
 </html>
