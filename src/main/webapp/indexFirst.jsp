@@ -334,6 +334,7 @@
                                     <img src="${product.thumbnailImage}" class="card-img-top" alt="${product.name}">
                                     <div class="card-body">
                                         <h5 class="card-title">${product.name}</h5>
+                                        <p class="card-text description-ellipsis">${product.description}</p>
                                         <p class="card-text">
                                             <span class="discount-price">${product.discountPrice}₫</span><br>
                                             <span class="text-decoration-line-through">${product.originalPrice}₫</span>
@@ -366,6 +367,7 @@
                                     <img src="${product.thumbnailImage}" class="card-img-top" alt="${product.name}">
                                     <div class="card-body">
                                         <h5 class="card-title">${product.name}</h5>
+                                        <p class="card-text description-ellipsis">${product.description}</p>
                                         <p class="card-text">
                                             <span class="discount-price">${product.discountPrice}₫</span><br>
                                             <span class="text-decoration-line-through">${product.originalPrice}₫</span>

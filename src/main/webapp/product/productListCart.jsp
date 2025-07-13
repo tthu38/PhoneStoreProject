@@ -208,6 +208,13 @@
             z-index: 10;
             animation: pulse 1.5s infinite;
         }
+        .description-ellipsis {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
 
         @keyframes pulse {
             0% { transform: scale(1); }
@@ -322,6 +329,7 @@
                                 <img src="${product.thumbnailImage}" class="card-img-top" alt="${product.name}">
                                 <div class="card-body">
                                     <h5 class="card-title">${product.name}</h5>
+                                    <p class="card-text description-ellipsis">${product.description}</p>
                                     <p class="card-text">
                                         <c:choose>
                                             <c:when test="${product.discountPercent > 0}">

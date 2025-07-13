@@ -244,8 +244,8 @@
                 text-align: center;
             }
             .btn-primary {
-               background: linear-gradient(90deg, #ff2e63, #ff6b6b) !important;
-    border-color: #b71c1c !important;
+                background: linear-gradient(90deg, #ff2e63, #ff6b6b) !important;
+                border-color: #b71c1c !important;
             }
 
             .btn-primary:hover {
@@ -271,6 +271,13 @@
                 box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
                 z-index: 10;
                 animation: pulse 1.5s infinite;
+            }
+            .description-ellipsis {
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
             @keyframes pulse {
                 0% {
@@ -349,7 +356,7 @@
 
                 .btn-primary {
                     padding: 0.6rem 1.5rem;
-                    
+
                 }
             }
         </style>
@@ -392,6 +399,7 @@
 
                                         <div class="card-body">
                                             <h5 class="card-title">${product['name']}</h5>
+                                            <p class="card-text description-ellipsis">${product.description}</p>
                                             <p class="card-text">
                                                 <c:choose>
                                                     <c:when test="${product['discountPercent'] > 0}">

@@ -286,6 +286,13 @@
             animation-delay: calc(var(--animation-order) * 0.1s);
             opacity: 0;
         }
+        .description-ellipsis {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
 
         @keyframes slideUp {
             from {
@@ -431,6 +438,7 @@
                                         <img src="${product.thumbnailImage}" class="card-img-top" alt="${product.name}">
                                         <div class="card-body">
                                             <h5 class="card-title">${product.name}</h5>
+                                            <p class="card-text description-ellipsis">${product.description}</p>
                                             <p class="card-text">
                                                 <span class="discount-price">${product.discountPrice}₫</span><br>
                                                 <span class="text-decoration-line-through">${product.originalPrice}₫</span>
