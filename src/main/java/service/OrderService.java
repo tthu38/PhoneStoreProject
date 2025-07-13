@@ -213,5 +213,33 @@ public class OrderService {
             em.close();
         }
     }
+
+    // Lấy doanh thu theo brand (key: brand name, value: tổng doanh thu)
+    public Map<String, Double> getBrandSalesData() {
+        EntityManager em = emf.createEntityManager();
+        try {
+            List<Object[]> results = em.createNativeQuery(
+                "SELECT b.BrandName, SUM(od.UnitPrice * od.Quantity) as TotalSales " +
+                "FROM Orders o " +
+                "JOIN OrderDetails od ON o.OrderID = od.OrderID " +
+                "JOIN ProductVariants pv ON od.VariantID = pv.VariantID " +
+                "JOIN ProductBase p ON pv.ProductBaseID = p.ProductBaseID " +
+                "JOIN Brands b ON p.BrandID = b.BrandID " +
+                "WHERE o.Status = 'Paid' " +
+                "GROUP BY b.BrandID, b.BrandName " +
+                "ORDER BY TotalSales DESC"
+            ).getResultList();
+
+            Map<String, Double> brandSalesMap = new java.util.LinkedHashMap<>();
+            for (Object[] row : results) {
+                String brandName = (String) row[0];
+                Double totalSales = row[1] != null ? ((Number) row[1]).doubleValue() : 0.0;
+                brandSalesMap.put(brandName, totalSales);
+            }
+            return brandSalesMap;
+        } finally {
+            em.close();
+        }
+    }
 }
 
