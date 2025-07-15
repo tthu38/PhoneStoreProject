@@ -88,8 +88,8 @@
                                 </a>
                                 <ul class="dropdown-menu" aria-labelledby="phoneDropdown">
                                     <li><a class="dropdown-item" href="products?action=find">Tất cả sản phẩm</a></li>
-                                    <li><a class="dropdown-item" href="<c:url value='/products?action=find&brandId=2'/>">iPhone</a></li>
-                                    <li><a class="dropdown-item" href="<c:url value='/products?action=find&brandId=1'/>">Samsung</a></li>
+                                    <li><a class="dropdown-item" href="<c:url value='/products?action=find&brandId=1'/>">iPhone</a></li>
+                                    <li><a class="dropdown-item" href="<c:url value='/products?action=find&brandId=2'/>">Samsung</a></li>
                                     <li><a class="dropdown-item" href="<c:url value='/products?action=find&brandId=5'/>">Oppo</a></li>
                                     <li><a class="dropdown-item" href="<c:url value='/products?action=find&brandId=3'/>">Xiaomi</a></li>
                                     <li><a class="dropdown-item" href="<c:url value='/products?action=find&brandId=4'/>">Realme</a></li>
