@@ -148,6 +148,16 @@
                 color: #000000;
                 text-decoration: line-through;
             }
+            .price-ori {
+                font-size: 1.2rem;
+                color: #000000;
+                /*                text-decoration: line-through;*/
+            }
+            .nodiscount{
+                font-size: 1.2rem;
+                color: red !important;
+                text-decoration: none;
+            }
 
             .discount-price {
                 font-size: 1.5rem;
@@ -474,21 +484,21 @@
             <div class="product-info">
                 <h1 class="product-title">${productDetails[0].productName}</h1>
                 <h2 class="product-price">
-<c:choose>
-    <c:when test="${productDetails[0].discountValid}">
-        <span class="price text-muted text-decoration-line-through me-2">
-            ${productDetails[0].originalPrice} VND
-        </span>
-        <span class="discount-price text-danger fw-bold">
-            ${productDetails[0].discountPrice} VND
-        </span>
-    </c:when>
-    <c:otherwise>
-        <span class="price text-dark fw-bold">
-            ${productDetails[0].originalPrice} VND
-        </span>
-    </c:otherwise>
-</c:choose>
+                    <c:choose>
+                        <c:when test="${productDetails[0].discountValid}">
+                            <span class="price text-muted text-decoration-line-through me-2">
+                                ${productDetails[0].originalPrice} VND
+                            </span>
+                            <span class="discount-price text-danger fw-bold">
+                                ${productDetails[0].discountPrice} VND
+                            </span>
+                        </c:when>
+                        <c:otherwise>
+                            <span class="price text-dark fw-bold nodiscount">
+                                ${productDetails[0].originalPrice} VND
+                            </span>
+                        </c:otherwise>
+                    </c:choose>
 
                 </h2>
                 <div class="stock-info">Còn lại: <span id="stockCount">${productDetails[0].stock}</span> sản phẩm</div>
@@ -588,47 +598,47 @@
 
         <script>
             $(document).ready(function () {
-    const $suggestionContainer = $(".suggested-products-wrapper");
-    const $prevBtn = $("#prevSuggestion");
-    const $nextBtn = $("#nextSuggestion");
-    let scrollPosition = 0;
-    const cardWidth = $(".suggestion-card").outerWidth(true); // chiều rộng thẻ + margin
-    const visibleCards = 5;
+                const $suggestionContainer = $(".suggested-products-wrapper");
+                const $prevBtn = $("#prevSuggestion");
+                const $nextBtn = $("#nextSuggestion");
+                let scrollPosition = 0;
+                const cardWidth = $(".suggestion-card").outerWidth(true); // chiều rộng thẻ + margin
+                const visibleCards = 5;
 
-    function getMaxScroll() {
-        return $suggestionContainer[0].scrollWidth - $suggestionContainer.outerWidth();
-    }
+                function getMaxScroll() {
+                    return $suggestionContainer[0].scrollWidth - $suggestionContainer.outerWidth();
+                }
 
-    function updateButtonState() {
-        const maxScroll = getMaxScroll();
-        $prevBtn.prop("disabled", scrollPosition <= 0);
-        $nextBtn.prop("disabled", scrollPosition >= maxScroll);
-    }
+                function updateButtonState() {
+                    const maxScroll = getMaxScroll();
+                    $prevBtn.prop("disabled", scrollPosition <= 0);
+                    $nextBtn.prop("disabled", scrollPosition >= maxScroll);
+                }
 
-    $prevBtn.click(function () {
-        const maxScroll = getMaxScroll();
-        if (scrollPosition > 0) {
-            scrollPosition -= cardWidth * visibleCards;
-            scrollPosition = Math.max(0, scrollPosition);
-            $suggestionContainer.animate({scrollLeft: scrollPosition}, 300);
-            updateButtonState();
-        }
-    });
+                $prevBtn.click(function () {
+                    const maxScroll = getMaxScroll();
+                    if (scrollPosition > 0) {
+                        scrollPosition -= cardWidth * visibleCards;
+                        scrollPosition = Math.max(0, scrollPosition);
+                        $suggestionContainer.animate({scrollLeft: scrollPosition}, 300);
+                        updateButtonState();
+                    }
+                });
 
-    $nextBtn.click(function () {
-        const maxScroll = getMaxScroll();
-        if (scrollPosition < maxScroll) {
-            scrollPosition += cardWidth * visibleCards;
-            scrollPosition = Math.min(maxScroll, scrollPosition);
-            $suggestionContainer.animate({scrollLeft: scrollPosition}, 300);
-            updateButtonState();
-        }
-    });
+                $nextBtn.click(function () {
+                    const maxScroll = getMaxScroll();
+                    if (scrollPosition < maxScroll) {
+                        scrollPosition += cardWidth * visibleCards;
+                        scrollPosition = Math.min(maxScroll, scrollPosition);
+                        $suggestionContainer.animate({scrollLeft: scrollPosition}, 300);
+                        updateButtonState();
+                    }
+                });
 
-    $(window).on("resize", function () {
-        updateButtonState();
-    }).trigger("resize");
-});
+                $(window).on("resize", function () {
+                    updateButtonState();
+                }).trigger("resize");
+            });
 
             $(document).ready(function () {
                 // Các biến khởi tạo
@@ -741,8 +751,8 @@
                 function updatePrice() {
                     let romBtn = $("#romOptions .option-btn.active");
                     let colorBtn = $("#colorOptions .option-btn.active");
-                    let discountPrice = romBtn.data("discount") || colorBtn.data("discount") || "30.390.000";
-                    let price = romBtn.data("price") || colorBtn.data("price") || "34.990.000";
+                    let discountPrice = romBtn.data("discount") || colorBtn.data("discount");
+                    let price = romBtn.data("price") || colorBtn.data("price");
                     $(".price").text(price + "đ");
                     $(".discount-price").text(discountPrice + "đ");
                 }
@@ -847,13 +857,13 @@
                     $("#addToCartBtn").prop("disabled", false).text("Thêm vào giỏ");
                 }
             }
-            
+
 
 
 
 
         </script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<jsp:include page="/templates/footer.jsp"/>
+        <jsp:include page="/templates/footer.jsp"/>
     </body>
 </html>

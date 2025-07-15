@@ -12,6 +12,7 @@ import jakarta.persistence.Persistence;
 import jakarta.persistence.TypedQuery;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -213,7 +214,7 @@ public class ProductService {
         }
     }
 
-    public List<Map<String, Object>> detailProduct(int id) {
+  public List<Map<String, Object>> detailProduct(int id) {
         EntityManager em = emf.createEntityManager();
         try {
             String jpql = "SELECT p.id, p.name, p.thumbnailImage, p.description, "
@@ -255,6 +256,9 @@ public class ProductService {
             em.close();
         }
     }
+
+
+
 
     public void updateProductDetails(int productId, String name, String description, String thumbnailImage,
             int brandId, String[] color, String[] rom, String[] prices, String[] quantities) {
