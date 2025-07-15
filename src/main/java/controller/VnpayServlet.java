@@ -243,10 +243,6 @@ public class VnpayServlet extends HttpServlet {
             
             System.out.println("Order details created successfully");
             
-            // Xóa các sản phẩm đã thanh toán khỏi cart
-            cart.removeAll(selectedItems);
-            session.setAttribute("cart", cart);
-            
             // Chuẩn bị thông tin cho VNPay
             String bankCode = req.getParameter("bankCode");
             String language = req.getParameter("language");
