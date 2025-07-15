@@ -179,9 +179,6 @@
                 <div class="action-buttons">
                     <c:choose>
                         <c:when test="${transResult == true}">
-                            <a href="${pageContext.request.contextPath}/user/orders.jsp" class="btn btn-primary">
-                                <i class="fas fa-list"></i> Xem đơn hàng
-                            </a>
                             <a href="${pageContext.request.contextPath}/" class="btn btn-secondary">
                                 <i class="fas fa-home"></i> Về trang chủ
                             </a>

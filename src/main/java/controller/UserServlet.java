@@ -81,8 +81,6 @@ public class UserServlet extends HttpServlet {
     private void showUserList(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         List<User> users = userService.getAllUsers();
-        // Lọc chỉ lấy user roleID = 2
-        users.removeIf(u -> u.getRoleID() != 2);
         Map<Integer, UserAddress> addressMap = new HashMap<>();
         for (User u : users) {
             List<UserAddress> addresses = addressService.getAllAddressesByUserId(u.getUserID());
@@ -110,7 +108,13 @@ public class UserServlet extends HttpServlet {
                 List<UserAddress> addresses = addressService.getAllAddressesByUserId(user.getUserID());
                 UserAddress userAddress = (addresses != null && !addresses.isEmpty()) ? addresses.get(0) : null;
                 request.setAttribute("user", user);
-                request.setAttribute("userAddress", userAddress);
+                request.setAttribute("address", userAddress);
+                if (userAddress != null && userAddress.getAddress() != null) {
+                    String[] parts = userAddress.getAddress().split(",\\s*");
+                    request.setAttribute("ward", parts.length > 0 ? parts[0] : "");
+                    request.setAttribute("district", parts.length > 1 ? parts[1] : "");
+                    request.setAttribute("province", parts.length > 2 ? parts[2] : "");
+                }
                 request.getRequestDispatcher("/user/edituser.jsp").forward(request, response);
             } else {
                 response.sendRedirect(request.getContextPath() + "/users?action=list");
@@ -306,6 +310,71 @@ public class UserServlet extends HttpServlet {
 
     private void handleUpdateProfile(HttpServletRequest request, HttpServletResponse response, HttpSession session)
             throws ServletException, IOException {
+        User user = (User) session.getAttribute("user");
+        String fullName = request.getParameter("fullname");
+        String phone = request.getParameter("phone");
+        String dobStr = request.getParameter("dob");
+        String province = request.getParameter("province");
+        String district = request.getParameter("district");
+        String ward = request.getParameter("ward");
+        String address = request.getParameter("address");
+
+        // Validate dữ liệu (bạn có thể dùng ValidationUtils nếu muốn)
+        if (fullName == null || fullName.trim().isEmpty()) {
+            request.setAttribute("error", "Họ tên không được để trống.");
+        } else if (phone == null || !ValidationUtils.isValidPhoneNumber(phone)) {
+            request.setAttribute("error", "Số điện thoại không hợp lệ.");
+        } else if (dobStr != null && !dobStr.isEmpty() && java.time.LocalDate.parse(dobStr).isAfter(java.time.LocalDate.now())) {
+            request.setAttribute("error", "Ngày sinh không hợp lệ.");
+        }
+
+        if (request.getAttribute("error") != null) {
+            // Load lại địa chỉ cho form
+            List<UserAddress> addresses = addressService.getAllAddressesByUserId(user.getUserID());
+            UserAddress userAddress = (addresses != null && !addresses.isEmpty()) ? addresses.get(0) : null;
+            request.setAttribute("user", user);
+            request.setAttribute("userAddress", userAddress);
+            request.getRequestDispatcher("/user/editprofile.jsp").forward(request, response);
+            return;
+        }
+
+        // Cập nhật user
+        user.setFullName(fullName);
+        user.setPhoneNumber(phone);
+        if (dobStr != null && !dobStr.isEmpty()) {
+            user.setDob(java.time.LocalDate.parse(dobStr));
+        }
+        userService.updateUser(user);
+
+        // Cập nhật địa chỉ
+        List<UserAddress> addresses = addressService.getAllAddressesByUserId(user.getUserID());
+        UserAddress userAddress;
+        if (addresses != null && !addresses.isEmpty()) {
+            userAddress = addresses.get(0);
+            userAddress.setFullName(fullName);
+            userAddress.setPhoneNumber(phone);
+            userAddress.setAddress(address);
+            addressService.updateAddress(userAddress);
+        } else {
+            userAddress = new UserAddress();
+            userAddress.setUser(user);
+            userAddress.setFullName(fullName);
+            userAddress.setPhoneNumber(phone);
+            userAddress.setAddress(address);
+            userAddress.setIsDefault(true);
+            userAddress.setIsActive(true);
+            userAddress.setCreatedAt(java.time.Instant.now());
+            addressService.addAddress(userAddress);
+        }
+
+        // Cập nhật lại session
+        session.setAttribute("user", user);
+
+        // Thông báo thành công
+        request.setAttribute("message", "Cập nhật thông tin thành công!");
+        request.setAttribute("user", user);
+        request.setAttribute("userAddress", userAddress);
+        request.getRequestDispatcher("/user/profile.jsp").forward(request, response);
     }
 
     private void handleDeleteUser(HttpServletRequest request, HttpServletResponse response)

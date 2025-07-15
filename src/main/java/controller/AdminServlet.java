@@ -144,7 +144,7 @@ public class AdminServlet extends HttpServlet {
 
     private String handleCustomerList(HttpServletRequest request) {
         List<User> users = userService.getAllUsers();
-        users.removeIf(u -> u.getRoleID() != 2);
+        
 
         String sort = request.getParameter("sort");
         String status = request.getParameter("status");
@@ -235,7 +235,7 @@ public class AdminServlet extends HttpServlet {
         String password = request.getParameter("password");
         String phoneNumber = request.getParameter("phoneNumber");
         String dob = request.getParameter("dob");
-
+        String addressStr = request.getParameter("address");
 
         admin.setFullName(fullName);
         admin.setEmail(email);
@@ -249,6 +249,36 @@ public class AdminServlet extends HttpServlet {
 
         boolean success = userService.updateUser(admin);
 
+        // Cập nhật địa chỉ
+        service.UserAddressService addressService = new service.UserAddressService();
+        List<UserAddress> addresses = addressService.getAllAddressesByUserId(admin.getUserID());
+        UserAddress address;
+        if (addresses != null && !addresses.isEmpty()) {
+            address = addresses.get(0);
+            address.setFullName(fullName);
+            address.setPhoneNumber(phoneNumber);
+            address.setAddress(addressStr);
+            addressService.updateAddress(address);
+        } else {
+            address = new UserAddress();
+            address.setUser(admin);
+            address.setFullName(fullName);
+            address.setPhoneNumber(phoneNumber);
+            address.setAddress(addressStr);
+            address.setIsDefault(true);
+            address.setIsActive(true);
+            address.setCreatedAt(java.time.Instant.now());
+            addressService.addAddress(address);
+        }
+
+        // Tách lại địa chỉ để set vào request
+        if (address != null && address.getAddress() != null) {
+            String[] parts = address.getAddress().split(",\\s*");
+            request.setAttribute("ward", parts.length > 0 ? parts[0] : "");
+            request.setAttribute("district", parts.length > 1 ? parts[1] : "");
+            request.setAttribute("province", parts.length > 2 ? parts[2] : "");
+        }
+
         request.getSession().setAttribute("user", admin);
 
         if (success) {
@@ -258,6 +288,7 @@ public class AdminServlet extends HttpServlet {
         }
 
         request.setAttribute("user", admin);
+        request.setAttribute("address", address);
         request.setAttribute("contentPage", "../../user/edituser.jsp");
         request.getRequestDispatcher("/admin/layout/admin-header.jsp").forward(request, response);
     }

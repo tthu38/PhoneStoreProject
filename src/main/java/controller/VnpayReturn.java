@@ -120,6 +120,19 @@ public class VnpayReturn extends HttpServlet {
                                 System.out.println("[VnpayReturn] Lỗi khi gửi email: " + e.getMessage());
                                 e.printStackTrace();
                             }
+                            // Xóa các sản phẩm đã thanh toán khỏi session cart
+                            jakarta.servlet.http.HttpSession session = request.getSession(false);
+                            if (session != null) {
+                                java.util.List<model.CartItem> cart = (java.util.List<model.CartItem>) session.getAttribute("cart");
+                                if (cart != null && orderDetails != null) {
+                                    java.util.Set<Integer> paidVariantIds = new java.util.HashSet<>();
+                                    for (OrderDetails od : orderDetails) {
+                                        paidVariantIds.add(od.getProductVariant().getId());
+                                    }
+                                    cart.removeIf(item -> paidVariantIds.contains(item.getProductVariant().getId()) && item.isSelected());
+                                    session.setAttribute("cart", cart);
+                                }
+                            }
                         } else {
                             message = "Thanh toán thành công nhưng không thể cập nhật trạng thái đơn hàng.";
                         }

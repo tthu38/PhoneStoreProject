@@ -33,7 +33,6 @@
         <div class="cart-container">
             <div class="cart-header">
                 <h1><i class="fas fa-shopping-cart"></i> Giỏ hàng của bạn</h1>
-                <p class="mb-0">Quản lý sản phẩm trong giỏ hàng</p>
             </div>
 
             <div class="row">
@@ -45,7 +44,7 @@
                                 <h3>Giỏ hàng trống</h3>
                                 <p>Bạn chưa có sản phẩm nào trong giỏ hàng</p>
                                 <a href="${pageContext.request.contextPath}/" class="continue-shopping">
-                                    <i class="fas fa-arrow-left"></i> Tiếp tục mua sắm
+                                    Tiếp tục mua sắm
                                 </a>
                             </div>
                         </c:when>

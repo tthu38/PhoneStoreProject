@@ -243,9 +243,6 @@
 
                 <!-- Action Buttons -->
                 <div class="action-buttons">
-                    <a href="${pageContext.request.contextPath}/user/orders.jsp" class="btn btn-primary">
-                        <i class="fas fa-list"></i> Xem đơn hàng
-                    </a>
                     <a href="${pageContext.request.contextPath}/" class="btn btn-secondary">
                         <i class="fas fa-home"></i> Về trang chủ
                     </a>
