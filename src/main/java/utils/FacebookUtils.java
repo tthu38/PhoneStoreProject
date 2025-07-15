@@ -10,13 +10,18 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ResourceBundle;
 
 /**
  *
  * @author dangt
  */
 public class FacebookUtils {
-    // Hàm lấy thông tin user từ Facebook access token
+    private static final ResourceBundle bundle = ResourceBundle.getBundle("application");
+    public static String getConfig(String key) {
+        return bundle.getString(key);
+    }
+
     public static User getUserInfo(String accessToken) {
         try {
             String url = "https://graph.facebook.com/me?fields=id,name,email,picture&access_token=" + accessToken;

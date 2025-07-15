@@ -79,6 +79,9 @@ public class LoginServlet extends HttpServlet {
             case "login-google":
                 handleLoginGoogle(request, response);
                 break;
+            case "login-facebook":
+                handleLoginFacebook(request, response);
+                break;
             case "oauth2-google":
                 handleOauth2Google(request, response);
                 break;
@@ -321,11 +324,34 @@ public class LoginServlet extends HttpServlet {
             }
             request.getSession().removeAttribute("rememberMe");
 
+            if (userToLogin.getRoleID() == 1) {
+                response.sendRedirect(request.getContextPath() + "/admin");
+            } else {
+                response.sendRedirect(request.getContextPath() + "/indexFirst.jsp");
+            }
         } catch (Exception e) {
             e.printStackTrace();
             request.setAttribute("error", "Lỗi khi đăng nhập bằng Google: " + e.getMessage());
             request.getRequestDispatcher("/user/login.jsp").forward(request, response);
         }
+    }
+
+    private void handleLoginFacebook(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String fbAppId;
+        String fbRedirectUri;
+        try {
+            fbAppId = utils.FacebookUtils.getConfig("facebook.app.id");
+            fbRedirectUri = utils.FacebookUtils.getConfig("facebook.redirect.uri");
+        } catch (Exception e) {
+            java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("application");
+            fbAppId = bundle.getString("facebook.app.id");
+            fbRedirectUri = bundle.getString("facebook.redirect.uri");
+        }
+        String fbLoginUrl = "https://www.facebook.com/v18.0/dialog/oauth?client_id=" + fbAppId
+                + "&redirect_uri=" + java.net.URLEncoder.encode(fbRedirectUri, "UTF-8")
+                + "&scope=email";
+        response.sendRedirect(fbLoginUrl);
     }
 
     private void handleVerifyGoogleOtp(HttpServletRequest request, HttpServletResponse response)

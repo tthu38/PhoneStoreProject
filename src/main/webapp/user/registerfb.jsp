@@ -39,21 +39,48 @@
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Số điện thoại <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" name="phone" placeholder="Nhập số điện thoại" required>
+                    <input type="text" class="form-control" name="phone"
+                           pattern="0[0-9]{9,10}" title="Bắt đầu bằng 0, có 10-11 số" required>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Ngày sinh</label>
-                    <input type="date" class="form-control" name="dob">
+                    <input type="date" class="form-control" name="dob" max="<%= java.time.LocalDate.now() %>">
                 </div>
-                <div class="mb-3">
-                    <label class="form-label">Địa chỉ</label>
-                    <input type="text" class="form-control" name="address" placeholder="Nhập địa chỉ">
+                <!-- Địa chỉ API -->
+                <div class="row">
+                    <div class="col-md-4 mb-2">
+                        <label class="form-label">Tỉnh/Thành phố</label>
+                        <select class="form-select" id="province" name="province" required data-selected="">
+                            <option value="">Chọn tỉnh/thành phố</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <label class="form-label">Quận/Huyện</label>
+                        <select class="form-select" id="district" name="district" required data-selected="" disabled>
+                            <option value="">Chọn quận/huyện</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <label class="form-label">Phường/Xã</label>
+                        <select class="form-select" id="ward" name="ward" required data-selected="" disabled>
+                            <option value="">Chọn phường/xã</option>
+                        </select>
+                    </div>
                 </div>
+                <input type="hidden" name="address" id="address">
                 <input type="hidden" name="oauthId" value="<%= fbUser.getOauthId() %>">
                 <input type="hidden" name="oauthProvider" value="facebook">
                 <button type="submit" class="btn btn-primary w-100">Hoàn tất đăng ký</button>
             </form>
         </div>
     </div>
+    <script src="${pageContext.request.contextPath}/js/address.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            if (typeof initProvinceDistrictWard === "function") {
+                initProvinceDistrictWard("province", "district", "ward");
+            }
+        });
+    </script>
 </body>
 </html>
