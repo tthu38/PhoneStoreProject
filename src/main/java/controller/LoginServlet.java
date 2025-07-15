@@ -134,7 +134,7 @@ public class LoginServlet extends HttpServlet {
             if (user.getRoleID() == 1) {
                 response.sendRedirect(request.getContextPath() + "/admin");
             } else {
-                response.sendRedirect(request.getContextPath() + "/indexFirst.jsp");
+                response.sendRedirect(request.getContextPath() + "/home");
             }
             return;
         }
@@ -142,7 +142,7 @@ public class LoginServlet extends HttpServlet {
         Optional<User> rememberedUser = userService.checkRememberToken(request);
         if (rememberedUser.isPresent()) {
             request.getSession().setAttribute("user", rememberedUser.get());
-            response.sendRedirect(request.getContextPath() + "/indexFirst.jsp");
+            response.sendRedirect(request.getContextPath() + "/home");
             return;
         }
 
@@ -186,7 +186,7 @@ public class LoginServlet extends HttpServlet {
             if (user.getRoleID() == 1) {
                 response.sendRedirect(request.getContextPath() + "/admin");
             } else {
-                response.sendRedirect(request.getContextPath() + "/indexFirst.jsp");
+                response.sendRedirect(request.getContextPath() + "/home");
             }
         } else {
             request.setAttribute("error", "Sai email/số điện thoại hoặc mật khẩu");

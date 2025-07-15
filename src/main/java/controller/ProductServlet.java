@@ -453,9 +453,9 @@ public class ProductServlet extends HttpServlet {
                     .orElse(1); // Giá trị mặc định để test
 
             // Ghi tương tác view và click
-            logInteraction(userId, id, "purchase");
+//            logInteraction(userId, id, "purchase");
             logInteraction(userId, id, "click");
-            logInteraction(userId, id, "cart");
+//            logInteraction(userId, id, "cart");
 
             // Lấy chi tiết sản phẩm
             List<Map<String, Object>> productDetails = productService.detailProduct(id);

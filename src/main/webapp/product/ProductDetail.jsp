@@ -581,47 +581,48 @@
 
         <script>
             $(document).ready(function () {
-                const $suggestionWrapper = $(".suggested-products-wrapper");
+    const $suggestionContainer = $(".suggested-products-wrapper");
+    const $prevBtn = $("#prevSuggestion");
+    const $nextBtn = $("#nextSuggestion");
+    let scrollPosition = 0;
+    const cardWidth = $(".suggestion-card").outerWidth(true); // chiều rộng thẻ + margin
+    const visibleCards = 5;
 
-                const $prevBtn = $("#prevSuggestion");
-                const $nextBtn = $("#nextSuggestion");
-                let scrollPosition = 0;
-                const cardWidth = $(".suggestion-card").outerWidth(true); // Chiều rộng thẻ + margin
-                const visibleCards = 5; // Số thẻ hiển thị trên một hàng
-                const maxScroll = $suggestionContainer[0].scrollWidth - $suggestionContainer.outerWidth();
+    function getMaxScroll() {
+        return $suggestionContainer[0].scrollWidth - $suggestionContainer.outerWidth();
+    }
 
-                // Cập nhật trạng thái nút
-                function updateButtonState() {
-                    $prevBtn.prop("disabled", scrollPosition <= 0);
-                    $nextBtn.prop("disabled", scrollPosition >= maxScroll);
-                }
+    function updateButtonState() {
+        const maxScroll = getMaxScroll();
+        $prevBtn.prop("disabled", scrollPosition <= 0);
+        $nextBtn.prop("disabled", scrollPosition >= maxScroll);
+    }
 
-                // Nút Previous
-                $prevBtn.click(function () {
-                    if (scrollPosition > 0) {
-                        scrollPosition -= cardWidth * visibleCards;
-                        scrollPosition = Math.max(0, scrollPosition);
-                        $suggestionContainer.animate({scrollLeft: scrollPosition}, 300);
-                        updateButtonState();
-                    }
-                });
+    $prevBtn.click(function () {
+        const maxScroll = getMaxScroll();
+        if (scrollPosition > 0) {
+            scrollPosition -= cardWidth * visibleCards;
+            scrollPosition = Math.max(0, scrollPosition);
+            $suggestionContainer.animate({scrollLeft: scrollPosition}, 300);
+            updateButtonState();
+        }
+    });
 
-                // Nút Next
-                $nextBtn.click(function () {
-                    if (scrollPosition < maxScroll) {
-                        scrollPosition += cardWidth * visibleCards;
-                        scrollPosition = Math.min(maxScroll, scrollPosition);
-                        $suggestionContainer.animate({scrollLeft: scrollPosition}, 300);
-                        updateButtonState();
-                    }
-                });
+    $nextBtn.click(function () {
+        const maxScroll = getMaxScroll();
+        if (scrollPosition < maxScroll) {
+            scrollPosition += cardWidth * visibleCards;
+            scrollPosition = Math.min(maxScroll, scrollPosition);
+            $suggestionContainer.animate({scrollLeft: scrollPosition}, 300);
+            updateButtonState();
+        }
+    });
 
-                // Cập nhật trạng thái ban đầu
-                $(window).on("resize", function () {
-                    maxScroll = $suggestionContainer[0].scrollWidth - $suggestionContainer.outerWidth();
-                    updateButtonState();
-                }).trigger("resize");
-            });
+    $(window).on("resize", function () {
+        updateButtonState();
+    }).trigger("resize");
+});
+
             $(document).ready(function () {
                 // Các biến khởi tạo
                 let selectedRom = "", selectedColor = "", quantity = 1;
@@ -839,6 +840,7 @@
                     $("#addToCartBtn").prop("disabled", false).text("Thêm vào giỏ");
                 }
             }
+            
 
 
 

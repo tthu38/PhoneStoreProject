@@ -18,14 +18,14 @@
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/register.css">
     </head>
     <body>
-<%--<%@ page import="model.User" %>
+<%@ page import="model.User" %>
 <%
     User currentUser = (User) session.getAttribute("user");
     request.setAttribute("currentUser", currentUser);
 %>
         <c:if test="${not empty user}">
             <c:set var="currentUser" value="${user}" scope="page"/>
-        </c:if>--%>
+        </c:if>
 
         <header class="header-main">
             <div class="header-container">
