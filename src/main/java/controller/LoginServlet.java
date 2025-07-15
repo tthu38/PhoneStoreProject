@@ -395,8 +395,9 @@ public class LoginServlet extends HttpServlet {
     private void handleForgotPasswordVerifyOtp(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String otpInput = request.getParameter("otp");
-        String otpSession = (String) request.getSession().getAttribute("reset_otp");
-        if (otpSession != null && otpSession.equals(otpInput)) {
+        String email = (String) request.getSession().getAttribute("reset_email");
+        service.MailService mailService = new service.MailService();
+        if (email != null && mailService.verifyOTP(email, otpInput)) {
             request.getRequestDispatcher("/user/reset-password.jsp").forward(request, response);
         } else {
             request.setAttribute("error", "Mã xác nhận không đúng hoặc đã hết hạn.");
@@ -409,11 +410,8 @@ public class LoginServlet extends HttpServlet {
         String email = request.getParameter("email");
         String otpInput = request.getParameter("otp");
         String newPassword = request.getParameter("newPassword");
-        String otpSession = (String) request.getSession().getAttribute("reset_otp");
-        String emailSession = (String) request.getSession().getAttribute("reset_email");
-
-        if (emailSession != null && emailSession.equals(email)
-                && otpSession != null && otpSession.equals(otpInput)) {
+        service.MailService mailService = new service.MailService();
+        if (mailService.verifyOTP(email, otpInput)) {
             boolean updated = userService.updatePasswordByEmail(email, newPassword);
             if (updated) {
                 request.getSession().removeAttribute("reset_otp");

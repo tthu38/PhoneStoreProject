@@ -39,13 +39,22 @@ public class HomeServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        HttpSession session = request.getSession(false);
+        // Kiểm tra nếu là admin thì redirect về trang admin
+        if (session != null && session.getAttribute("user") != null) {
+            model.User user = (model.User) session.getAttribute("user");
+            if (user.getRoleID() == 1) {
+                response.sendRedirect(request.getContextPath() + "/admin");
+                return;
+            }
+        }
+
         // Lấy sản phẩm giảm giá
         List<Map<String, Object>> discountedProducts = productService.getMostDiscountedProducts(10);
         request.setAttribute("discountedProducts", discountedProducts);
 
         // ====== GỢI Ý SẢN PHẨM TỪ FLASK API =======
         // Kiểm tra nếu user đã đăng nhập
-        HttpSession session = request.getSession(false);
         if (session != null && session.getAttribute("userId") != null) {
             int userId = (int) session.getAttribute("userId");
 

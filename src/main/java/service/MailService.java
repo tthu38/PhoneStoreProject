@@ -34,8 +34,8 @@ public class MailService {
 
         otpStore.put(email, otp); // Lưu OTP tạm thời
 
-        // Tự động xóa sau 30 giây
-        scheduler.schedule(() -> otpStore.remove(email), 30, TimeUnit.SECONDS);
+        // Tự động xóa sau 5 phút
+        scheduler.schedule(() -> otpStore.remove(email), 300, TimeUnit.SECONDS);
 
         return otp;
     }

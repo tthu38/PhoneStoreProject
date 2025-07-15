@@ -70,7 +70,7 @@
                     <div>
                         <input type="checkbox" name="rememberMe" value="on"> Ghi nhớ đăng nhập
                     </div>
-                    <a href="${pageContext.request.contextPath}/user/forgotpassword.jsp" class="text-decoration-none">Quên mật khẩu?</a>
+                    <a href="/PhoneStore/user/forgotpassword.jsp" class="text-decoration-none">Quên mật khẩu?</a>
                 </div>
                 <div class="text-center mb-2" style="color:#888;">Hoặc đăng nhập bằng</div>
                 <div class="d-flex justify-content-center mb-3 gap-2">
