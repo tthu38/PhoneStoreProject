@@ -10,35 +10,48 @@ public class InteractionLogger {
     private static final String INTERACTION_API_URL = "http://localhost:5555/api/interaction";
 
     public static void logInteraction(int userId, int productId, String interactionType) {
+        HttpURLConnection conn = null;
         try {
+            // Tạo JSON payload
             String jsonPayload = String.format(
                 "{\"user_id\":%d,\"product_id\":%d,\"interaction_type\":\"%s\"}",
                 userId, productId, interactionType
             );
 
+            // Mở kết nối
             URL url = new URL(INTERACTION_API_URL);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
             conn.setDoOutput(true);
 
+            // Gửi dữ liệu
             try (OutputStream os = conn.getOutputStream()) {
                 os.write(jsonPayload.getBytes(StandardCharsets.UTF_8));
+                os.flush();
             }
 
+            // Xử lý phản hồi
             int responseCode = conn.getResponseCode();
             if (responseCode != 200) {
                 try (BufferedReader br = new BufferedReader(new InputStreamReader(conn.getErrorStream()))) {
                     String errorResponse = br.lines().collect(Collectors.joining());
-                    System.out.println("Lỗi API /api/interaction: Code=" + responseCode + ", Response=" + errorResponse);
+                    System.err.printf("❌ Gọi API thất bại: [%d] %s%n", responseCode, errorResponse);
                 }
             } else {
-                System.out.println("Tương tác " + interactionType + " đã lưu: UserID=" + userId + ", ProductID=" + productId);
+                try (BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
+                    String response = br.lines().collect(Collectors.joining());
+                    System.out.printf("✅ Ghi nhận tương tác [%s]: user=%d, product=%d%n", interactionType, userId, productId);
+                }
             }
-            conn.disconnect();
+
         } catch (Exception e) {
-            System.out.println("Lỗi gọi API /api/interaction: UserID=" + userId + ", ProductID=" + productId + 
-                               ", Type=" + interactionType + ", Error=" + e.getMessage());
+            System.err.printf("❌ Lỗi gọi API: user=%d, product=%d, type=%s, error=%s%n",
+                    userId, productId, interactionType, e.getMessage());
+        } finally {
+            if (conn != null) {
+                conn.disconnect();
+            }
         }
     }
 }

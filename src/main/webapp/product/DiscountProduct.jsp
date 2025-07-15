@@ -393,31 +393,6 @@
 
         <div class="container">
             <h2 class="section-title">Sản Phẩm Khuyến Mãi</h2>
-<!--            <div class="filter-buttons filter-container">
-                <button class="btn btn-outline-primary">Lọc</button>
-                <button class="btn btn-outline-primary">
-                    <img src="${pageContext.request.contextPath}/images/samsung.png" alt="Samsung" class="logo">
-                </button>
-                <button class="btn btn-outline-primary">
-                    <img src="${pageContext.request.contextPath}/images/iphone.png" alt="Iphone" class="logo">
-                </button>
-                <button class="btn btn-outline-primary">
-                    <img src="${pageContext.request.contextPath}/images/oppo.png" alt="Oppo" class="logo">
-                </button>
-                <button class="btn btn-outline-primary">
-                    <img src="${pageContext.request.contextPath}/images/xiaomi.png" alt="Xiaomi" class="logo">
-                </button>
-                <button class="btn btn-outline-primary">
-                    <img src="${pageContext.request.contextPath}/images/realme.png" alt="Realme" class="logo">
-                </button>
-                <button class="btn btn-outline-primary">
-                    <img src="${pageContext.request.contextPath}/images/vivo.png" alt="Vivo" class="logo">
-                </button>
-                <button class="btn btn-outline-primary">
-                    <img src="${pageContext.request.contextPath}/images/nokia.png" alt="Nokia" class="logo">
-                </button>
-            </div>-->
-
             <c:choose>
                 <c:when test="${empty discountedProducts}">
                     <div class="alert alert-warning text-center">

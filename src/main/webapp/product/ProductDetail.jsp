@@ -474,15 +474,22 @@
             <div class="product-info">
                 <h1 class="product-title">${productDetails[0].productName}</h1>
                 <h2 class="product-price">
-                    <c:choose>
-                        <c:when test="${productDetails[0].discountPrice != null}">
-                            <span class="price text-muted text-decoration-line-through me-2">${productDetails[0].price} VND</span>
-                            <span class="discount-price text-danger fw-bold">${productDetails[0].discountPrice} VND</span>
-                        </c:when>
-                        <c:otherwise>
-                            <span class="price">${productDetails[0].price} VND</span>
-                        </c:otherwise>
-                    </c:choose>
+<c:choose>
+    <c:when test="${productDetails[0].discountValid}">
+        <span class="price text-muted text-decoration-line-through me-2">
+            ${productDetails[0].originalPrice} VND
+        </span>
+        <span class="discount-price text-danger fw-bold">
+            ${productDetails[0].discountPrice} VND
+        </span>
+    </c:when>
+    <c:otherwise>
+        <span class="price text-dark fw-bold">
+            ${productDetails[0].originalPrice} VND
+        </span>
+    </c:otherwise>
+</c:choose>
+
                 </h2>
                 <div class="stock-info">Còn lại: <span id="stockCount">${productDetails[0].stock}</span> sản phẩm</div>
 

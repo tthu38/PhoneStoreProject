@@ -102,121 +102,126 @@ public class ProductService {
 
     //filter product customer
     public List<Product> searchAndFilterProducts(String name, String categoryID, String brandID, String sortType, int page, int pageSize) {
-    EntityManager em = emf.createEntityManager();
-    try {
-        StringBuilder queryStr = new StringBuilder(
-                "SELECT p, "
-                + "COALESCE(MIN(CASE WHEN v.discountPrice IS NOT NULL AND v.discountExpiry >= CURRENT_TIMESTAMP THEN v.discountPrice END), NULL) AS minDiscountPrice, "
-                + "MIN(v.price) AS minOriginalPrice, "
-                + "COALESCE(MIN(v.rom), NULL) AS displayStorage "
-                + "FROM Product p "
-                + "LEFT JOIN p.variants v ON v.isActive = true "
-                + "LEFT JOIN p.category c "
-                + "LEFT JOIN p.brand b "
-                + "WHERE p.isActive = true "
-        );
-        boolean hasCategoryFilter = categoryID != null && !categoryID.trim().isEmpty();
-        boolean hasNameFilter = name != null && !name.trim().isEmpty();
-        boolean hasBrandFilter = brandID != null && !brandID.trim().isEmpty();
+        EntityManager em = emf.createEntityManager();
+        try {
+            StringBuilder queryStr = new StringBuilder(
+                    "SELECT p, "
+                    + "COALESCE(MIN(CASE WHEN v.discountPrice IS NOT NULL AND v.discountExpiry >= CURRENT_TIMESTAMP THEN v.discountPrice END), NULL) AS minDiscountPrice, "
+                    + "MIN(v.price) AS minOriginalPrice, "
+                    + "COALESCE(MIN(v.rom), NULL) AS displayStorage "
+                    + "FROM Product p "
+                    + "LEFT JOIN p.variants v ON v.isActive = true "
+                    + "LEFT JOIN p.category c "
+                    + "LEFT JOIN p.brand b "
+                    + "WHERE p.isActive = true "
+            );
+            boolean hasCategoryFilter = categoryID != null && !categoryID.trim().isEmpty();
+            boolean hasNameFilter = name != null && !name.trim().isEmpty();
+            boolean hasBrandFilter = brandID != null && !brandID.trim().isEmpty();
 
-        if (hasCategoryFilter) {
-            queryStr.append(" AND c.id = :categoryId");
-        }
-        if (hasNameFilter) {
-            queryStr.append(" AND LOWER(p.name) LIKE :name");
-        }
-        if (hasBrandFilter) {
-            queryStr.append(" AND p.brand.id = :brandId");
-        }
-
-        queryStr.append(" GROUP BY p");
-
-        if (sortType != null && !sortType.isEmpty()) {
-            switch (sortType) {
-                case "name_asc":
-                    queryStr.append(" ORDER BY p.name ASC");
-                    break;
-                case "name_desc":
-                    queryStr.append(" ORDER BY p.name DESC");
-                    break;
+            if (hasCategoryFilter) {
+                queryStr.append(" AND c.id = :categoryId");
             }
-        }
-
-        TypedQuery<Object[]> query = em.createQuery(queryStr.toString(), Object[].class);
-
-        if (hasCategoryFilter) {
-            query.setParameter("categoryId", Integer.parseInt(categoryID));
-        }
-        if (hasNameFilter) {
-            query.setParameter("name", "%" + name.trim().toLowerCase() + "%");
-        }
-        if (hasBrandFilter) {
-            query.setParameter("brandId", Integer.parseInt(brandID));
-        }
-
-        query.setFirstResult((page - 1) * pageSize);
-        query.setMaxResults(pageSize);
-
-        List<Object[]> results = query.getResultList();
-        List<Product> products = new ArrayList<>();
-
-        for (Object[] row : results) {
-            Product product = (Product) row[0];
-            BigDecimal minDiscountPrice = (BigDecimal) row[1];
-            BigDecimal minOriginalPrice = (BigDecimal) row[2];
-            Integer displayStorage = (Integer) row[3];
-
-            product.setOriginalPrice(minOriginalPrice);
-            product.setDiscountPrice(minDiscountPrice);
-            product.setDisplayStorage(displayStorage);
-
-            if (minDiscountPrice != null) {
-                BigDecimal discount = minOriginalPrice.subtract(minDiscountPrice);
-                BigDecimal percentage = discount.multiply(BigDecimal.valueOf(100))
-                        .divide(minOriginalPrice, 0, RoundingMode.HALF_UP);
-                product.setDiscountPercent(percentage.intValue());
-            } else {
-                product.setDiscountPercent(0);
+            if (hasNameFilter) {
+                queryStr.append(" AND LOWER(p.name) LIKE :name");
+            }
+            if (hasBrandFilter) {
+                queryStr.append(" AND p.brand.id = :brandId");
             }
 
-            products.add(product);
-        }
+            queryStr.append(" GROUP BY p");
 
-        // Sắp xếp theo giá với xử lý null
-        if (sortType != null) {
-            switch (sortType) {
-                case "price_asc":
-                    products.sort(Comparator.comparing(
-                            p -> p.getDiscountPrice() != null ? p.getDiscountPrice() : 
-                                 (p.getOriginalPrice() != null ? p.getOriginalPrice() : BigDecimal.ZERO)
-                    ));
-                    break;
-                case "price_desc":
-                    products.sort((p1, p2) -> {
-                        BigDecimal price1 = p1.getDiscountPrice() != null ? p1.getDiscountPrice() : 
-                                          (p1.getOriginalPrice() != null ? p1.getOriginalPrice() : BigDecimal.ZERO);
-                        BigDecimal price2 = p2.getDiscountPrice() != null ? p2.getDiscountPrice() : 
-                                          (p2.getOriginalPrice() != null ? p2.getOriginalPrice() : BigDecimal.ZERO);
-                        return price2.compareTo(price1);
-                    });
-                    break;
+            if (sortType != null && !sortType.isEmpty()) {
+                switch (sortType) {
+                    case "name_asc":
+                        queryStr.append(" ORDER BY p.name ASC");
+                        break;
+                    case "name_desc":
+                        queryStr.append(" ORDER BY p.name DESC");
+                        break;
+                }
             }
-        }
 
-        return products;
-    } finally {
-        em.close();
+            TypedQuery<Object[]> query = em.createQuery(queryStr.toString(), Object[].class);
+
+            if (hasCategoryFilter) {
+                query.setParameter("categoryId", Integer.parseInt(categoryID));
+            }
+            if (hasNameFilter) {
+                query.setParameter("name", "%" + name.trim().toLowerCase() + "%");
+            }
+            if (hasBrandFilter) {
+                query.setParameter("brandId", Integer.parseInt(brandID));
+            }
+
+            query.setFirstResult((page - 1) * pageSize);
+            query.setMaxResults(pageSize);
+
+            List<Object[]> results = query.getResultList();
+            List<Product> products = new ArrayList<>();
+
+            for (Object[] row : results) {
+                Product product = (Product) row[0];
+                BigDecimal minDiscountPrice = (BigDecimal) row[1];
+                BigDecimal minOriginalPrice = (BigDecimal) row[2];
+                Integer displayStorage = (Integer) row[3];
+
+                product.setOriginalPrice(minOriginalPrice);
+                product.setDisplayStorage(displayStorage);
+
+// Nếu còn hạn giảm giá thì set discount
+                if (minDiscountPrice != null) {
+                    product.setDiscountPrice(minDiscountPrice);
+
+                    BigDecimal discount = minOriginalPrice.subtract(minDiscountPrice);
+                    BigDecimal percentage = discount.multiply(BigDecimal.valueOf(100))
+                            .divide(minOriginalPrice, 0, RoundingMode.HALF_UP);
+                    product.setDiscountPercent(percentage.intValue());
+                } else {
+                    // Nếu hết hạn thì reset discount
+                    product.setDiscountPrice(null);
+                    product.setDiscountPercent(0);
+                }
+
+                products.add(product);
+            }
+
+            // Sắp xếp theo giá với xử lý null
+            if (sortType != null) {
+                switch (sortType) {
+                    case "price_asc":
+                        products.sort(Comparator.comparing(
+                                p -> p.getDiscountPrice() != null ? p.getDiscountPrice()
+                                : (p.getOriginalPrice() != null ? p.getOriginalPrice() : BigDecimal.ZERO)
+                        ));
+                        break;
+                    case "price_desc":
+                        products.sort((p1, p2) -> {
+                            BigDecimal price1 = p1.getDiscountPrice() != null ? p1.getDiscountPrice()
+                                    : (p1.getOriginalPrice() != null ? p1.getOriginalPrice() : BigDecimal.ZERO);
+                            BigDecimal price2 = p2.getDiscountPrice() != null ? p2.getDiscountPrice()
+                                    : (p2.getOriginalPrice() != null ? p2.getOriginalPrice() : BigDecimal.ZERO);
+                            return price2.compareTo(price1);
+                        });
+                        break;
+                }
+            }
+
+            return products;
+        } finally {
+            em.close();
+        }
     }
-}
 
     public List<Map<String, Object>> detailProduct(int id) {
         EntityManager em = emf.createEntityManager();
         try {
-            String jpql = "SELECT p.id, p.name, p.thumbnailImage, p.description, pv.color, pv.rom, pv.price, pv.discountPrice, ps.amount "
+            String jpql = "SELECT p.id, p.name, p.thumbnailImage, p.description, "
+                    + "pv.color, pv.rom, pv.price, pv.discountPrice, pv.discountExpiry, ps.amount "
                     + "FROM Product p "
                     + "JOIN ProductVariant pv ON p = pv.product "
                     + "JOIN ProductStock ps ON pv = ps.variant "
-                    + "WHERE p.id = :productId AND p.isActive = true AND pv.isActive = true ";
+                    + "WHERE p.id = :productId AND p.isActive = true AND pv.isActive = true";
 
             return em.createQuery(jpql, Object[].class)
                     .setParameter("productId", id)
@@ -229,9 +234,20 @@ public class ProductService {
                         result.put("description", row[3]);
                         result.put("color", row[4]);
                         result.put("rom", row[5]);
-                        result.put("originalPrice", row[6]);
-                        result.put("discountPrice", row[7]);
-                        result.put("stock", row[8]);
+
+                        BigDecimal originalPrice = (BigDecimal) row[6];
+                        BigDecimal discountPrice = (BigDecimal) row[7];
+                        LocalDateTime discountExpiry = (LocalDateTime) row[8];
+                        int stock = (int) row[9];
+
+                        boolean discountValid = discountPrice != null && discountExpiry != null
+                                && discountExpiry.isAfter(LocalDateTime.now());
+
+                        result.put("originalPrice", originalPrice);
+                        result.put("discountPrice", discountValid ? discountPrice : null);
+                        result.put("discountValid", discountValid);
+                        result.put("discountExpiry", discountExpiry);
+                        result.put("stock", stock);
                         return result;
                     })
                     .collect(Collectors.toList());
@@ -343,165 +359,163 @@ public class ProductService {
     }
 
     //Apply discount to products
- public void applyDiscount(String name, String categoryId, int discountPercent, LocalDate expireDate) {
-    if (discountPercent < 0 || discountPercent > 100) {
-        throw new IllegalArgumentException("Discount percentage must be between 0 and 100");
-    }
-    if (expireDate == null) {
-        throw new IllegalArgumentException("Expiration date must be provided");
-    }
-
-    EntityManager em = emf.createEntityManager();
-    EntityTransaction tx = em.getTransaction();
-
-    try {
-        tx.begin();
-
-        StringBuilder queryStr = new StringBuilder("SELECT DISTINCT p FROM Product p WHERE p.isActive = true");
-
-        if (name != null && !name.trim().isEmpty()) {
-            queryStr.append(" AND LOWER(p.name) LIKE :name");
+    public void applyDiscount(String name, String categoryId, int discountPercent, LocalDate expireDate) {
+        if (discountPercent < 0 || discountPercent > 100) {
+            throw new IllegalArgumentException("Discount percentage must be between 0 and 100");
+        }
+        if (expireDate == null) {
+            throw new IllegalArgumentException("Expiration date must be provided");
         }
 
-        Integer parsedCategoryId = null;
-        if (categoryId != null && !categoryId.trim().isEmpty()) {
-            try {
-                parsedCategoryId = Integer.parseInt(categoryId.trim());
-                queryStr.append(" AND p.category.id = :categoryId");
-            } catch (NumberFormatException e) {
-                throw new IllegalArgumentException("Category ID không hợp lệ.");
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+
+        try {
+            tx.begin();
+
+            StringBuilder queryStr = new StringBuilder("SELECT DISTINCT p FROM Product p WHERE p.isActive = true");
+
+            if (name != null && !name.trim().isEmpty()) {
+                queryStr.append(" AND LOWER(p.name) LIKE :name");
             }
-        }
 
-        TypedQuery<Product> query = em.createQuery(queryStr.toString(), Product.class);
-
-        if (name != null && !name.trim().isEmpty()) {
-            query.setParameter("name", "%" + name.toLowerCase().trim() + "%");
-        }
-
-        if (parsedCategoryId != null) {
-            query.setParameter("categoryId", parsedCategoryId);
-        }
-
-        List<Product> products = query.getResultList();
-
-        if (products.isEmpty()) {
-            throw new IllegalArgumentException("Không tìm thấy sản phẩm phù hợp.");
-        }
-
-        Instant expireDateInstant = expireDate.atStartOfDay(ZoneId.systemDefault()).toInstant();
-
-        int discountCount = 0;
-
-        for (Product product : products) {
-            List<ProductVariant> variants = em.createQuery(
-                    "SELECT pv FROM ProductVariant pv WHERE pv.product = :product AND pv.isActive = true",
-                    ProductVariant.class)
-                    .setParameter("product", product)
-                    .getResultList();
-
-            for (ProductVariant variant : variants) {
-                BigDecimal discount = variant.getPrice().multiply(BigDecimal.valueOf(discountPercent))
-                        .divide(BigDecimal.valueOf(100), RoundingMode.HALF_UP);
-                variant.setDiscountPrice(variant.getPrice().subtract(discount));
-                variant.setDiscountExpiry(LocalDateTime.ofInstant(expireDateInstant, ZoneId.systemDefault()));
-                em.merge(variant);
-                discountCount++;
-            }
-        }
-
-        tx.commit();
-        System.out.println("✅ Discount applied to " + discountCount + " variants.");
-
-    } catch (Exception e) {
-        if (tx.isActive()) tx.rollback();
-        throw new RuntimeException("Lỗi áp dụng khuyến mãi: " + e.getMessage(), e);
-    } finally {
-        em.close();
-    }
-}
-
-
-
-
-
-    public void removeDiscount(String name, String categoryId) {
-    EntityManager em = emf.createEntityManager();
-    EntityTransaction tx = em.getTransaction();
-
-    try {
-        tx.begin();
-
-        // Log input
-        System.out.println("removeDiscount - name: " + name + ", categoryId: " + categoryId);
-
-        // Validate categoryId
-        boolean hasCategoryFilter = categoryId != null && !categoryId.isEmpty() && categoryId.matches("\\d+");
-        boolean hasNameFilter = name != null && !name.isEmpty();
-
-        // Build query for products
-        StringBuilder queryStr = new StringBuilder("SELECT p FROM Product p WHERE p.isActive = true");
-        if (hasCategoryFilter) {
-            queryStr.append(" AND p.category.id = :categoryId");
-        }
-        if (hasNameFilter) {
-            queryStr.append(" AND LOWER(p.name) LIKE :name");
-        }
-
-        TypedQuery<Product> query = em.createQuery(queryStr.toString(), Product.class);
-
-        if (hasCategoryFilter) {
-            try {
-                query.setParameter("categoryId", Integer.parseInt(categoryId));
-            } catch (NumberFormatException e) {
-                throw new IllegalArgumentException("Invalid categoryId: " + categoryId);
-            }
-        }
-        if (hasNameFilter) {
-            query.setParameter("name", "%" + name.toLowerCase() + "%");
-        }
-
-        List<Product> products = query.getResultList();
-        System.out.println("Found " + products.size() + " products");
-
-        // Remove discount from variants
-        int updatedVariants = 0;
-        for (Product product : products) {
-            List<ProductVariant> variants = em.createQuery(
-                    "SELECT pv FROM ProductVariant pv WHERE pv.product = :product AND pv.isActive = true",
-                    ProductVariant.class)
-                    .setParameter("product", product)
-                    .getResultList();
-            System.out.println("Product ID: " + product.getId() + ", Found " + variants.size() + " variants");
-
-            for (ProductVariant variant : variants) {
-                if (variant.getDiscountPrice() != null || variant.getDiscountExpiry() != null) {
-                    variant.setDiscountPrice(null);
-                    variant.setDiscountExpiry(null);
-                    em.merge(variant);
-                    updatedVariants++;
+            Integer parsedCategoryId = null;
+            if (categoryId != null && !categoryId.trim().isEmpty()) {
+                try {
+                    parsedCategoryId = Integer.parseInt(categoryId.trim());
+                    queryStr.append(" AND p.category.id = :categoryId");
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException("Category ID không hợp lệ.");
                 }
             }
-        }
 
-        System.out.println("Updated " + updatedVariants + " variants");
-        tx.commit();
+            TypedQuery<Product> query = em.createQuery(queryStr.toString(), Product.class);
 
-        // Log success
-        if (updatedVariants == 0) {
-            System.out.println("No variants updated - no discounts found or no matching products/variants");
+            if (name != null && !name.trim().isEmpty()) {
+                query.setParameter("name", "%" + name.toLowerCase().trim() + "%");
+            }
+
+            if (parsedCategoryId != null) {
+                query.setParameter("categoryId", parsedCategoryId);
+            }
+
+            List<Product> products = query.getResultList();
+
+            if (products.isEmpty()) {
+                throw new IllegalArgumentException("Không tìm thấy sản phẩm phù hợp.");
+            }
+
+            Instant expireDateInstant = expireDate.atStartOfDay(ZoneId.systemDefault()).toInstant();
+
+            int discountCount = 0;
+
+            for (Product product : products) {
+                List<ProductVariant> variants = em.createQuery(
+                        "SELECT pv FROM ProductVariant pv WHERE pv.product = :product AND pv.isActive = true",
+                        ProductVariant.class)
+                        .setParameter("product", product)
+                        .getResultList();
+
+                for (ProductVariant variant : variants) {
+                    BigDecimal discount = variant.getPrice().multiply(BigDecimal.valueOf(discountPercent))
+                            .divide(BigDecimal.valueOf(100), RoundingMode.HALF_UP);
+                    variant.setDiscountPrice(variant.getPrice().subtract(discount));
+                    variant.setDiscountExpiry(LocalDateTime.ofInstant(expireDateInstant, ZoneId.systemDefault()));
+                    em.merge(variant);
+                    discountCount++;
+                }
+            }
+
+            tx.commit();
+            System.out.println("✅ Discount applied to " + discountCount + " variants.");
+
+        } catch (Exception e) {
+            if (tx.isActive()) {
+                tx.rollback();
+            }
+            throw new RuntimeException("Lỗi áp dụng khuyến mãi: " + e.getMessage(), e);
+        } finally {
+            em.close();
         }
-    } catch (Exception e) {
-        if (tx.isActive()) {
-            tx.rollback();
-        }
-        System.err.println("Error in removeDiscount: " + e.getMessage());
-        e.printStackTrace();
-        throw e;
-    } finally {
-        em.close();
     }
-}
+
+    public void removeDiscount(String name, String categoryId) {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+
+        try {
+            tx.begin();
+
+            // Log input
+            System.out.println("removeDiscount - name: " + name + ", categoryId: " + categoryId);
+
+            // Validate categoryId
+            boolean hasCategoryFilter = categoryId != null && !categoryId.isEmpty() && categoryId.matches("\\d+");
+            boolean hasNameFilter = name != null && !name.isEmpty();
+
+            // Build query for products
+            StringBuilder queryStr = new StringBuilder("SELECT p FROM Product p WHERE p.isActive = true");
+            if (hasCategoryFilter) {
+                queryStr.append(" AND p.category.id = :categoryId");
+            }
+            if (hasNameFilter) {
+                queryStr.append(" AND LOWER(p.name) LIKE :name");
+            }
+
+            TypedQuery<Product> query = em.createQuery(queryStr.toString(), Product.class);
+
+            if (hasCategoryFilter) {
+                try {
+                    query.setParameter("categoryId", Integer.parseInt(categoryId));
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException("Invalid categoryId: " + categoryId);
+                }
+            }
+            if (hasNameFilter) {
+                query.setParameter("name", "%" + name.toLowerCase() + "%");
+            }
+
+            List<Product> products = query.getResultList();
+            System.out.println("Found " + products.size() + " products");
+
+            // Remove discount from variants
+            int updatedVariants = 0;
+            for (Product product : products) {
+                List<ProductVariant> variants = em.createQuery(
+                        "SELECT pv FROM ProductVariant pv WHERE pv.product = :product AND pv.isActive = true",
+                        ProductVariant.class)
+                        .setParameter("product", product)
+                        .getResultList();
+                System.out.println("Product ID: " + product.getId() + ", Found " + variants.size() + " variants");
+
+                for (ProductVariant variant : variants) {
+                    if (variant.getDiscountPrice() != null || variant.getDiscountExpiry() != null) {
+                        variant.setDiscountPrice(null);
+                        variant.setDiscountExpiry(null);
+                        em.merge(variant);
+                        updatedVariants++;
+                    }
+                }
+            }
+
+            System.out.println("Updated " + updatedVariants + " variants");
+            tx.commit();
+
+            // Log success
+            if (updatedVariants == 0) {
+                System.out.println("No variants updated - no discounts found or no matching products/variants");
+            }
+        } catch (Exception e) {
+            if (tx.isActive()) {
+                tx.rollback();
+            }
+            System.err.println("Error in removeDiscount: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
 
     // Get discounted products
     public List<Product> getDiscountedProducts(int offset, int limit) {
@@ -642,60 +656,57 @@ public class ProductService {
     }
 
     public List<Map<String, Object>> getMostOrderedProducts(Integer limit) {
-    EntityManager em = productDAO.emf.createEntityManager();
-    try {
-        String jpql = "SELECT p.id, p.name, p.description, p.thumbnailImage, "
-                + "MIN(v.price), "
-                + "MIN(CASE WHEN v.discountPrice IS NOT NULL AND v.discountExpiry >= CURRENT_TIMESTAMP "
-                + "THEN v.discountPrice ELSE NULL END), "
-                + "SUM(od.quantity) "
-                + "FROM Product p "
-                + "JOIN p.variants v "
-                + "JOIN OrderDetails od ON v = od.productVariant "
-                + "WHERE p.isActive = true AND v.isActive = true "
-                + "GROUP BY p.id, p.name, p.description, p.thumbnailImage "
-                + "ORDER BY SUM(od.quantity) DESC";
+        EntityManager em = productDAO.emf.createEntityManager();
+        try {
+            String jpql = "SELECT p.id, p.name, p.description, p.thumbnailImage, "
+                    + "MIN(v.price), "
+                    + "MIN(CASE WHEN v.discountPrice IS NOT NULL AND v.discountExpiry >= CURRENT_TIMESTAMP "
+                    + "THEN v.discountPrice ELSE NULL END), "
+                    + "SUM(od.quantity) "
+                    + "FROM Product p "
+                    + "JOIN p.variants v "
+                    + "JOIN OrderDetails od ON v = od.productVariant "
+                    + "WHERE p.isActive = true AND v.isActive = true "
+                    + "GROUP BY p.id, p.name, p.description, p.thumbnailImage "
+                    + "ORDER BY SUM(od.quantity) DESC";
 
-        TypedQuery<Object[]> query = em.createQuery(jpql, Object[].class);
+            TypedQuery<Object[]> query = em.createQuery(jpql, Object[].class);
 
-        if (limit != null && limit > 0) {
-            query.setMaxResults(limit);
-        }
-
-        return query.getResultStream().map(row -> {
-            Map<String, Object> map = new HashMap<>();
-            map.put("id", row[0]);
-            map.put("name", row[1]);
-            map.put("description", row[2]);
-            map.put("thumbnailImage", row[3]);
-
-            BigDecimal originalPrice = (BigDecimal) row[4];
-            BigDecimal discountPrice = (BigDecimal) row[5];
-            Long totalOrdered = (Long) row[6];
-
-            map.put("originalPrice", originalPrice);
-            map.put("discountPrice", discountPrice);
-            map.put("totalOrdered", totalOrdered);
-
-            BigDecimal discountPercent = BigDecimal.ZERO;
-            if (originalPrice != null && discountPrice != null && originalPrice.compareTo(BigDecimal.ZERO) > 0) {
-                discountPercent = originalPrice.subtract(discountPrice)
-                        .divide(originalPrice, 2, RoundingMode.HALF_UP)
-                        .multiply(BigDecimal.valueOf(100))
-                        .setScale(0, RoundingMode.HALF_UP); // Làm tròn 0 chữ số sau dấu phẩy
+            if (limit != null && limit > 0) {
+                query.setMaxResults(limit);
             }
-            map.put("discountPercent", discountPercent);
 
-            return map;
-        }).collect(Collectors.toList());
+            return query.getResultStream().map(row -> {
+                Map<String, Object> map = new HashMap<>();
+                map.put("id", row[0]);
+                map.put("name", row[1]);
+                map.put("description", row[2]);
+                map.put("thumbnailImage", row[3]);
 
-    } finally {
-        em.close();
+                BigDecimal originalPrice = (BigDecimal) row[4];
+                BigDecimal discountPrice = (BigDecimal) row[5];
+                Long totalOrdered = (Long) row[6];
+
+                map.put("originalPrice", originalPrice);
+                map.put("discountPrice", discountPrice);
+                map.put("totalOrdered", totalOrdered);
+
+                BigDecimal discountPercent = BigDecimal.ZERO;
+                if (originalPrice != null && discountPrice != null && originalPrice.compareTo(BigDecimal.ZERO) > 0) {
+                    discountPercent = originalPrice.subtract(discountPrice)
+                            .divide(originalPrice, 2, RoundingMode.HALF_UP)
+                            .multiply(BigDecimal.valueOf(100))
+                            .setScale(0, RoundingMode.HALF_UP); // Làm tròn 0 chữ số sau dấu phẩy
+                }
+                map.put("discountPercent", discountPercent);
+
+                return map;
+            }).collect(Collectors.toList());
+
+        } finally {
+            em.close();
+        }
     }
-}
-
-
-
 
     // Count total discounted products for pagination
     public int getNumberOfDiscountedProducts() {
@@ -921,17 +932,16 @@ public class ProductService {
     public List<Map<String, Object>> getMostDiscountedProducts(Integer limit) {
         EntityManager em = productDAO.emf.createEntityManager();
         try {
-           String jpql = "SELECT p.id, p.name, p.description, p.thumbnailImage, "
-        + "MIN(v.price), MIN(v.discountPrice), "
-        + "ROUND((1.0 * (MIN(v.price) - MIN(v.discountPrice)) / MIN(v.price)) * 100) "
-        + "FROM Product p "
-        + "JOIN p.variants v "  
-        + "WHERE p.isActive = true AND v.isActive = true "
-        + "AND v.discountPrice IS NOT NULL "
-        + "AND v.discountExpiry >= CURRENT_TIMESTAMP "
-        + "GROUP BY p.id, p.name, p.description, p.thumbnailImage "
-        + "ORDER BY p.id";
-
+            String jpql = "SELECT p.id, p.name, p.description, p.thumbnailImage, "
+                    + "MIN(v.price), MIN(v.discountPrice), "
+                    + "ROUND((1.0 * (MIN(v.price) - MIN(v.discountPrice)) / MIN(v.price)) * 100) "
+                    + "FROM Product p "
+                    + "JOIN p.variants v "
+                    + "WHERE p.isActive = true AND v.isActive = true "
+                    + "AND v.discountPrice IS NOT NULL "
+                    + "AND v.discountExpiry >= CURRENT_TIMESTAMP "
+                    + "GROUP BY p.id, p.name, p.description, p.thumbnailImage "
+                    + "ORDER BY p.id";
 
             TypedQuery<Object[]> query = em.createQuery(jpql, Object[].class);
 
@@ -940,16 +950,16 @@ public class ProductService {
             }
 
             return query.getResultStream().map(row -> {
-    Map<String, Object> map = new HashMap<>();
-    map.put("id", row[0]);
-    map.put("name", row[1]);
-    map.put("description", row[2]);
-    map.put("thumbnailImage", row[3]);
-    map.put("originalPrice", row[4]);
-    map.put("discountPrice", row[5]);
-    map.put("discountPercent", row[6]);
-    return map;
-}).collect(Collectors.toList());
+                Map<String, Object> map = new HashMap<>();
+                map.put("id", row[0]);
+                map.put("name", row[1]);
+                map.put("description", row[2]);
+                map.put("thumbnailImage", row[3]);
+                map.put("originalPrice", row[4]);
+                map.put("discountPrice", row[5]);
+                map.put("discountPercent", row[6]);
+                return map;
+            }).collect(Collectors.toList());
 
         } finally {
             em.close();

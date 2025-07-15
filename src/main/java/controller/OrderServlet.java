@@ -18,6 +18,7 @@ import model.ProductStock;
 import service.OrderService;
 import service.OrderDetailService;
 import service.ProductStockService;
+import utils.InteractionLogger;
 import service.MailService;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -216,7 +217,10 @@ public class OrderServlet extends HttpServlet {
                                  item.getProductVariant().getId());
             }
         }
-
+        // Đoạn của Thư: ghi log tương tác 
+        for (CartItem item : selectedItems) {
+    InteractionLogger.logInteraction(user.getUserID(), item.getProductVariant().getProduct().getId(), "purchase");
+}
         // Gửi email xác nhận đơn hàng
         try {
             List<OrderDetails> orderDetails = orderDetailService.getOrderDetailsByOrderId(order.getId());
