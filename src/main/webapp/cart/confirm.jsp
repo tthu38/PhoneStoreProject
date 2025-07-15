@@ -415,7 +415,13 @@
                             </div>
 
                             <div class="payment-method" data-method="paypal">
-                                <i class="fas fa-paypal"></i>
+                                <span style="display:inline-block;width:32px;height:32px;margin-bottom:10px;vertical-align:middle;">
+                                    <svg viewBox="0 0 32 32" width="32" height="32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <rect width="32" height="32" rx="8" fill="#fff"/>
+                                        <path d="M13.5 8.5h7.2c2.2 0 3.7 1.2 3.7 3.2 0 2.1-1.5 3.3-3.7 3.3h-4.2l-1.1 6.5h-2.1l1.1-6.5h-2.1l-1.1 6.5h-2.1l2.1-12h4.2zm2.1 5.2h3.7c1.1 0 1.7-0.5 1.7-1.4 0-0.9-0.6-1.3-1.7-1.3h-3.7l-0.7 4.1z" fill="#003087"/>
+                                        <path d="M21.5 13.5c0.7 0 1.3-0.2 1.7-0.6 0.4-0.4 0.6-0.9 0.6-1.5 0-1.1-0.8-1.7-2.2-1.7h-3.7l-0.7 4.1h3.7c0.7 0 1.3-0.2 1.7-0.6z" fill="#009cde"/>
+                                    </svg>
+                                </span>
                                 <div>
                                     <strong>PAYPAL</strong>
                                     <small class="d-block text-muted">Ví điện tử PayPal</small>

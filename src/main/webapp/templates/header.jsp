@@ -6,6 +6,17 @@
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ page import="model.User" %>
+<%@ page import="model.CartItem" %>
+<%@ page import="java.util.List" %>
+<%
+    List<CartItem> cart = (List<CartItem>) session.getAttribute("cart");
+    int cartCount = 0;
+    if (cart != null) {
+        for (CartItem item : cart) {
+            cartCount += item.getQuantity();
+        }
+    }
+%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE html>
 <html>
@@ -72,7 +83,7 @@
                 <a href="${pageContext.request.contextPath}/carts" class="cart-link">
                     <i class="fa fa-shopping-cart"></i>
                     <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger cart-badge" 
-                          id="cartBadge">2</span>
+                          id="cartBadge"><%= cartCount %></span>
                     <span class="cart-text">Giỏ hàng</span>
                 </a>
             </div>
@@ -88,8 +99,8 @@
                                 </a>
                                 <ul class="dropdown-menu" aria-labelledby="phoneDropdown">
                                     <li><a class="dropdown-item" href="products?action=find">Tất cả sản phẩm</a></li>
-                                    <li><a class="dropdown-item" href="<c:url value='/products?action=find&brandId=2'/>">iPhone</a></li>
-                                    <li><a class="dropdown-item" href="<c:url value='/products?action=find&brandId=1'/>">Samsung</a></li>
+                                    <li><a class="dropdown-item" href="<c:url value='/products?action=find&brandId=1'/>">iPhone</a></li>
+                                    <li><a class="dropdown-item" href="<c:url value='/products?action=find&brandId=2'/>">Samsung</a></li>
                                     <li><a class="dropdown-item" href="<c:url value='/products?action=find&brandId=5'/>">Oppo</a></li>
                                     <li><a class="dropdown-item" href="<c:url value='/products?action=find&brandId=3'/>">Xiaomi</a></li>
                                     <li><a class="dropdown-item" href="<c:url value='/products?action=find&brandId=4'/>">Realme</a></li>
