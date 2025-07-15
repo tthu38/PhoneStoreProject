@@ -20,8 +20,8 @@ body {
     background: #EA1D25;
     box-shadow: var(--shadow-sm);
     border-radius: 0 0 0.5rem 0.5rem;
-    padding-top: 0;
-    padding-bottom: 0;
+    padding: 0;
+    padding-top: 10px;
 }
 
 .header-container {
@@ -30,9 +30,9 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 4px 18px 4px 18px;
-    min-height: 48px;
-    gap: 18px;
+    padding: 2px 18px 2px 18px;
+    min-height: 40px;
+    gap: 10px;
 }
 
 .brand-logo {
@@ -41,15 +41,13 @@ body {
     gap: 8px;
     text-decoration: none;
     margin-right: 12px;
+    margin-left: 10px;
 }
 
 .brand-logo img {
-    height: 100px;
+    height: 48px;
     width: auto;
     object-fit: contain;
-    border: none;
-    padding: 0;
-    margin: 0;
     border-radius: 50%;
 }
 
@@ -61,9 +59,9 @@ body {
 }
 
 .search-form {
-    flex: 1;
-    max-width: 420px;
-    margin: 0 12px 0 0;
+    flex: 2;
+    max-width: 600px;
+    margin: 0 18px 0 0;
 }
 
 .search-input-group {
@@ -226,6 +224,7 @@ body {
     position: relative;
     height: 32px;
     padding: 0 10px;
+    margin-right: 10px;
 }
 
 .cart-badge {
@@ -256,18 +255,19 @@ body {
     margin: 0 auto;
     display: flex;
     align-items: center;
+    justify-content: center;
     padding: 0 18px;
 }
 
 .main-menu {
     display: flex;
     flex-wrap: nowrap;
-    justify-content: flex-start;
+    justify-content: center;
     align-items: center;
     gap: 28px;
     padding: 0.2rem 0;
     margin: 0;
-    height: 48px;
+    height: 40px;
 }
 
 .nav-link {
@@ -438,4 +438,22 @@ body {
 }
 .cart-link i {
     color: #fff;
+} 
+
+.main-menu .nav-link:active,
+.main-menu .nav-link:focus {
+    background: #fff;
+    color: #EA1D25 !important;
+    border-radius: 24px;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(234,29,37,0.08);
+    transition: background 0.18s, color 0.18s;
+}
+.main-menu .nav-link:hover {
+    background: #fff;
+    color: #EA1D25 !important;
+    border-radius: 24px;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(234,29,37,0.08);
+    transition: background 0.18s, color 0.18s;
 } 
