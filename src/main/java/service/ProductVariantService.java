@@ -112,4 +112,19 @@ public class ProductVariantService {
         }
         return result;
     }
+    public ProductVariant findByProductRomColor(int productId, int rom, String color) {
+    EntityManager em = emf.createEntityManager();
+    try {
+        return em.createQuery("SELECT v FROM ProductVariant v WHERE v.product.id = :productId AND v.rom = :rom AND v.color = :color", ProductVariant.class)
+                .setParameter("productId", productId)
+                .setParameter("rom", rom)
+                .setParameter("color", color)
+                .getResultStream()
+                .findFirst()
+                .orElse(null);
+    } finally {
+        em.close();
+    }
+}
+
 }
