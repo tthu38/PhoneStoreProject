@@ -329,16 +329,27 @@
                     <c:forEach var="product" items="${bestsellerProducts}">
                         <div class="col-custom-5 mb-4 d-flex">
                             <div class="card w-100">
-                                <div class="discount-badge">${product.discountPercent}%</div>
+                                <c:if test="${product.discountPercent > 0}">
+                                <div class="discount-badge">
+                                    -${product.discountPercent}%
+                                </div>
+                            </c:if>
                                 <a href="products?action=productDetail&productId=${product.id}">
                                     <img src="${product.thumbnailImage}" class="card-img-top" alt="${product.name}">
                                     <div class="card-body">
                                         <h5 class="card-title">${product.name}</h5>
                                         <p class="card-text description-ellipsis">${product.description}</p>
                                         <p class="card-text">
-                                            <span class="discount-price">${product.discountPrice}₫</span><br>
-                                            <span class="text-decoration-line-through">${product.originalPrice}₫</span>
-                                        </p>
+                                        <c:choose>
+                                            <c:when test="${product.discountPercent > 0}">
+                                                <span class="discount-price">${product.discountPrice}₫</span><br>
+                                                <span class="text-decoration-line-through text-muted">${product.originalPrice}₫</span>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <span class="discount-price">${product.originalPrice}₫</span>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </p>
                                     </div>
                                 </a>
                             </div>
