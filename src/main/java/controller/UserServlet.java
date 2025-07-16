@@ -9,13 +9,10 @@ import model.UserAddress;
 import service.UserService;
 import service.UserAddressService;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.Period;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
