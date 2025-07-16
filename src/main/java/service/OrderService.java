@@ -40,7 +40,19 @@ public class OrderService {
 
     // Thêm đơn hàng mới
     public boolean addOrder(Order order) {
-        return orderDAO.insert(order);
+        boolean result = orderDAO.insert(order);
+        if (!result) {
+            System.out.println("[OrderService] Lỗi khi insert Order. Thông tin order:");
+            System.out.println("  User: " + (order.getUser() != null ? order.getUser().getUserID() : "null"));
+            System.out.println("  TotalAmount: " + order.getTotalAmount());
+            System.out.println("  Status: " + order.getStatus());
+            System.out.println("  ShippingAddress: " + order.getShippingAddress());
+            System.out.println("  PaymentMethod: " + order.getPaymentMethod());
+            System.out.println("  PhoneNumber: " + order.getPhoneNumber());
+            System.out.println("  Note: " + order.getNote());
+            new Exception("Order insert failed").printStackTrace();
+        }
+        return result;
     }
 
     // Cập nhật đơn hàng

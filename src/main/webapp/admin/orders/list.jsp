@@ -188,6 +188,47 @@
             .lm button{
                 margin-right: 50px;
             }
+            
+            /* Filter button styles */
+            .filter-btn {
+                transition: all 0.3s ease;
+                border-radius: 8px;
+                font-weight: 500;
+            }
+            
+            .filter-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            }
+            
+            .filter-btn.active {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            }
+            
+            .filter-btn.active[data-status="all"] {
+                background-color: #0d6efd;
+                border-color: #0d6efd;
+                color: white;
+            }
+            
+            .filter-btn.active[data-status="Pending"] {
+                background-color: #ffc107;
+                border-color: #ffc107;
+                color: #000;
+            }
+            
+            .filter-btn.active[data-status="Paid"] {
+                background-color: #198754;
+                border-color: #198754;
+                color: white;
+            }
+            
+            .filter-btn.active[data-status="Cancelled"] {
+                background-color: #dc3545;
+                border-color: #dc3545;
+                color: white;
+            }
         </style>
     </head>
     <body>
@@ -209,6 +250,42 @@
                             <i class="fas fa-sync-alt me-1"></i> Làm mới
                         </button>
                     </form>
+                </div>
+            </div>
+
+            <!-- Filter Buttons -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <h6 class="card-title mb-3">
+                                <i class="fas fa-filter me-2"></i>
+                                Lọc theo trạng thái
+                            </h6>
+                            <div class="d-flex flex-wrap gap-2">
+                                <button type="button" class="btn btn-outline-primary filter-btn" data-status="all" onclick="filterOrders('all')">
+                                    <i class="fas fa-list me-1"></i>
+                                    Tất cả
+                                    <span class="badge bg-primary ms-1" id="count-all">0</span>
+                                </button>
+                                <button type="button" class="btn btn-outline-warning filter-btn" data-status="Pending" onclick="filterOrders('Pending')">
+                                    <i class="fas fa-clock me-1"></i>
+                                    Đang chờ
+                                    <span class="badge bg-warning ms-1" id="count-pending">0</span>
+                                </button>
+                                <button type="button" class="btn btn-outline-success filter-btn" data-status="Paid" onclick="filterOrders('Paid')">
+                                    <i class="fas fa-check me-1"></i>
+                                    Đã thanh toán
+                                    <span class="badge bg-success ms-1" id="count-paid">0</span>
+                                </button>
+                                <button type="button" class="btn btn-outline-danger filter-btn" data-status="Cancelled" onclick="filterOrders('Cancelled')">
+                                    <i class="fas fa-times me-1"></i>
+                                    Đã hủy
+                                    <span class="badge bg-danger ms-1" id="count-cancelled">0</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -422,18 +499,109 @@
         <script>
                 // Get context path from JSP
                 var contextPath = '${pageContext.request.contextPath}';
+                var ordersTable;
 
                 $(document).ready(function () {
                     // Initialize DataTable
-                    $('#ordersTable').DataTable({
+                    ordersTable = $('#ordersTable').DataTable({
                         language: {
                             url: '//cdn.datatables.net/plug-ins/1.13.0/i18n/vi.json'
                         },
                         pageLength: 25,
                         order: [[0, 'desc']],
-                        responsive: true
+                        responsive: true,
+                        initComplete: function() {
+                            // Count and update badges after DataTable is initialized
+                            updateFilterBadges();
+                        }
                     });
+
+                    // Function to update filter badges
+                    function updateFilterBadges() {
+                        var allCount = ordersTable.rows().count();
+                        var pendingCount = 0;
+                        var paidCount = 0;
+                        var cancelledCount = 0;
+
+                        // Count by status
+                        ordersTable.rows().every(function() {
+                            var status = this.data()[5]; // Status is in column 5
+                            if (status.includes('Đang chờ')) {
+                                pendingCount++;
+                            } else if (status.includes('Đã thanh toán')) {
+                                paidCount++;
+                            } else if (status.includes('Đã hủy')) {
+                                cancelledCount++;
+                            }
+                        });
+
+                        $('#count-all').text(allCount);
+                        $('#count-pending').text(pendingCount);
+                        $('#count-paid').text(paidCount);
+                        $('#count-cancelled').text(cancelledCount);
+                    }
+
+                    // Event listener for filter buttons
+                    $('.filter-btn').on('click', function() {
+                        $('.filter-btn').removeClass('active');
+                        $(this).addClass('active');
+                        var status = $(this).data('status');
+                        filterOrders(status);
+                    });
+
+                    // Initial filter application
+                    var currentStatus = '${statusFilter}';
+                    if (currentStatus) {
+                        $('.filter-btn[data-status="' + currentStatus + '"]').addClass('active');
+                    } else {
+                        $('.filter-btn[data-status="all"]').addClass('active');
+                    }
                 });
+
+                function filterOrders(status) {
+                    if (status === 'all') {
+                        ordersTable.column(5).search('').draw();
+                    } else {
+                        var searchTerm = '';
+                        switch(status) {
+                            case 'Pending':
+                                searchTerm = 'Đang chờ';
+                                break;
+                            case 'Paid':
+                                searchTerm = 'Đã thanh toán';
+                                break;
+                            case 'Cancelled':
+                                searchTerm = 'Đã hủy';
+                                break;
+                        }
+                        ordersTable.column(5).search(searchTerm).draw();
+                    }
+                    updateFilterBadges();
+                }
+
+                function updateFilterBadges() {
+                    var allCount = ordersTable.rows().count();
+                    var pendingCount = 0;
+                    var paidCount = 0;
+                    var cancelledCount = 0;
+
+                    // Count by status
+                    ordersTable.rows().every(function() {
+                        var status = this.data()[5]; // Status is in column 5
+                        if (status.includes('Đang chờ')) {
+                            pendingCount++;
+                        } else if (status.includes('Đã thanh toán')) {
+                            paidCount++;
+                        } else if (status.includes('Đã hủy')) {
+                            cancelledCount++;
+                        }
+                    });
+
+                    $('#count-all').text(allCount);
+                    $('#count-pending').text(pendingCount);
+                    $('#count-paid').text(paidCount);
+                    $('#count-cancelled').text(cancelledCount);
+                }
 
                 function refreshOrders() {
                     window.location.reload();
