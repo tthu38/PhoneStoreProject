@@ -16,51 +16,48 @@
                 max-width: 1200px;
                 margin: 0 auto;
                 padding: 20px;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                background: #fff;
                 min-height: 100vh;
             }
 
             .page-header {
-                background: rgba(255, 255, 255, 0.95);
-                color: #2c3e50;
+                background: #fff;
+                color: #dc3545;
                 padding: 40px;
                 border-radius: 20px;
                 margin-bottom: 30px;
                 text-align: center;
-                box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-                backdrop-filter: blur(10px);
+                box-shadow: 0 10px 30px rgba(220,53,69,0.08);
+                border: 1px solid #f8d7da;
             }
 
             .page-header h1 {
                 font-size: 2.5rem;
                 font-weight: 700;
                 margin-bottom: 10px;
-                background: linear-gradient(135deg, #667eea, #764ba2);
-                -webkit-background-clip: text;
-                -webkit-text-fill-color: transparent;
-                background-clip: text;
+                color: #dc3545;
+                background: none;
             }
 
             .page-header p {
                 font-size: 1.1rem;
-                color: #7f8c8d;
+                color: #b5b5b5;
                 margin: 0;
             }
 
             .order-card {
-                background: rgba(255, 255, 255, 0.95);
+                background: #fff;
                 border-radius: 20px;
                 padding: 30px;
                 margin-bottom: 25px;
-                box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+                box-shadow: 0 8px 24px rgba(220,53,69,0.08);
                 transition: all 0.3s ease;
-                border: 1px solid rgba(255, 255, 255, 0.2);
-                backdrop-filter: blur(10px);
+                border: 1px solid #f8d7da;
             }
 
             .order-card:hover {
                 transform: translateY(-5px);
-                box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+                box-shadow: 0 16px 32px rgba(220,53,69,0.13);
             }
 
             .order-header {
@@ -69,21 +66,18 @@
                 align-items: center;
                 margin-bottom: 25px;
                 padding-bottom: 20px;
-                border-bottom: 2px solid #ecf0f1;
+                border-bottom: 2px solid #f8d7da;
             }
 
             .order-id {
                 font-size: 1.5rem;
                 font-weight: 700;
-                color: #2c3e50;
-                background: linear-gradient(135deg, #667eea, #764ba2);
-                -webkit-background-clip: text;
-                -webkit-text-fill-color: transparent;
-                background-clip: text;
+                color: #dc3545;
+                background: none;
             }
 
             .order-date {
-                color: #7f8c8d;
+                color: #b5b5b5;
                 font-size: 0.9rem;
                 margin-top: 5px;
             }
@@ -98,33 +92,33 @@
             }
 
             .status-pending {
-                background: linear-gradient(135deg, #f39c12, #e67e22);
-                color: white;
-                box-shadow: 0 4px 15px rgba(243, 156, 18, 0.3);
+                background: #fff3cd;
+                color: #b85c00;
+                border: 1px solid #ffe082;
             }
 
             .status-paid {
-                background: linear-gradient(135deg, #27ae60, #2ecc71);
-                color: white;
-                box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+                background: #f8d7da;
+                color: #dc3545;
+                border: 1px solid #dc3545;
             }
 
             .status-shipped {
-                background: linear-gradient(135deg, #3498db, #2980b9);
-                color: white;
-                box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+                background: #e9ecef;
+                color: #dc3545;
+                border: 1px solid #dc3545;
             }
 
             .status-delivered {
-                background: linear-gradient(135deg, #9b59b6, #8e44ad);
-                color: white;
-                box-shadow: 0 4px 15px rgba(155, 89, 182, 0.3);
+                background: #f8d7da;
+                color: #dc3545;
+                border: 1px solid #dc3545;
             }
 
             .status-cancelled {
-                background: linear-gradient(135deg, #e74c3c, #c0392b);
-                color: white;
-                box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+                background: #fff0f1;
+                color: #dc3545;
+                border: 1px solid #dc3545;
             }
 
             .order-items {
@@ -132,24 +126,24 @@
             }
 
             .order-items h6 {
-                color: #2c3e50;
+                color: #dc3545;
                 font-size: 1.1rem;
                 font-weight: 600;
                 margin-bottom: 20px;
                 padding-bottom: 10px;
-                border-bottom: 2px solid #ecf0f1;
+                border-bottom: 2px solid #f8d7da;
             }
 
             .order-item {
                 display: flex;
                 align-items: center;
                 padding: 20px 0;
-                border-bottom: 1px solid #ecf0f1;
+                border-bottom: 1px solid #f8d7da;
                 transition: background-color 0.3s ease;
             }
 
             .order-item:hover {
-                background: rgba(102, 126, 234, 0.05);
+                background: #fff0f1;
                 border-radius: 10px;
                 padding: 20px;
                 margin: 0 -20px;
@@ -165,8 +159,8 @@
                 object-fit: cover;
                 border-radius: 15px;
                 margin-right: 20px;
-                box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-                border: 3px solid #ecf0f1;
+                box-shadow: 0 5px 15px rgba(220,53,69,0.08);
+                border: 3px solid #f8d7da;
             }
 
             .item-info {
@@ -176,14 +170,14 @@
             .item-name {
                 font-weight: 600;
                 margin-bottom: 8px;
-                color: #2c3e50;
+                color: #dc3545;
                 font-size: 1rem;
             }
 
             .item-variant {
-                color: #7f8c8d;
+                color: #b5b5b5;
                 font-size: 0.9rem;
-                background: #f8f9fa;
+                background: #fff0f1;
                 padding: 4px 12px;
                 border-radius: 15px;
                 display: inline-block;
@@ -192,16 +186,16 @@
             .item-price {
                 text-align: right;
                 font-weight: 700;
-                color: #e74c3c;
+                color: #dc3545;
                 font-size: 1.1rem;
             }
 
             .order-summary {
-                background: linear-gradient(135deg, #f8f9fa, #ecf0f1);
+                background: #fff0f1;
                 border-radius: 15px;
                 padding: 25px;
                 margin-top: 25px;
-                border: 1px solid #ecf0f1;
+                border: 1px solid #f8d7da;
             }
 
             .summary-row {
@@ -209,15 +203,15 @@
                 justify-content: space-between;
                 margin-bottom: 15px;
                 font-size: 1rem;
-                color: #2c3e50;
+                color: #dc3545;
             }
 
             .summary-row:last-child {
                 margin-bottom: 0;
                 font-weight: 700;
-                color: #2c3e50;
+                color: #dc3545;
                 font-size: 1.3rem;
-                border-top: 2px solid #ecf0f1;
+                border-top: 2px solid #f8d7da;
                 padding-top: 15px;
                 margin-top: 15px;
             }
@@ -230,8 +224,8 @@
             }
 
             .btn-detail {
-                background: linear-gradient(135deg, #667eea, #764ba2);
-                color: white;
+                background: #dc3545;
+                color: #fff;
                 border: none;
                 padding: 12px 25px;
                 border-radius: 25px;
@@ -240,34 +234,35 @@
                 font-weight: 600;
                 transition: all 0.3s ease;
                 text-align: center;
-                box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+                box-shadow: 0 5px 15px rgba(220,53,69,0.13);
             }
 
             .btn-detail:hover {
-                background: linear-gradient(135deg, #5a6fd8, #6a4c93);
-                color: white;
+                background: #b71c1c;
+                color: #fff;
                 transform: translateY(-2px);
-                box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+                box-shadow: 0 8px 25px rgba(220,53,69,0.18);
             }
 
             .empty-state {
                 text-align: center;
                 padding: 80px 20px;
-                color: #7f8c8d;
-                background: rgba(255, 255, 255, 0.95);
+                color: #b5b5b5;
+                background: #fff;
                 border-radius: 20px;
-                box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+                box-shadow: 0 15px 35px rgba(220,53,69,0.08);
+                border: 1px solid #f8d7da;
             }
 
             .empty-state i {
                 font-size: 5rem;
-                color: #bdc3c7;
+                color: #f8d7da;
                 margin-bottom: 30px;
-                opacity: 0.5;
+                opacity: 0.7;
             }
 
             .empty-state h3 {
-                color: #2c3e50;
+                color: #dc3545;
                 font-size: 1.8rem;
                 margin-bottom: 15px;
                 font-weight: 600;
@@ -276,35 +271,37 @@
             .empty-state p {
                 font-size: 1.1rem;
                 margin-bottom: 30px;
-                color: #7f8c8d;
+                color: #b5b5b5;
             }
 
             .empty-state .btn {
-                background: linear-gradient(135deg, #667eea, #764ba2);
+                background: #dc3545;
                 border: none;
                 padding: 15px 30px;
                 border-radius: 25px;
                 font-weight: 600;
-                box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+                box-shadow: 0 5px 15px rgba(220,53,69,0.13);
+                color: #fff;
                 transition: all 0.3s ease;
             }
 
             .empty-state .btn:hover {
-                background: linear-gradient(135deg, #5a6fd8, #6a4c93);
+                background: #b71c1c;
+                color: #fff;
                 transform: translateY(-2px);
-                box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+                box-shadow: 0 8px 25px rgba(220,53,69,0.18);
             }
 
             .shipping-info {
-                background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+                background: #fff0f1;
                 border-radius: 15px;
                 padding: 20px;
                 margin-bottom: 20px;
-                border: 1px solid #90caf9;
+                border: 1px solid #f8d7da;
             }
 
             .shipping-info h6 {
-                color: #1976d2;
+                color: #dc3545;
                 margin-bottom: 15px;
                 font-size: 1rem;
                 font-weight: 600;
@@ -315,7 +312,7 @@
 
             .shipping-info p {
                 margin-bottom: 8px;
-                color: #1565c0;
+                color: #dc3545;
                 font-size: 0.95rem;
                 line-height: 1.5;
             }
@@ -325,13 +322,13 @@
                 border: none;
                 padding: 20px;
                 margin-bottom: 25px;
-                box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+                box-shadow: 0 5px 15px rgba(220,53,69,0.08);
             }
 
             .alert-danger {
-                background: linear-gradient(135deg, #ffebee, #ffcdd2);
-                color: #c62828;
-                border-left: 4px solid #f44336;
+                background: #fff0f1;
+                color: #dc3545;
+                border-left: 4px solid #dc3545;
             }
 
             @media (max-width: 768px) {
