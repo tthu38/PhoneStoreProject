@@ -327,7 +327,7 @@ public class LoginServlet extends HttpServlet {
             if (userToLogin.getRoleID() == 1) {
                 response.sendRedirect(request.getContextPath() + "/admin");
             } else {
-                response.sendRedirect(request.getContextPath() + "/indexFirst.jsp");
+                response.sendRedirect(request.getContextPath() + "/home");
             }
         } catch (Exception e) {
             e.printStackTrace();

@@ -29,11 +29,11 @@
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/register.css">
     </head>
     <body>
-<%@ page import="model.User" %>
-<%
-    User currentUser = (User) session.getAttribute("user");
-    request.setAttribute("currentUser", currentUser);
-%>
+        <%@ page import="model.User" %>
+        <%
+            User currentUser = (User) session.getAttribute("user");
+            request.setAttribute("currentUser", currentUser);
+        %>
         <c:if test="${not empty user}">
             <c:set var="currentUser" value="${user}" scope="page"/>
         </c:if>
@@ -83,38 +83,40 @@
                 <a href="${pageContext.request.contextPath}/carts" class="cart-link">
                     <i class="fa fa-shopping-cart"></i>
                     <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger cart-badge" 
-                          id="cartBadge"><%= cartCount %></span>
+                          id="cartBadge"><%= cartCount%></span>
                     <span class="cart-text">Giỏ hàng</span>
                 </a>
             </div>
 
-                <!-- Main Navigation -->
-                <nav class="main-nav">
-                    <div class="nav-container">
-                        <ul class="nav main-menu flex-nowrap justify-content-center">
-                            <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/">Trang chủ</a></li>
-                            <li class="nav-item dropdown position-relative">
-                                <a class="nav-link dropdown-toggle" href="#" id="phoneDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    Điện thoại
-                                </a>
-                                <ul class="dropdown-menu" aria-labelledby="phoneDropdown">
-                                    <li><a class="dropdown-item" href="products?action=find">Tất cả sản phẩm</a></li>
-                                    <li><a class="dropdown-item" href="<c:url value='/products?action=find&brandId=1'/>">iPhone</a></li>
-                                    <li><a class="dropdown-item" href="<c:url value='/products?action=find&brandId=2'/>">Samsung</a></li>
-                                    <li><a class="dropdown-item" href="<c:url value='/products?action=find&brandId=5'/>">Oppo</a></li>
-                                    <li><a class="dropdown-item" href="<c:url value='/products?action=find&brandId=3'/>">Xiaomi</a></li>
-                                    <li><a class="dropdown-item" href="<c:url value='/products?action=find&brandId=4'/>">Realme</a></li>
-                                    <li><a class="dropdown-item" href="<c:url value='/products?action=find&brandId=6'/>">Vivo</a></li>
-                                </ul>
-                            </li>
+            <!-- Main Navigation -->
+            <nav class="main-nav">
+                <div class="nav-container">
+                    <ul class="nav main-menu flex-nowrap justify-content-center">
+                        <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/">Trang chủ</a></li>
+                        <li class="nav-item dropdown position-relative">
+                            <a class="nav-link dropdown-toggle" href="#" id="phoneDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Điện thoại
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="phoneDropdown">
+                                <li><a class="dropdown-item" href="products?action=find">Tất cả sản phẩm</a></li>
+                                <li><a class="dropdown-item" href="<c:url value='/products?action=find&brandId=1'/>">iPhone</a></li>
+                                <li><a class="dropdown-item" href="<c:url value='/products?action=find&brandId=2'/>">Samsung</a></li>
+                                <li><a class="dropdown-item" href="<c:url value='/products?action=find&brandId=5'/>">Oppo</a></li>
+                                <li><a class="dropdown-item" href="<c:url value='/products?action=find&brandId=3'/>">Xiaomi</a></li>
+                                <li><a class="dropdown-item" href="<c:url value='/products?action=find&brandId=4'/>">Realme</a></li>
+                                <li><a class="dropdown-item" href="<c:url value='/products?action=find&brandId=6'/>">Vivo</a></li>
+                            </ul>
+                        </li>
 
-                            <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/products?action=productBestSeller">Best Seller</a></li>
-                            <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/products?action=showDiscountedProducts">Khuyến mãi</a></li>
-                            <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/faq">Hỏi đáp</a></li>
-                            <li class="nav-item"><a class="nav-link" href="https://www.facebook.com/01215532044a">Liên hệ</a></li>
-                        </ul>
+                        <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/products?action=productBestSeller">Best Seller</a></li>
+                        <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/products?action=showDiscountedProducts">Khuyến mãi</a></li>
+                        <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/faq">Hỏi đáp</a></li>
+                        <li class="nav-item"><a class="nav-link" href="https://www.facebook.com/01215532044a">Liên hệ</a></li>
+                    </ul>
                 </div>
-            </nav>
+            </nav>       
+  
+                        
         </header>
 
         <!-- Modal đăng nhập/đăng ký -->
@@ -148,6 +150,15 @@
                 </div>
             </div>
         </div>
+                      <!-- Nút Chat -->
+            <div id="chat-toggle" title="Hỗ trợ tư vấn">
+                <i class="fas fa-comments"></i>
+                <span id="chat-label">Trợ lý AI</span>
+            </div>
+
+            <!-- Khung Chatbox (iframe) -->
+            <iframe id="chat-frame" src="http://localhost:8080/chatbox/chat"></iframe>
+
 
         <script>
             const placeholders = [
@@ -167,26 +178,51 @@
 
             setInterval(rotatePlaceholder, 2500);
             document.querySelectorAll('.nav-item.dropdown').forEach(function (dropdown) {
-        dropdown.addEventListener('mouseenter', function () {
-            const toggle = this.querySelector('[data-bs-toggle="dropdown"]');
-            if (toggle) bootstrap.Dropdown.getOrCreateInstance(toggle).show();
+                dropdown.addEventListener('mouseenter', function () {
+                    const toggle = this.querySelector('[data-bs-toggle="dropdown"]');
+                    if (toggle)
+                        bootstrap.Dropdown.getOrCreateInstance(toggle).show();
+                });
+                dropdown.addEventListener('mouseleave', function () {
+                    const toggle = this.querySelector('[data-bs-toggle="dropdown"]');
+                    if (toggle)
+                        bootstrap.Dropdown.getOrCreateInstance(toggle).hide();
+                });
+            });
+            
+        //thêm đoạn này vào project
+        const toggleBtn = document.getElementById("chat-toggle");
+        const chatFrame = document.getElementById("chat-frame");
+        const label = document.getElementById("chat-label");
+
+        toggleBtn.addEventListener("click", function () {
+            const isOpen = chatFrame.style.display === "block";
+
+            // Toggle khung chat
+            chatFrame.style.display = isOpen ? "none" : "block";
+
+            // Xử lý nhãn
+            if (isOpen) {
+                // Nếu đang mở thì đóng và hiện lại chữ sau 0.5s
+                setTimeout(() => {
+                    label.style.display = "inline-block";
+                }, 0);
+            } else {
+                // Nếu đang đóng thì mở và ẩn chữ
+                label.style.display = "none";
+            }
         });
-        dropdown.addEventListener('mouseleave', function () {
-            const toggle = this.querySelector('[data-bs-toggle="dropdown"]');
-            if (toggle) bootstrap.Dropdown.getOrCreateInstance(toggle).hide();
-        });
-    });
         </script>
         <script>
-document.querySelectorAll('.dropdown-toggle').forEach(function (el) {
-    el.addEventListener('click', function (e) {
-        e.preventDefault();
-        bootstrap.Dropdown.getOrCreateInstance(el).toggle();
-    });
-});
-</script>
+            document.querySelectorAll('.dropdown-toggle').forEach(function (el) {
+                el.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    bootstrap.Dropdown.getOrCreateInstance(el).toggle();
+                });
+            });
+        </script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
     </body>
-    
+
 </html>

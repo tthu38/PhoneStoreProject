@@ -136,6 +136,7 @@ public class ProductStockService {
             em.close();
         }
     }
+    
 
     // Cập nhật số lượng trong kho sau khi thanh toán thành công
     public boolean updateStockAfterPayment(Integer variantId, int quantityToReduce) {

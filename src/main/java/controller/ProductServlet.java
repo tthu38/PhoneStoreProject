@@ -232,95 +232,118 @@ public class ProductServlet extends HttpServlet {
         }
     }
 
-    private void createProduct(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        try {
-            request.setCharacterEncoding("UTF-8");
+   private void createProduct(HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException {
+    try {
+        request.setCharacterEncoding("UTF-8");
 
-            // Nhận dữ liệu từ form
-            String selectedProductId = request.getParameter("productId");
-            String productName = request.getParameter("productName");
-            String description = request.getParameter("description");
-            String color = request.getParameter("color");
-            String romStr = request.getParameter("rom");
-            String brandIDStr = request.getParameter("brandID");
-            String priceStr = request.getParameter("price");
-            String stockStr = request.getParameter("stock");
+        // Nhận dữ liệu từ form
+        String selectedProductId = request.getParameter("productId");
+        String productName = request.getParameter("productName");
+        String description = request.getParameter("description");
+        String color = request.getParameter("color");
+        String romStr = request.getParameter("rom");
+        String brandIDStr = request.getParameter("brandID");
+        String priceStr = request.getParameter("price");
+        String stockStr = request.getParameter("stock");
 
-            if ((selectedProductId == null || selectedProductId.isEmpty())
-                    && (productName == null || productName.trim().isEmpty())) {
-                throw new IllegalArgumentException("Vui lòng chọn sản phẩm có sẵn hoặc nhập tên sản phẩm mới.");
-            }
-
-            int rom = Integer.parseInt(romStr);
-            int brandID = Integer.parseInt(brandIDStr);
-            BigDecimal price = new BigDecimal(priceStr);
-            int stock = Integer.parseInt(stockStr);
-
-            Part filePart = request.getPart("thumbnailImage");
-            String relativePath = ProductUtils.saveImage(filePart, getServletContext(), "default.png");
-
-            Product product;
-            boolean isNewProduct = false;
-
-            if (selectedProductId != null && !selectedProductId.isEmpty()) {
-                int productId = Integer.parseInt(selectedProductId);
-                product = productService.getProductById(productId);
-                if (product == null) {
-                    throw new IllegalArgumentException("Không tìm thấy sản phẩm có ID: " + productId);
-                }
-            } else {
-
-                product = new Product();
-                product.setName(productName);
-                product.setDescription(description);
-                product.setThumbnailImage(relativePath);
-                product.setIsActive(true);
-                product.setCreateAt(Instant.now());
-
-                Category defaultCategory = new Category();
-                defaultCategory.setId(1);
-                product.setCategory(defaultCategory);
-
-                ProductBrand brand = new ProductBrand();
-                brand.setId(brandID);
-                product.setBrand(brand);
-
-                productService.addProduct(product);
-                isNewProduct = true;
-            }
-
-            ProductVariant variant = new ProductVariant();
-            variant.setProduct(product);
-            variant.setRom(rom);
-            variant.setColor(color);
-            variant.setPrice(price);
-            variant.setIsActive(true);
-            variant.setImageURLs(relativePath);
-
-            // Lưu variant
-            productVariantService.addProductVariant(variant);
-
-            // Tạo Stock cho variant
-            ProductStock productStock = new ProductStock();
-            productStock.setVariant(variant);
-            productStock.setAmount(stock);
-            productStock.setInventoryID(new InventoryService().findById(1)); // giả định kho mặc định
-            new ProductStockService().addProductStock(productStock);
-
-            response.sendRedirect("products");
-
-        } catch (Exception e) {
-            e.printStackTrace();
-
-            request.setAttribute("error", "Lỗi khi thêm sản phẩm: " + e.getMessage());
-
-            List<Product> existingProducts = productService.getAllProducts();
-            request.setAttribute("productList", existingProducts);
-
-            request.getRequestDispatcher("/product/ProductCreate.jsp").forward(request, response);
+        if ((selectedProductId == null || selectedProductId.isEmpty())
+                && (productName == null || productName.trim().isEmpty())) {
+            throw new IllegalArgumentException("Vui lòng chọn sản phẩm có sẵn hoặc nhập tên sản phẩm mới.");
         }
+
+        int rom = Integer.parseInt(romStr);
+        int brandID = Integer.parseInt(brandIDStr);
+        BigDecimal price = new BigDecimal(priceStr);
+        int stock = Integer.parseInt(stockStr);
+
+        Part filePart = request.getPart("thumbnailImage");
+        String relativePath = ProductUtils.saveImage(filePart, getServletContext(), "default.png");
+
+        Product product;
+        boolean isNewProduct = false;
+
+        if (selectedProductId != null && !selectedProductId.isEmpty()) {
+            int productId = Integer.parseInt(selectedProductId);
+            product = productService.getProductById(productId);
+            if (product == null) {
+                throw new IllegalArgumentException("Không tìm thấy sản phẩm có ID: " + productId);
+            }
+        } else {
+            product = new Product();
+            product.setName(productName);
+            product.setDescription(description);
+            product.setThumbnailImage(relativePath);
+            product.setIsActive(true);
+            product.setCreateAt(Instant.now());
+
+            Category defaultCategory = new Category();
+            defaultCategory.setId(1);
+            product.setCategory(defaultCategory);
+
+            ProductBrand brand = new ProductBrand();
+            brand.setId(brandID);
+            product.setBrand(brand);
+
+            productService.addProduct(product);
+            isNewProduct = true;
+        }
+
+        // ✅ Kiểm tra xem biến thể đã tồn tại chưa
+        ProductVariant existingVariant = productVariantService.findByProductRomColor(product.getId(), rom, color);
+        if (existingVariant != null) {
+            // Đã tồn tại: cập nhật stock
+            ProductStockService stockService = new ProductStockService();
+            ProductStock existingStock = stockService.getStockByVariantId(existingVariant.getId());
+            if (existingStock != null) {
+                existingStock.setAmount(existingStock.getAmount() + stock);
+                stockService.updateProductStock(existingStock);
+            } else {
+                // Không có stock thì tạo mới
+                ProductStock newStock = new ProductStock();
+                newStock.setVariant(existingVariant);
+                newStock.setAmount(stock);
+                newStock.setInventoryID(new InventoryService().findById(1));
+                stockService.addProductStock(newStock);
+            }
+
+            // Không tạo mới variant nữa
+            response.sendRedirect("products");
+            return;
+        }
+
+        // ✅ Nếu chưa tồn tại thì tạo mới variant
+        ProductVariant variant = new ProductVariant();
+        variant.setProduct(product);
+        variant.setRom(rom);
+        variant.setColor(color);
+        variant.setPrice(price);
+        variant.setIsActive(true);
+        variant.setImageURLs(relativePath);
+
+        productVariantService.addProductVariant(variant);
+
+        // Tạo Stock cho variant mới
+        ProductStock productStock = new ProductStock();
+        productStock.setVariant(variant);
+        productStock.setAmount(stock);
+        productStock.setInventoryID(new InventoryService().findById(1));
+        new ProductStockService().addProductStock(productStock);
+
+        response.sendRedirect("products");
+
+    } catch (Exception e) {
+        e.printStackTrace();
+
+        request.setAttribute("error", "Lỗi khi thêm sản phẩm: " + e.getMessage());
+
+        List<Product> existingProducts = productService.getAllProducts();
+        request.setAttribute("productList", existingProducts);
+
+        request.getRequestDispatcher("/product/ProductCreate.jsp").forward(request, response);
     }
+}
+
 
     private void searchProductsKeyWord(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String keyword = request.getParameter("term"); // 'term' là mặc định của Select2
